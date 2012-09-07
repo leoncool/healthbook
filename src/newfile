@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="healthbookPU" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>health.database.models.DatastreamTriggers</class>
+    <class>health.database.models.AnyvalueSubject</class>
+    <class>health.database.models.AnyvalueStream</class>
+    <class>health.database.models.DatapointTable</class>
+    <class>health.database.models.Subject</class>
+    <class>health.database.models.AnydataSubject</class>
+    <class>health.database.models.Users</class>
+    <class>health.database.models.Datastream</class>
+    <class>health.database.models.AnydataStream</class>
+    <class>health.database.models.DatastreamBlocks</class>
+    <class>health.database.models.DatastreamUnits</class>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://146.169.35.28:55557/healthbook"/>
+      <property name="javax.persistence.jdbc.password" value="superhealthy"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.user" value="healthbook"/>
+    </properties>
+  </persistence-unit>
+</persistence>
