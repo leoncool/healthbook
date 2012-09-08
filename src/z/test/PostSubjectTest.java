@@ -33,8 +33,8 @@ public class PostSubjectTest {
                     connection.getOutputStream());
             Gson gson = new Gson();
             JsonSubject subject = new JsonSubject();
-            subject.setLoginid("test2");
-            subject.setTitle("Sleep");
+            subject.setLoginid("leoncool");
+            subject.setTitle("Sleep3");
             subject.setPrivate_set("private");
             System.out.println(gson.toJson(subject));
             out.write(gson.toJson(subject));

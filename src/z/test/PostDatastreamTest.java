@@ -26,7 +26,7 @@ public class PostDatastreamTest {
 
     public static void main(String args[]) {
         try {
-            String subjectID = "628";
+            String subjectID = "632";
             String parameter = AllConstants.api_entryPoints.request_devicetemplateID + "=" + "d98eb956-7236-45ab-ac15-dec9c370bca7";
             URL url = new URL("http://146.169.35.28:55555/healthbook/v1/subjects/" + subjectID + "/datastreams" + "?" + parameter);
             URLConnection connection = url.openConnection();
