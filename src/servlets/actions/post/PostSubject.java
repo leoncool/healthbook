@@ -2,36 +2,39 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
+package servlets.actions.post;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import health.database.DAO.DatastreamDAO;
+import com.google.gson.stream.JsonWriter;
+import health.database.DAO.DebugDAO;
+import server.exception.ReturnParser;
 import health.database.DAO.SubjectDAO;
-import health.database.models.Datastream;
-import health.database.models.DatastreamBlocks;
+import health.database.DAO.UserDAO;
+import health.input.jsonmodels.JsonSubject;
 import health.database.models.Subject;
-import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
-import static util.JsonUtil.ServletPath;
-import util.ServerUtil;
 
 /**
  *
  * @author Leon
  */
-public class PostDatastreamBlocks extends HttpServlet {
+public class PostSubject extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -44,66 +47,52 @@ public class PostDatastreamBlocks extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     public void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, UnsupportedEncodingException, IOException {
         response.setContentType("application/json"); 
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
+        JsonUtil jutil = new JsonUtil();
+        Gson gson = new Gson();
         try {
-            SubjectDAO subjDao = new SubjectDAO();
-            int subID = ServerUtil.getSubjectID(ServletPath(request));
-            String streamID = ServerUtil.getStreamID(ServletPath(request));
-            Subject subject = null;
-            try {
-                subject = (Subject) subjDao.getObjectByID(Subject.class, subID);
-                if (subject == null) {
-                    ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_SubjectID, AllConstants.ErrorDictionary.Unknown_SubjectID, Integer.toString(subID));
-                    return;
-                }
-            } catch (Exception ex) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
-                ex.printStackTrace();
-            }
-            DatastreamDAO dsDao = new DatastreamDAO();
-            Datastream stream = null;
-            try {
-                stream = dsDao.getDatastream(streamID, false, true);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            if (stream == null) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_StreamID, AllConstants.ErrorDictionary.Unknown_StreamID, streamID);
+            JsonSubject jsubject = gson.fromJson(jutil.readJsonStrFromHttpRequest(request), JsonSubject.class);
+            if (jsubject.getLoginid() == null || jsubject.getTitle() == null) {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);
                 return;
             }
-            Gson gson = new Gson();
-            JsonDatastreamBlock jblock = null;
-            try {
-                JsonUtil jutil = new JsonUtil();
-                jblock = gson.fromJson(jutil.readJsonStrFromHttpRequest(request), JsonDatastreamBlock.class);
-            } catch (JsonSyntaxException ex) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Input_Json_Format_Error, null, null);
-                ex.printStackTrace();
+            UserDAO userDao = new UserDAO();
+            if (!userDao.existLogin(jsubject.getLoginid())) {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
                 return;
             }
-            if (jblock == null) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Input_Json_Format_Error, null, null);
-                return;
-            }
+            Date now = new Date();
+            Subject subject = new Subject();
+            subject.setUpdated(now);
+            subject.setCreatedTime(now);
+            subject.setLoginID(jsubject.getLoginid());
+            subject.setTitle(jsubject.getTitle());
+            subject.setDescription(jsubject.getDescription());
+            subject.setPrivateSet("private");
+            SubjectDAO dao = new SubjectDAO();
+//            if (1 == 1) {
+//                return;
+//            }
+            subject = dao.createSubject(subject);
+            DBtoJsonUtil djUtil = new DBtoJsonUtil();
             try {
-                DatastreamBlocks block = dsDao.CreateDatastreamBlock(stream, jblock.getBlockname(), jblock.getBlockdesc());
-                DBtoJsonUtil dbjUtil = new DBtoJsonUtil();
-                jblock = dbjUtil.convert_a_Datablock(block);
-                JsonElement je = gson.toJsonTree(jblock);
+                JsonSubject jsub = djUtil.convert_a_Subject(subject);
+                JsonElement je = gson.toJsonTree(jsub);
                 JsonObject jo = new JsonObject();
                 jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
-                jo.add("datastream_block", je);
-                out.println(gson.toJson(jo));
-            } catch (Exception ex) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
+                jo.add("subject", je);
+                JsonWriter jwriter = new JsonWriter(out);
+                gson.toJson(jo, jwriter);
+                System.out.println(gson.toJson(jsub));
+            } catch (ParseException ex) {
                 ex.printStackTrace();
             }
-
-        } catch (IOException ex) {
+        } catch (JsonSyntaxException ex) {
+            ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Input_Json_Format_Error, null, null);
             ex.printStackTrace();
         } finally {
             out.close();

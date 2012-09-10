@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
+package servlets.actions.get;
 
 import static util.JsonUtil.ServletPath;
 import com.google.gson.Gson;

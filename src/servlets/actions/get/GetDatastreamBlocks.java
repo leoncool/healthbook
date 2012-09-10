@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
+package servlets.actions.get;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -10,8 +10,10 @@ import com.google.gson.JsonObject;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamBlocks;
 import health.database.models.Subject;
 import health.input.jsonmodels.JsonDatastream;
+import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,7 +32,7 @@ import static util.JsonUtil.ServletPath;
  *
  * @author Leon
  */
-public class GetDatastreamsList extends HttpServlet {
+public class GetDatastreamBlocks extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -50,8 +52,9 @@ public class GetDatastreamsList extends HttpServlet {
 
         PrintWriter out = response.getWriter();
         try {
-            SubjectDAO subjDao = new SubjectDAO();
             int subID = ServerUtil.getSubjectID(ServletPath(request));
+            SubjectDAO subjDao = new SubjectDAO();
+            String streamID = ServerUtil.getStreamID(ServletPath(request));
             Subject subject = (Subject) subjDao.getObjectByID(Subject.class, subID); //Retreive Subject from DB
             if (subject == null) {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_SubjectID, null, Integer.toString(subID));
@@ -59,18 +62,21 @@ public class GetDatastreamsList extends HttpServlet {
             }
             DatastreamDAO dstreamDao = new DatastreamDAO();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-            List<Datastream> dsList = dstreamDao.getDatastreamList(subID, true, false);
-            System.out.println("dsList size:" + dsList.size());
-            List<JsonDatastream> jsonDsList = new ArrayList<JsonDatastream>();
-            for (Datastream ds : dsList) {
-                jsonDsList.add(dbtoJUtil.convertDatastream(ds, null));
+            Datastream datastream = dstreamDao.getDatastream(streamID, false, true);
+            if (datastream == null) {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_StreamID, null, streamID);
+                return;
             }
-            System.out.println(jsonDsList.size());
+            List<DatastreamBlocks> dsBlockList = datastream.getDatastreamBlocksList();
+            List<JsonDatastreamBlock> jdatablockList = new ArrayList<JsonDatastreamBlock>();
+            for (DatastreamBlocks block : dsBlockList) {
+                jdatablockList.add(dbtoJUtil.convert_a_Datablock(block));
+            }
             Gson gson = new Gson();
-            JsonElement je = gson.toJsonTree(jsonDsList);
+            JsonElement je = gson.toJsonTree(jdatablockList);
             JsonObject jo = new JsonObject();
             jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
-            jo.add("datastream_list", je);
+            jo.add("datastream_blocklist", je);
             System.out.println(jo.toString());
             out.println(gson.toJson(jo));
         } catch (Exception ex) {

@@ -8,6 +8,7 @@ import health.database.models.Debug;
 import health.database.models.DeviceBinding;
 import health.database.models.DeviceTemplate;
 import health.database.models.Follower;
+import health.database.models.JobsTable;
 import health.database.models.Subject;
 import health.database.models.UserAvatar;
 import health.database.models.Users;
@@ -62,6 +63,7 @@ public class HibernateUtil {
             config.addAnnotatedClass(DeviceTemplate.class);
             config.addAnnotatedClass(Debug.class);
             config.addAnnotatedClass(UserAvatar.class);
+            config.addAnnotatedClass(JobsTable.class);
             serviceRegistry = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
             factory = config.buildSessionFactory(serviceRegistry);
 
@@ -90,7 +92,11 @@ public class HibernateUtil {
     }
 
     public static void commitTransaction() {
+    	if(!HibernateUtil.getSession().getTransaction().wasCommitted())
+    	{
+    		System.out.println("committing");
         HibernateUtil.getSession().getTransaction().commit();
+    	}
         if (HibernateUtil.getSession().isOpen()) {
             HibernateUtil.getSession().close();
         }
@@ -98,7 +104,12 @@ public class HibernateUtil {
     }
 
     public static void rollBackTransaction() {
-        HibernateUtil.getSession().getTransaction().rollback();
+    	if(HibernateUtil.getSession().getTransaction().wasCommitted())
+    	{
+    		System.out.println("rollback");
+    		HibernateUtil.getSession().getTransaction().rollback();
+    	}
+        
     }
 
     public static void main(String args[]) {

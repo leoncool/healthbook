@@ -82,7 +82,7 @@ public class Datastream implements Serializable {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<DatastreamUnits> datastreamUnitsList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "streamID")
-        @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<DatastreamBlocks> datastreamBlocksList;
 
     public Datastream() {

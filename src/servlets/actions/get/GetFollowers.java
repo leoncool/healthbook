@@ -2,38 +2,31 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
-import static util.JsonUtil.ServletPath;
+package servlets.actions.get;
+
 import com.google.gson.Gson;
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.SubjectDAO;
-import health.database.models.Datastream;
-import health.database.models.Subject;
-import health.database.models.Subject;
-import health.input.jsonmodels.JsonSubject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import health.database.DAO.FollowingDAO;
+import health.database.DAO.UserDAO;
+import health.database.models.Follower;
+import health.input.jsonmodels.JsonFollower;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.MatchMode;
 import util.AllConstants;
-import util.HibernateUtil;
 
 /**
  *
  * @author Leon
  */
-public class GetaSubject extends HttpServlet {
+public class GetFollowers extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -47,23 +40,37 @@ public class GetaSubject extends HttpServlet {
      */
     public void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json"); 
+        response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
         PrintWriter out = response.getWriter();
         try {
-            SubjectDAO subdao = new SubjectDAO();
-            DatastreamDAO dstreamDao = new DatastreamDAO();
-            List<JsonSubject> jsubList = new ArrayList<JsonSubject>();
-            List<Subject> subList = subdao.findSubjectsByLoginID("leoncool");
-            for (Subject sub : subList) {
-                DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-//                jsubList.add(dbtoJUtil.convertSubject(sub));
+
+            String loginID = "leoncool";
+            if (request.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
+                loginID = request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
             }
-            System.out.println(jsubList.size());
+            FollowingDAO flDao = new FollowingDAO();
+            List<Follower> follwerList = flDao.getFollowers(loginID, null);
+            List<JsonFollower> jfollowerList = new ArrayList<JsonFollower>();
+            DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+            UserDAO userDao=new UserDAO();
+            if (follwerList != null && !follwerList.isEmpty()) {
+                for (Follower follower : follwerList) {
+                    JsonFollower jfollower = dbtoJUtil.convert_a_Follower(follower);
+                    jfollower.setFollower_info(dbtoJUtil.convert_a_userinfo(userDao.getUserInfo(follower.getFollowerID())));
+                    jfollowerList.add(jfollower);
+                }
+            }
             Gson gson = new Gson();
-            out.println(gson.toJson(jsubList));
+            JsonElement je = gson.toJsonTree(jfollowerList);
+            JsonObject jo = new JsonObject();
+            jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
+            jo.addProperty(AllConstants.api_entryPoints.request_api_loginid, loginID);
+            jo.add("follower_list", je);
+            System.out.println(jo.toString());
+            out.println(gson.toJson(jo));
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

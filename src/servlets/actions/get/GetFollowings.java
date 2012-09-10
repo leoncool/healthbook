@@ -2,18 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
+package servlets.actions.get;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.SubjectDAO;
-import health.database.models.Datastream;
-import health.database.models.DatastreamBlocks;
-import health.database.models.Subject;
-import health.input.jsonmodels.JsonDatastream;
-import health.input.jsonmodels.JsonDatastreamBlock;
+import health.database.DAO.FollowingDAO;
+import health.database.DAO.UserDAO;
+import health.database.models.Follower;
+import health.database.models.Users;
+import health.input.jsonmodels.JsonFollower;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,16 +21,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import server.exception.ReturnParser;
 import util.AllConstants;
-import util.ServerUtil;
-import static util.JsonUtil.ServletPath;
 
 /**
  *
  * @author Leon
  */
-public class GetDatastreamBlocks extends HttpServlet {
+public class GetFollowings extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -46,37 +41,35 @@ public class GetDatastreamBlocks extends HttpServlet {
      */
     public void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json"); 
+        response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
 
         PrintWriter out = response.getWriter();
         try {
-            int subID = ServerUtil.getSubjectID(ServletPath(request));
-            SubjectDAO subjDao = new SubjectDAO();
-            String streamID = ServerUtil.getStreamID(ServletPath(request));
-            Subject subject = (Subject) subjDao.getObjectByID(Subject.class, subID); //Retreive Subject from DB
-            if (subject == null) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_SubjectID, null, Integer.toString(subID));
-                return;
+
+            String loginID = "leoncool";
+            if (request.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
+                loginID = request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
             }
-            DatastreamDAO dstreamDao = new DatastreamDAO();
+            FollowingDAO flDao = new FollowingDAO();
+            List<Follower> follwerList = flDao.getFollowers(null, loginID);
+            List<JsonFollower> jfollowerList = new ArrayList<JsonFollower>();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-            Datastream datastream = dstreamDao.getDatastream(streamID, false, true);
-            if (datastream == null) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_StreamID, null, streamID);
-                return;
-            }
-            List<DatastreamBlocks> dsBlockList = datastream.getDatastreamBlocksList();
-            List<JsonDatastreamBlock> jdatablockList = new ArrayList<JsonDatastreamBlock>();
-            for (DatastreamBlocks block : dsBlockList) {
-                jdatablockList.add(dbtoJUtil.convert_a_Datablock(block));
+            UserDAO userDao = new UserDAO();
+            if (follwerList != null && !follwerList.isEmpty()) {
+                for (Follower follower : follwerList) {
+                    JsonFollower jfollower = dbtoJUtil.convert_a_Follower(follower);
+                    jfollower.setFollowing_info(dbtoJUtil.convert_a_userinfo(userDao.getUserInfo(follower.getLoginID())));
+                    jfollowerList.add(jfollower);
+                }
             }
             Gson gson = new Gson();
-            JsonElement je = gson.toJsonTree(jdatablockList);
+            JsonElement je = gson.toJsonTree(jfollowerList);
             JsonObject jo = new JsonObject();
             jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
-            jo.add("datastream_blocklist", je);
+            jo.addProperty(AllConstants.api_entryPoints.request_api_loginid, loginID);
+            jo.add("following_list", je);
             System.out.println(jo.toString());
             out.println(gson.toJson(jo));
         } catch (Exception ex) {

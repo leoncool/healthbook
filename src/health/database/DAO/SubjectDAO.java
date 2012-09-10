@@ -4,13 +4,18 @@
  */
 package health.database.DAO;
 
+import health.database.models.Datastream;
+import health.database.models.JobsTable;
 import health.database.models.Subject;
-import java.io.Serializable;
+
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+
 import util.AllConstants;
 import util.HibernateUtil;
 
@@ -22,7 +27,6 @@ public class SubjectDAO extends BaseDAO {
 //
     public Subject getSubjectByID(int subjectid) {
         try {
-
             Session session = HibernateUtil.beginTransaction();
             Subject obj = (Subject) session.get(Subject.class, subjectid);
             if (session.isOpen()) {
@@ -79,6 +83,36 @@ public class SubjectDAO extends BaseDAO {
             return null;
         } finally {
         }
+    }
+    public void deleteSubjectByID(Subject subject)
+    {
+    	try{    	
+    	DatastreamDAO dsDao=new DatastreamDAO();
+        List<Datastream> dsList=dsDao.getDatastreamList(subject.getId(), false, false);
+        Session session = HibernateUtil.beginTransaction();
+        Date now=new Date();
+        session.delete(subject);
+        for(Datastream ds:dsList)
+        {
+        	session.delete(ds);
+        	JobsTable job=new JobsTable();
+        	job.setCreatedDate(now);
+        	job.setUpdatedDate(now);
+        	job.setStatus(AllConstants.ProgramConts.job_status_pending);
+        	job.setMethod(AllConstants.ProgramConts.job_method_delete);
+        	job.setTargetObject(AllConstants.ProgramConts.job_targetObject_datastream);
+        	job.setTargetObjectID(ds.getStreamId());
+        	session.save(job);
+        }
+    	HibernateUtil.commitTransaction();
+        if (session.isOpen()) {
+            session.close();
+        }
+        
+    } catch (Exception e) {
+    	HibernateUtil.rollBackTransaction();
+        e.printStackTrace();
+    }
     }
 
     public Subject findDevicePurposeSubject(String loginID) {

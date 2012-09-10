@@ -4,30 +4,33 @@
  */
 package servlets;
 
-import servlets.actions.PostSubject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import servlets.actions.GetDataPoints;
-import servlets.actions.GetDataPointsLocalDebug;
-import servlets.actions.GetDatastreamBlocks;
-import servlets.actions.GetDatastreamsList;
 import servlets.device.actions.GetDeviceBindingList;
-import servlets.actions.GetFollowers;
-import servlets.actions.GetFollowings;
-import servlets.actions.GetSubjectList;
-import servlets.actions.GetUserInfo;
-import servlets.actions.GetaDatastream;
 import servlets.device.actions.PostBindingDeviceSerial;
-import servlets.actions.PostDatapoints;
-import servlets.actions.PostDatastream;
-import servlets.actions.PostDatastreamBlocks;
-import servlets.actions.PostNewFollower;
-import servlets.actions.PostNewUserReg;
 import servlets.actions.SearchUsers;
+import servlets.actions.delete.DeleteADatastream;
+import servlets.actions.delete.DeleteADatastreamBlock;
+import servlets.actions.delete.DeleteASubject;
+import servlets.actions.get.GetDataPoints;
+import servlets.actions.get.GetDataPointsLocalDebug;
+import servlets.actions.get.GetDatastreamBlocks;
+import servlets.actions.get.GetDatastreamsList;
+import servlets.actions.get.GetFollowers;
+import servlets.actions.get.GetFollowings;
+import servlets.actions.get.GetSubjectList;
+import servlets.actions.get.GetUserInfo;
+import servlets.actions.get.GetaDatastream;
+import servlets.actions.post.PostDatapoints;
+import servlets.actions.post.PostDatastream;
+import servlets.actions.post.PostDatastreamBlocks;
+import servlets.actions.post.PostNewFollower;
+import servlets.actions.post.PostNewUserReg;
+import servlets.actions.post.PostSubject;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceDataPoints;
 import servlets.device.actions.GetDeviceList;
@@ -130,7 +133,30 @@ public class RestFul extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         System.out.println(req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req));
-
+        resp.setHeader("Access-Control-Allow-Origin", "*");
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        if (isDeleteASubjectRequest(ServletPath(req)))
+        {
+            System.out.println("");
+            DeleteASubject proceReq = new DeleteASubject();
+            proceReq.processRequest(req, resp);
+        }
+        else if(isDeleteADataStreamRequest(ServletPath(req)))
+        {
+        	  System.out.println("isDeleteADataStreamRequest");
+              DeleteADatastream proceReq = new DeleteADatastream();
+              proceReq.processRequest(req, resp);
+        }
+        else if(isDeleteADataBlock(ServletPath(req)))
+        {
+        	  System.out.println("isDeleteADataBlock");
+        	  DeleteADatastreamBlock proceReq = new DeleteADatastreamBlock();
+              proceReq.processRequest(req, resp);
+        }else {
+            PrintWriter out = resp.getWriter();
+            out.println("Unknown Request");
+        }
     }
 
     @Override

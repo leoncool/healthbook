@@ -56,6 +56,10 @@ public interface AllConstants {
         public static final String follower_status_active = "active";
         public static final String follower_status_pending = "pending";
         public static final String follower_status_ignored = "ignored";
+        public static final String job_status_pending = "pending";
+        public static final String job_method_delete = "delete";
+        public static final String job_targetObject_datastream = "datastream";
+        public static final String job_targetObject_datablock = "datablock";
     }
 
     public interface ValidDictionary {

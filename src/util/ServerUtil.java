@@ -36,6 +36,12 @@ public class ServerUtil {
         String serialID = values[0]; //Retrieve Subject ID from URL
         return serialID;
     }
+    public static String getDatastreamBlockID(String ServletPath)
+    {
+    	  String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "/", "").split("/");
+          String blockID = values[4];
+          return blockID;
+    }
 
     public static boolean isPostSubjectReq(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "[/]*$")) {
@@ -241,6 +247,31 @@ public class ServerUtil {
     public static boolean isGetUserinfo(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user
                 + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isDeleteASubjectRequest(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "/[0-9]+"+"[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isDeleteADataStreamRequest(String ServletPath) {
+    	 if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
+                 + "/[0-9]+/" + AllConstants.api_entryPoints.api_datastream
+                 + "/[-a-zA-Z0-9]+" + "[/]*$")) {
+             return true;
+         } else {
+             return false;
+         }
+    }
+    public static boolean isDeleteADataBlock(String ServletPath) {
+    	if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
+                + "/[0-9]+/" + AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+/" + AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
             return true;
         } else {
             return false;

@@ -2,43 +2,36 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions;
+package servlets.actions.post;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.SubjectDAO;
+import health.database.DAO.DeviceSerialDAO;
+import server.exception.ReturnParser;
 import health.database.DAO.UserDAO;
-import health.database.models.Datastream;
-import health.database.models.Subject;
-import health.database.models.Subject;
-import health.input.jsonmodels.JsonSubject;
+import health.database.models.DeviceBinding;
+import device.input.jsonmodels.JsonDeviceBinding;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.MatchMode;
-import server.exception.ReturnParser;
 import util.AllConstants;
-import util.HibernateUtil;
+import util.JsonUtil;
 
 /**
  *
  * @author Leon
  */
-public class GetSubjectList extends HttpServlet {
+public class PostUnBindingDeviceSerial extends HttpServlet {
 
     /**
      * Processes requests for both HTTP
@@ -51,55 +44,56 @@ public class GetSubjectList extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     public void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("application/json");
+            throws ServletException, UnsupportedEncodingException, IOException {
+        response.setContentType("application/json"); 
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
-
         PrintWriter out = response.getWriter();
+        JsonUtil jutil = new JsonUtil();
+        Gson gson = new Gson();
         try {
-            SubjectDAO subdao = new SubjectDAO();
-            DatastreamDAO dstreamDao = new DatastreamDAO();
-            List<JsonSubject> jsubList = new ArrayList<JsonSubject>();
-            List<Subject> subList = new ArrayList<Subject>();
-            String loginID = "leoncool";
-            if (request.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
-                loginID = request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
+            JsonDeviceBinding jDevice = gson.fromJson(jutil.readJsonStrFromHttpRequest(request), JsonDeviceBinding.class);
+            if (jDevice.getActive_by() == null || jDevice.getSerial_id() == null) {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);
+                return;
             }
             UserDAO userDao = new UserDAO();
-            if (!userDao.existLogin(loginID)) {
+            if (!userDao.existLogin(jDevice.getActive_by())) {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
                 return;
             }
-            if (request.getParameter(AllConstants.api_entryPoints.request_api_onlyParentSubjects) != null
-                    && request.getParameter(AllConstants.api_entryPoints.request_api_onlyParentSubjects)
-                    .equalsIgnoreCase(AllConstants.api_entryPoints.request_api_true)) {
-                subList = subdao.findOnlyParentSubjectsByLoginID(loginID);
-            } else {
-                subList = subdao.findSubjectsByLoginID(loginID);
+            Date now = new Date();
+            DeviceSerialDAO dsDao = new DeviceSerialDAO();
+            DeviceBinding device = dsDao.getDeviceSerial(jDevice.getSerial_id());
+            if (device == null) {
+                ReturnParser.outputErrorException(response, AllConstants.DeviceErrorDictionary.Unknown_DeviceSerialID, null, null);
+                return;
             }
-            for (Subject sub : subList) {
-                DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-                jsubList.add(dbtoJUtil.convert_a_Subject(sub));
+            if (device.getActiveBy() == null || device.getOwner() == null) {
+                ReturnParser.outputErrorException(response, AllConstants.DeviceErrorDictionary.DeviceBindingNotActived, null, null);
+                return;
             }
-            System.out.println(jsubList.size());
-            Gson gson = new Gson();
-            JsonElement je = gson.toJsonTree(jsubList);
-            JsonObject jo = new JsonObject();
-            jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
-            jo.add("subject_list", je);
-            JsonWriter jwriter = new JsonWriter(response.getWriter());
-//            if (request.getParameter("callback") != null) {
-//                System.out.println("using callback");
-//                out.print(request.getParameter("callback")+"("+ gson.toJson(jo) + ");");
-//            } else {
-//                gson.toJson(jo, jwriter);
-//                jwriter.close();
-//            }
-            gson.toJson(jo, jwriter);
-            jwriter.close();
+            device = dsDao.deactiveDevice(device, jDevice.getActive_by());
+            if (device == null) {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.unknownFault, null, null);
+                return;
+            }
 
-        } catch (Exception ex) {
+            DBtoJsonUtil djUtil = new DBtoJsonUtil();
+            try {
+                JsonDeviceBinding jdevice = djUtil.convertDeviceSerial(device);
+                JsonElement je = gson.toJsonTree(jdevice);
+                JsonObject jo = new JsonObject();
+                jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
+                jo.add("device_serial_binding", je);
+                JsonWriter jwriter = new JsonWriter(out);
+                gson.toJson(jo, jwriter);
+                System.out.println(gson.toJson(jdevice));
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
+        } catch (JsonSyntaxException ex) {
+            ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Input_Json_Format_Error, null, null);
             ex.printStackTrace();
         } finally {
             out.close();
