@@ -11,6 +11,7 @@ import java.io.File;
 
 public class ConfigManager {
 
+	//common
     private final String fileCommon = "common.properties";
     private final String fileVersion = "version";
     private Properties prop = null;
