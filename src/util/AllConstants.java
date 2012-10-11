@@ -11,7 +11,10 @@ public interface AllConstants {
 
     public static interface HBaseContants {
     }
-
+    public static interface ServerConfigs{
+    	
+    	public static final String configsFolderPath="AppConfigs/";
+    }
     public static interface api_entryPoints {
 
         public static final String api_subject = "subjects";

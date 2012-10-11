@@ -1,5 +1,8 @@
 package util;
 
+import java.io.File;
+import java.io.IOException;
+
 import health.database.models.Datastream;
 import health.database.models.DatastreamBlocks;
 import health.database.models.DatastreamTriggers;
@@ -50,7 +53,36 @@ public class HibernateUtil {
 
     public static Session getSession() {
         if (factory == null) {
-            Configuration config = new Configuration().configure("hibernate.cfg.xml");
+        	
+        	File configFolder=new File(AllConstants.ServerConfigs.configsFolderPath);
+        	if(!configFolder.exists())
+        	{
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Config folder!!!!!!!!!!!!!!");
+        		configFolder.mkdir();
+        	}
+        	
+        	File configFile=new File(AllConstants.ServerConfigs.configsFolderPath+"hibernate.cfg.xml");
+        	if(!configFile.exists())
+        	{
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        		System.out.println("Cannot Find Hibernate Config File!!!!!!!!!!!!!!");
+        	}else{
+        		System.out.println("Loading Hibernate Config File.......................");
+        		System.out.println("Loading Hibernate Config File.......................");
+        		System.out.println("Loading Hibernate Config File.......................");
+        		System.out.println("Loading Hibernate Config File.......................");
+        	}
+            Configuration config = new Configuration().configure(new File(AllConstants.ServerConfigs.configsFolderPath+"hibernate.cfg.xml"));
 
             config.addAnnotatedClass(DatastreamTriggers.class);
             config.addAnnotatedClass(Follower.class);
