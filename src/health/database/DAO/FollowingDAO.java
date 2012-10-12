@@ -6,12 +6,23 @@ package health.database.DAO;
 
 import health.database.models.Datastream;
 import health.database.models.Follower;
+import health.database.models.UserAvatar;
+import health.database.models.Users;
+import health.database.models.merge.UserInfo;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+
 import util.AllConstants;
 import util.HibernateUtil;
 
@@ -73,6 +84,41 @@ public class FollowingDAO extends BaseDAO {
             session.close();
         }
         return followerList;
+    }
+    public Map followerToMap(String loginID) {
+        Session session = HibernateUtil.beginTransaction();
+        Query query = session.createQuery("select loginID, followerID from Follower f where f.loginID =:loginID");
+        query.setParameter("loginID", loginID);
+//        query.setFirstResult(startFrom * AllConstants.HibernateConsts.UserSearch_maxPageSize);
+//        query.setMaxResults(AllConstants.HibernateConsts.UserSearch_maxPageSize);
+        List<Object[]> list = query.list();
+        if (session.isOpen()) {
+            session.close();
+        }
+        HashMap<String, String> map=new HashMap<String, String>();
+        for (Object[] result : list) {
+        	map.put((String)result[1], (String)result[1]);
+        }return map;
+    }
+    public Map followingsToMap(String loginID) {
+        Session session = HibernateUtil.beginTransaction();
+        Query query = session.createQuery("select loginID, followerID from Follower f where f.followerID =:loginID");
+        query.setParameter("loginID", loginID);
+//        query.setFirstResult(startFrom * AllConstants.HibernateConsts.UserSearch_maxPageSize);
+//        query.setMaxResults(AllConstants.HibernateConsts.UserSearch_maxPageSize);
+        List<Object[]> list = query.list();
+        if (session.isOpen()) {
+            session.close();
+        }
+        HashMap<String, String> map=new HashMap<String, String>();
+        for (Object[] result : list) {
+        	map.put((String)result[0], (String)result[0]);
+        }return map;
+    }
+    public static void main(String args[])
+    {
+    	FollowingDAO followingDao=new FollowingDAO();
+    	followingDao.followerToMap("leoncool");
     }
 //    public String allowCreateNewFollower(List<Follower> list, String datastreamID) {
 //

@@ -63,15 +63,41 @@ public class DBtoJsonUtil {
         return jsub;
     }
 
-    public JsonUserInfo convert_a_userinfo(UserInfo userinfo) {
+    public JsonUserInfo convert_a_userinfo(UserInfo userinfo,Map<String,String> followerMap,Map<String,String> followingMap) {
         JsonUserInfo juserinfo = new JsonUserInfo();
+        if(followerMap!=null&&followingMap!=null)
+        {
+        	juserinfo.setIs_follower("null");
+        	juserinfo.setIs_following("null");
+        	if(followerMap.containsKey((String)userinfo.getUser().getLoginID()))
+        	{
+        		juserinfo.setIs_follower("true");
+        	}
+        	else{
+        		juserinfo.setIs_follower("false");
+        	}
+        	if(followingMap.containsKey((String)userinfo.getUser().getLoginID()))
+        	{
+        		juserinfo.setIs_following("true");
+        	}else{
+        		juserinfo.setIs_following("false");
+        	}
+        }
         juserinfo.setUser(convert_a_user(userinfo.getUser()));
         if (userinfo.getAvatar() != null) {
             juserinfo.setAvatar(convert_a_userAvatar(userinfo.getAvatar()));
         }
         return juserinfo;
     }
-
+    public JsonUserInfo convert_a_userinfo(UserInfo userinfo) {
+        JsonUserInfo juserinfo = new JsonUserInfo();
+        
+        juserinfo.setUser(convert_a_user(userinfo.getUser()));
+        if (userinfo.getAvatar() != null) {
+            juserinfo.setAvatar(convert_a_userAvatar(userinfo.getAvatar()));
+        }
+        return juserinfo;
+    }
     public JsonUser convert_a_user(Users user) {
         JsonUser juser = new JsonUser();
         juser.setLoginid(user.getLoginID());

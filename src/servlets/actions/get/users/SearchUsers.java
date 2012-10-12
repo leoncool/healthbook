@@ -9,7 +9,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
+
+import health.database.DAO.FollowingDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.Follower;
 import health.database.models.Users;
 import health.database.models.merge.UserInfo;
 import health.input.jsonmodels.JsonUserInfo;
@@ -21,6 +24,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +74,14 @@ public class SearchUsers extends HttpServlet {
                 return;
             }
             String keywords = request.getParameter(AllConstants.api_entryPoints.request_api_keywords);
+            String loginID=null;
+            Map<String,String> followerMap=null;
+         	Map<String,String> followeringsMap=null;
+            if(request.getParameter(AllConstants.api_entryPoints.request_api_loginid)!=null)
+            {
+            	loginID=request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
+            }
+           
             UserDAO userDao = new UserDAO();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 //            dbtoJUtil.convert_a_Subject(null)
@@ -76,7 +89,14 @@ public class SearchUsers extends HttpServlet {
             List<JsonUserInfo> juserinfoList=new ArrayList<JsonUserInfo>();
             for(UserInfo info:userinfoList)
             {
-                juserinfoList.add(dbtoJUtil.convert_a_userinfo(info));
+            	 if(loginID!=null)
+                 {
+                 	FollowingDAO followingDao=new FollowingDAO();
+                 	followerMap=followingDao.followerToMap(loginID);
+                 	followeringsMap=followingDao.followingsToMap(loginID);
+                 	            	
+                 }
+                juserinfoList.add(dbtoJUtil.convert_a_userinfo(info,followerMap,followeringsMap));
             }
             System.out.println("size:" + juserinfoList.size());
             JsonElement je = gson.toJsonTree(juserinfoList);

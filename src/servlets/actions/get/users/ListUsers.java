@@ -72,7 +72,7 @@ public class ListUsers extends HttpServlet {
             List<JsonUserInfo> juserinfoList=new ArrayList<JsonUserInfo>();
             for(UserInfo info:userinfoList)
             {
-                juserinfoList.add(dbtoJUtil.convert_a_userinfo(info));
+                juserinfoList.add(dbtoJUtil.convert_a_userinfo(info,null,null));
             }
             System.out.println("size:" + juserinfoList.size());
             JsonElement je = gson.toJsonTree(juserinfoList);
