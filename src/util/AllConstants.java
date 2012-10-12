@@ -26,6 +26,7 @@ public interface AllConstants {
         public static final String api_devicebinding = "devicebinding";
         public static final String api_user = "users";
         public static final String api_search = "search";
+        public static final String api_list = "list";
         public static final String api_avatar = "user_av";
         public static final String version1 = "v1";
         public static final String api_url = "/" + version1 + "/";
@@ -46,6 +47,7 @@ public interface AllConstants {
 
     public interface HibernateConsts {
         public static final int UserSearch_maxPageSize = 500;
+        public static final int UserList_maxPageSize = 500;
     }
 
     public interface ProgramConts {

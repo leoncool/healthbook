@@ -91,6 +91,36 @@ public class UserDAO extends BaseDAO {
         userinfo.setAvatar(avatar);
         return userinfo;
     }
+    public List<UserInfo> ListUsers(int startFrom) {
+        Session session = HibernateUtil.beginTransaction();
+        Query query = session.createQuery("from Users u,UserAvatar a where u.loginID =a.loginID"
+                + "");
+       // query.setParameter("keywords", "%" + keywords + "%");
+        query.setFirstResult(startFrom * AllConstants.HibernateConsts.UserList_maxPageSize);
+        query.setMaxResults(AllConstants.HibernateConsts.UserList_maxPageSize);
+        List<Object[]> list = query.list();
+        if (session.isOpen()) {
+            session.close();
+        }
+        List<UserInfo> userInfoList = new ArrayList<UserInfo>();
+        if (list.isEmpty()) {
+            return userInfoList;
+        }
+        for (Object[] result : list) {
+            Users user = (Users) result[0];
+            UserAvatar avatar = null;
+            if (result[1] != null) {
+                avatar = (UserAvatar) result[1];
+            } else {
+            }
+            UserInfo userinfo = new UserInfo();
+            userinfo.setUser(user);
+            userinfo.setAvatar(avatar);
+            userInfoList.add(userinfo);
+        }
+
+        return userInfoList;
+    }
 
     public List<UserInfo> searchUserInfo(String keywords, int startFrom) {
         Session session = HibernateUtil.beginTransaction();

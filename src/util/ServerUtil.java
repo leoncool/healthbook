@@ -243,7 +243,14 @@ public class ServerUtil {
             return false;
         }
     }
-
+    public static boolean isListUsers(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_list + "/" + AllConstants.api_entryPoints.api_user
+                + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public static boolean isGetUserinfo(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user
                 + "[/]*$")) {

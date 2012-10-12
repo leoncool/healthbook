@@ -53,11 +53,7 @@ public class ListUsers extends HttpServlet {
         JsonUtil jutil = new JsonUtil();
         Gson gson = new Gson();
         try {
-            if (request.getParameter(AllConstants.api_entryPoints.request_api_keywords) == null
-                    || request.getParameter(AllConstants.api_entryPoints.request_api_keywords).length() < 1) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);
-                return;
-            }
+           
             int startPage = 0;
             try {
                 if (request.getParameter(AllConstants.api_entryPoints.request_api_startpage) != null) {
@@ -68,11 +64,11 @@ public class ListUsers extends HttpServlet {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR, null, null);
                 return;
             }
-            String keywords = request.getParameter(AllConstants.api_entryPoints.request_api_keywords);
+           
             UserDAO userDao = new UserDAO();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 //            dbtoJUtil.convert_a_Subject(null)
-            List<UserInfo> userinfoList = userDao.searchUserInfo(keywords, startPage);
+            List<UserInfo> userinfoList = userDao.ListUsers(startPage);
             List<JsonUserInfo> juserinfoList=new ArrayList<JsonUserInfo>();
             for(UserInfo info:userinfoList)
             {

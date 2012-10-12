@@ -24,6 +24,7 @@ import servlets.actions.get.GetFollowings;
 import servlets.actions.get.GetSubjectList;
 import servlets.actions.get.GetUserInfo;
 import servlets.actions.get.GetaDatastream;
+import servlets.actions.get.users.ListUsers;
 import servlets.actions.get.users.SearchUsers;
 import servlets.actions.post.PostDatapoints;
 import servlets.actions.post.PostDatastream;
@@ -115,7 +116,11 @@ public class RestFul extends HttpServlet {
         }else if (isGetUserinfo(ServletPath(req))) {
             GetUserInfo proceReq = new GetUserInfo();
             proceReq.processRequest(req, resp);
-        }  else {
+        }
+        else if (isListUsers(ServletPath(req))) {
+            ListUsers proceReq = new ListUsers();
+            proceReq.processRequest(req, resp);
+        }else {
             PrintWriter out = resp.getWriter();
             out.println("Unknown Request");
         }
