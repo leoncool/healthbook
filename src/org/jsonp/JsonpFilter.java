@@ -36,7 +36,11 @@ public class JsonpFilter implements Filter {
 		"text/json",
 		"text/x-json"
 	};
-
+	 public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Host,Date,Authorization,Content-Length,"
+	            + "Content-Type,x-amz-security-token,delimiter,marker,max-keys,prefix,Range,If-Modified-Since,"
+	            + "If-Unmodified-Since,If-Match,If-None-Match,Cache-Control,Content-Disposition,Content-Encoding,"
+	            + "Content-MD5,Expect,Expires,x-amz-acl";
+	    public static final String ACCESS_CONTROL_ALLOW_METHODS = "GET,HEAD,POST,PUT,DELETE,TRACE,OPTIONS";
 	protected boolean isJsonp(ServletRequest req) {
 		if (req instanceof HttpServletRequest) {
 			return req.getParameterMap().containsKey(jsonp);
@@ -64,6 +68,9 @@ public class JsonpFilter implements Filter {
 
 	public void doFilter(final ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
+        
+        
+		System.out.println("jsonp Filter!!!!!!!!!!!!!");
 
 		if (resp instanceof HttpServletResponse && isJsonp(req)) {
 
@@ -79,10 +86,16 @@ public class JsonpFilter implements Filter {
 
 				@Override
 				public byte[] wrap(byte[] content) throws UnsupportedEncodingException {
+					System.out.println("11111jsonp Filter!!!!!!!!!!!!!");
 					wrapContentType = true;
 					String contentstr = new String(content, getCharacterEncoding());
 					boolean isJson = isJson(req, super.getResponse());
                                         HttpServletResponse  httpres=(HttpServletResponse) super.getResponse();
+                                        httpres.setHeader("Access-Control-Allow-Origin", "*");
+                                        httpres.setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+                                        httpres.setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);
+                                        httpres.setHeader("Access-Control-Expose-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+                                        httpres.setHeader("Access-Control-Max-Age", "0");
                                         boolean iscompressed=false;
                                         if(httpres.getHeader("Content-Encoding")!=null&&httpres.getHeader("Content-Encoding").equalsIgnoreCase("gzip"))
                                         {
@@ -105,7 +118,15 @@ public class JsonpFilter implements Filter {
 			wrapper.flushWrapper();
 
 		} else {
-
+			if (resp instanceof HttpServletResponse )
+			{
+	System.out.println("coming to here now");
+				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Origin", "*");
+				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);
+				((HttpServletResponse) resp).setHeader("Access-Control-Expose-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+				((HttpServletResponse) resp).setHeader("Access-Control-Max-Age", "0");
+			}
 			chain.doFilter(req, resp);
 
 		}

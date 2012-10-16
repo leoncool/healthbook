@@ -1,5 +1,5 @@
 /*
- * To change this template, choose Tools | Templates
+  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package servlets;
@@ -47,7 +47,11 @@ import static util.ServerUtil.*;
  * @author Leon
  */
 public class RestFul extends HttpServlet {
-
+    public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Host,Date,Authorization,Content-Length,"
+            + "Content-Type,x-amz-security-token,delimiter,marker,max-keys,prefix,Range,If-Modified-Since,"
+            + "If-Unmodified-Since,If-Match,If-None-Match,Cache-Control,Content-Disposition,Content-Encoding,"
+            + "Content-MD5,Expect,Expires,x-amz-acl";
+    public static final String ACCESS_CONTROL_ALLOW_METHODS = "GET,HEAD,POST,PUT,DELETE,TRACE,OPTIONS";
     specialOperations special = new specialOperations();
 
 //        resp.setHeader("Access-Control-Allow-Origin", "*");
@@ -58,7 +62,10 @@ public class RestFul extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         resp.setHeader("Access-Control-Allow-Origin", "*");
-        System.out.println(req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req));
+        resp.setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+        resp.setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);
+        resp.setHeader("Access-Control-Expose-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+        System.out.println("cors:"+req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req));
 
 //        if (special.special(req, resp) == true) {
 //            return;
@@ -167,8 +174,13 @@ public class RestFul extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        System.out.println(req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req));
+    	
+        System.out.println(req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req)+"allow originls");
         resp.setHeader("Access-Control-Allow-Origin", "*");
+        resp.setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+        resp.setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);
+        resp.setHeader("Access-Control-Expose-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
+        resp.setHeader("Access-Control-Max-Age", "0");
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
 //        if (special.special(req, resp) == true) {
@@ -188,7 +200,7 @@ public class RestFul extends HttpServlet {
             PostDatastreamBlocks proceReq = new PostDatastreamBlocks();
             proceReq.processRequest(req, resp);
         } else if (isPostFollower(ServletPath(req))) {
-            System.out.println("api follower");
+            System.out.println("Post New follower");
             PostNewFollower proceReq = new PostNewFollower();
             proceReq.processRequest(req, resp);
         } else if (isPostUserRegister(ServletPath(req))) {

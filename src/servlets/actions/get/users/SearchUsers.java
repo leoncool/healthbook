@@ -98,7 +98,6 @@ public class SearchUsers extends HttpServlet {
                  }
                 juserinfoList.add(dbtoJUtil.convert_a_userinfo(info,followerMap,followeringsMap));
             }
-            System.out.println("size:" + juserinfoList.size());
             JsonElement je = gson.toJsonTree(juserinfoList);
             JsonObject jo = new JsonObject();
             jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);

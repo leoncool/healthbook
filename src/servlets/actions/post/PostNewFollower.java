@@ -53,9 +53,11 @@ public class PostNewFollower extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         request.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
+        
         JsonUtil jutil = new JsonUtil();
         Gson gson = new Gson();
         try {
+
             JsonFollower jfollower = gson.fromJson(jutil.readJsonStrFromHttpRequest(request), JsonFollower.class);
             if (jfollower.getLoginid() == null || jfollower.getFollower_id() == null) {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);

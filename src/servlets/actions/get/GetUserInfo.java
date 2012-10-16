@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -60,20 +62,35 @@ public class GetUserInfo extends HttpServlet {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);
                 return;
             }
-            String loginID = request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
+            String targetID=null;
+            targetID= request.getParameter(AllConstants.api_entryPoints.request_api_targetid);
+            if(targetID==null)
+            {
+                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.MISSING_DATA, null, null);
+                return;
+            }
+            String loginID=null;
+            loginID= request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
             UserDAO userDao = new UserDAO();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 //            dbtoJUtil.convert_a_Subject(null)
-            UserInfo userinfo = userDao.getUserInfo(loginID);
+            UserInfo userinfo = userDao.getUserInfo(targetID);
             if (userinfo == null) {
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_LoginID, null, null);
                 return;
             }
             FollowingDAO followingDao = new FollowingDAO();
-            List<Follower> follwerList = followingDao.getFollowers(loginID);
-            List<Follower> follweringList = followingDao.getFollowerings(loginID);
-
-            JsonUserInfo juserinfo = dbtoJUtil.convert_a_userinfo(userinfo);
+            List<Follower> follwerList = followingDao.getFollowers(targetID);
+            List<Follower> follweringList = followingDao.getFollowerings(targetID);
+            Map<String,String> followerMap=null;
+         	Map<String,String> followeringsMap=null;
+            if(loginID!=null)
+            {
+            	followerMap=followingDao.followerToMap(loginID);
+            	followeringsMap=followingDao.followingsToMap(loginID);
+            	            	
+            }
+            JsonUserInfo juserinfo = dbtoJUtil.convert_a_userinfo(userinfo,followerMap,followeringsMap);
             juserinfo.setTotal_followers(Integer.toString(follwerList.size()));
             juserinfo.setTotal_followings(Integer.toString(follweringList.size()));
             JsonElement je = gson.toJsonTree(juserinfo);
