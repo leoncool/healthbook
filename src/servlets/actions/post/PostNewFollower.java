@@ -5,7 +5,11 @@
 package servlets.actions.post;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonWriter;
+
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.FollowingDAO;
 import server.exception.ReturnParser;
@@ -14,7 +18,9 @@ import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
 import health.database.models.Follower;
 import health.database.models.Subject;
+import health.input.jsonmodels.JsonDatastream;
 import health.input.jsonmodels.JsonFollower;
+import health.input.jsonmodels.JsonSubject;
 import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,9 +98,15 @@ public class PostNewFollower extends HttpServlet {
                 return;
             }
             DBtoJsonUtil djUtil = new DBtoJsonUtil();
+           
             jfollower = djUtil.convert_a_Follower(follower);
-            out.println(gson.toJson(jfollower));
-            System.out.println(gson.toJson(jfollower));
+            JsonElement je = gson.toJsonTree(jfollower);
+            JsonObject jo = new JsonObject();
+            jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
+            jo.add("follower", je);
+            JsonWriter jwriter = new JsonWriter(out);
+            gson.toJson(jo, jwriter);
+            System.out.println(gson.toJson(jo));
         } catch (ParseException ex) {
             ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
             ex.printStackTrace();

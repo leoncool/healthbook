@@ -69,8 +69,6 @@ public class JsonpFilter implements Filter {
 	public void doFilter(final ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
         
-        
-		System.out.println("jsonp Filter!!!!!!!!!!!!!");
 
 		if (resp instanceof HttpServletResponse && isJsonp(req)) {
 
@@ -86,7 +84,6 @@ public class JsonpFilter implements Filter {
 
 				@Override
 				public byte[] wrap(byte[] content) throws UnsupportedEncodingException {
-					System.out.println("11111jsonp Filter!!!!!!!!!!!!!");
 					wrapContentType = true;
 					String contentstr = new String(content, getCharacterEncoding());
 					boolean isJson = isJson(req, super.getResponse());
@@ -101,7 +98,6 @@ public class JsonpFilter implements Filter {
                                         {
                                             iscompressed=true;
                                         }
-                                        System.out.println("isJson:"+isJson);
                                         if(iscompressed){
 					return content;
                                         }
@@ -120,7 +116,6 @@ public class JsonpFilter implements Filter {
 		} else {
 			if (resp instanceof HttpServletResponse )
 			{
-	System.out.println("coming to here now");
 				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Origin", "*");
 				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
 				((HttpServletResponse) resp).setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);

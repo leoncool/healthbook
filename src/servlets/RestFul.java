@@ -15,6 +15,7 @@ import servlets.device.actions.PostBindingDeviceSerial;
 import servlets.actions.delete.DeleteADatastream;
 import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
+import servlets.actions.delete.DeleteFollower;
 import servlets.actions.get.GetDataPoints;
 import servlets.actions.get.GetDataPointsLocalDebug;
 import servlets.actions.get.GetDatastreamBlocks;
@@ -165,7 +166,14 @@ public class RestFul extends HttpServlet {
         	  System.out.println("isDeleteADataBlock");
         	  DeleteADatastreamBlock proceReq = new DeleteADatastreamBlock();
               proceReq.processRequest(req, resp);
-        }else {
+        }
+        else if(isDeleteFollower(ServletPath(req)))
+        {
+        	  System.out.println("isDeleteFollower");
+        	  DeleteFollower proceReq = new DeleteFollower();
+              proceReq.processRequest(req, resp);
+        }
+        else {
             PrintWriter out = resp.getWriter();
             out.println("Unknown Request");
         }
