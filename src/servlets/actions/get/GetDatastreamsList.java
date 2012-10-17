@@ -70,6 +70,7 @@ public class GetDatastreamsList extends HttpServlet {
             JsonElement je = gson.toJsonTree(jsonDsList);
             JsonObject jo = new JsonObject();
             jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
+            jo.addProperty(AllConstants.api_entryPoints.request_api_loginid, subject.getLoginID());
             jo.add("datastream_list", je);
             System.out.println(jo.toString());
             out.println(gson.toJson(jo));

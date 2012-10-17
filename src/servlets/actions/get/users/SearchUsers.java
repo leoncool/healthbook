@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +86,12 @@ public class SearchUsers extends HttpServlet {
             UserDAO userDao = new UserDAO();
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 //            dbtoJUtil.convert_a_Subject(null)
-            List<UserInfo> userinfoList = userDao.searchUserInfo(keywords, startPage);
+            Map<String,String> ignoreMap=new HashMap<String, String>();
+            if(loginID!=null)
+            {
+            	ignoreMap.put(loginID, loginID);
+            }
+            List<UserInfo> userinfoList = userDao.searchUserInfo(keywords, startPage,ignoreMap);
             List<JsonUserInfo> juserinfoList=new ArrayList<JsonUserInfo>();
             for(UserInfo info:userinfoList)
             {
