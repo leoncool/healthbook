@@ -33,6 +33,7 @@ import servlets.actions.post.PostDatastreamBlocks;
 import servlets.actions.post.PostNewFollower;
 import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
+import servlets.actions.post.Upload;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceDataPoints;
 import servlets.device.actions.GetDeviceList;
@@ -223,7 +224,11 @@ public class RestFul extends HttpServlet {
         } else if (isPostDeviceSerialBinding(ServletPath(req))) {
             PostBindingDeviceSerial proceReq = new PostBindingDeviceSerial();
             proceReq.processRequest(req, resp);
-        } else {
+        }  else if (isPostUpload(ServletPath(req))) {
+            System.out.println("isPostUpload");
+            Upload proceReq = new Upload();
+            proceReq.processRequest(req, resp);
+        }else {
             PrintWriter out = resp.getWriter();
             out.println("Unknown Request");
         }
