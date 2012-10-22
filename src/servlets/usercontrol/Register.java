@@ -4,20 +4,24 @@
  */
 package servlets.usercontrol;
 
-import server.exception.ReturnParser;
 import health.database.DAO.UserDAO;
 import health.database.models.Users;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.util.Date;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import org.hibernate.Session;
+
+import server.exception.ReturnParser;
 import util.AllConstants.ErrorDictionary;
 import util.AllConstants.ValidDictionary;
 import util.HibernateUtil;

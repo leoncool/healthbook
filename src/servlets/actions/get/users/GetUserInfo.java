@@ -4,24 +4,16 @@
  */
 package servlets.actions.get.users;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonWriter;
 import health.database.DAO.FollowingDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Follower;
-import health.database.models.Users;
 import health.database.models.merge.UserInfo;
 import health.input.jsonmodels.JsonUserInfo;
 import health.input.util.DBtoJsonUtil;
-import server.exception.ReturnParser;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +21,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonWriter;
 
 /**
  *

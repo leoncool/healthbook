@@ -4,14 +4,46 @@
  */
 package servlets;
 
+import static util.JsonUtil.ServletPath;
+import static util.JsonUtil.contextPath;
+import static util.ServerUtil.isDeleteADataBlock;
+import static util.ServerUtil.isDeleteADataStreamRequest;
+import static util.ServerUtil.isDeleteASubjectRequest;
+import static util.ServerUtil.isDeleteFollower;
+import static util.ServerUtil.isGetADatastream;
+import static util.ServerUtil.isGetDataPointsAllUnits;
+import static util.ServerUtil.isGetDataPointsAllUnitsDebug;
+import static util.ServerUtil.isGetDatastreamBlocks;
+import static util.ServerUtil.isGetDatastreamList;
+import static util.ServerUtil.isGetDeviceDataPointsAllUnits;
+import static util.ServerUtil.isGetDeviceList;
+import static util.ServerUtil.isGetDeviceSerialRegisters;
+import static util.ServerUtil.isGetFollowers;
+import static util.ServerUtil.isGetFollowings;
+import static util.ServerUtil.isGetSubjectsListReq;
+import static util.ServerUtil.isGetUserinfo;
+import static util.ServerUtil.isGetaDeviceBinding;
+import static util.ServerUtil.isListUsers;
+import static util.ServerUtil.isPostDataBlocksReq;
+import static util.ServerUtil.isPostDataPointsReq;
+import static util.ServerUtil.isPostDatastreamReq;
+import static util.ServerUtil.isPostDevice;
+import static util.ServerUtil.isPostDeviceDatapoints;
+import static util.ServerUtil.isPostDeviceSerialBinding;
+import static util.ServerUtil.isPostFollower;
+import static util.ServerUtil.isPostSubjectReq;
+import static util.ServerUtil.isPostUpload;
+import static util.ServerUtil.isPostUserRegister;
+import static util.ServerUtil.isSearchUsers;
+
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import servlets.device.actions.GetDeviceBindingList;
-import servlets.device.actions.PostBindingDeviceSerial;
+
 import servlets.actions.delete.DeleteADatastream;
 import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
@@ -35,14 +67,13 @@ import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
 import servlets.actions.post.Upload;
 import servlets.device.actions.GetADeviceBinding;
+import servlets.device.actions.GetDeviceBindingList;
 import servlets.device.actions.GetDeviceDataPoints;
 import servlets.device.actions.GetDeviceList;
+import servlets.device.actions.PostBindingDeviceSerial;
 import servlets.device.actions.PostDevice;
 import servlets.device.actions.PostDeviceDatapoints;
-import static util.JsonUtil.contextPath;
-import static util.JsonUtil.ServletPath;
-import static util.AllConstants.api_entryPoints;
-import static util.ServerUtil.*;
+import util.AllConstants.api_entryPoints;
 
 /**
  *

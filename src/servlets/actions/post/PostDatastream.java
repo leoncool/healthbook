@@ -4,13 +4,7 @@
  */
 package servlets.actions.post;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonWriter;
-import device.input.jsonmodels.JsonDeviceTemplate;
-import server.exception.ReturnParser;
+import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.DeviceTemplateDAO;
 import health.database.DAO.SubjectDAO;
@@ -22,20 +16,31 @@ import health.database.models.Users;
 import health.input.jsonmodels.JsonDatastream;
 import health.input.jsonmodels.JsonDatastreamUnits;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
-import static util.JsonUtil.ServletPath;
 import util.UnitValueTypes;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonWriter;
+
+import device.input.jsonmodels.JsonDeviceTemplate;
 
 /**
  *

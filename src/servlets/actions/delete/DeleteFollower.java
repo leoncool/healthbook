@@ -4,33 +4,28 @@
  */
 package servlets.actions.delete;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import health.database.DAO.DatastreamDAO;
 import health.database.DAO.FollowingDAO;
-import server.exception.ReturnParser;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
-import health.database.models.Datastream;
 import health.database.models.Follower;
-import health.database.models.Subject;
 import health.input.jsonmodels.JsonFollower;
-import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 /**
  *

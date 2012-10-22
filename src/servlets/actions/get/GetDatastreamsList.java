@@ -4,27 +4,31 @@
  */
 package servlets.actions.get;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.input.jsonmodels.JsonDatastream;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import server.exception.ReturnParser;
 import util.AllConstants;
 import util.ServerUtil;
-import static util.JsonUtil.ServletPath;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 /**
  *

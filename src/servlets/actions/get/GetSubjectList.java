@@ -4,35 +4,30 @@
  */
 package servlets.actions.get;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
-import health.database.models.Datastream;
-import health.database.models.Subject;
 import health.database.models.Subject;
 import health.input.jsonmodels.JsonSubject;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.MatchMode;
+
 import server.exception.ReturnParser;
 import util.AllConstants;
-import util.HibernateUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 /**
  *

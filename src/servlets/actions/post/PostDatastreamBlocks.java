@@ -4,10 +4,7 @@
  */
 package servlets.actions.post;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
@@ -15,17 +12,24 @@ import health.database.models.DatastreamBlocks;
 import health.database.models.Subject;
 import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
-import static util.JsonUtil.ServletPath;
 import util.ServerUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 /**
  *

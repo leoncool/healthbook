@@ -4,40 +4,40 @@
  */
 package servlets.device.actions;
 
-import servlets.actions.*;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
+import static util.JsonUtil.ServletPath;
 import health.database.DAO.DataImportDAO;
 import health.database.DAO.DatastreamDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
-import health.database.models.Subject;
 import health.hbase.models.HBaseDataImport;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import util.AllConstants;
 import util.DateUtil;
 import util.ServerUtil;
-import static util.JsonUtil.ServletPath;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 /**
  *

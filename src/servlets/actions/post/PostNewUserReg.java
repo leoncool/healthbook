@@ -4,16 +4,10 @@
  */
 package servlets.actions.post;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import server.exception.ReturnParser;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
-import health.input.jsonmodels.JsonSubject;
-import health.database.models.Subject;
 import health.database.models.Users;
 import health.input.jsonmodels.JsonUser;
-import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -21,18 +15,22 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.hibernate.Session;
+
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.HibernateUtil;
 import util.JsonUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  *

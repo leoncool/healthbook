@@ -4,11 +4,7 @@
  */
 package servlets.device.actions;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import device.input.jsonmodels.JsonDevice;
 import health.database.DAO.DatastreamDAO;
-import server.exception.ReturnParser;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
@@ -16,6 +12,7 @@ import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
 import health.input.jsonmodels.JsonDatastreamUnits;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -23,13 +20,21 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
 import util.UnitValueTypes;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import device.input.jsonmodels.JsonDevice;
 
 /**
  *

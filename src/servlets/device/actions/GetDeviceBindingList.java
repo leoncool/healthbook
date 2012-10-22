@@ -4,25 +4,27 @@
  */
 package servlets.device.actions;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
 import health.database.DAO.DeviceSerialDAO;
 import health.database.models.DeviceBinding;
-import health.database.models.Follower;
-import device.input.jsonmodels.JsonDeviceBinding;
-import health.input.jsonmodels.JsonFollower;
 import health.input.util.DBtoJsonUtil;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import util.AllConstants;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import device.input.jsonmodels.JsonDeviceBinding;
 
 /**
  *

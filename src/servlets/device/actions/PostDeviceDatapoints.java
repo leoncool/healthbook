@@ -4,34 +4,34 @@
  */
 package servlets.device.actions;
 
-import servlets.actions.*;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import static util.JsonUtil.ServletPath;
 import health.database.DAO.DataImportDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamUnits;
-import health.database.models.Subject;
 import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataImport;
 import health.input.jsonmodels.JsonDataValues;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import server.exception.ReturnParser;
 import util.AllConstants;
 import util.JsonUtil;
-import static util.JsonUtil.ServletPath;
 import util.ServerUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 /**
  *

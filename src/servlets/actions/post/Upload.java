@@ -1,10 +1,17 @@
 package servlets.actions.post;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.servlet.Servlet;
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -32,7 +39,7 @@ public class Upload extends HttpServlet implements Servlet {
 	        FileItemFactory factory = new DiskFileItemFactory();
 	        ServletFileUpload upload = new ServletFileUpload(factory);
 	        upload.setProgressListener(listener);
-	        List uploadedItems = null;
+	        List<?> uploadedItems = null;
 	        FileItem fileItem = null;
 	        String filePath = "/usr/data/";
 	        if (!new File(filePath).exists()) {
@@ -56,7 +63,7 @@ public class Upload extends HttpServlet implements Servlet {
 
 	        try {
 	            uploadedItems = upload.parseRequest(request);
-	            Iterator i = uploadedItems.iterator();
+	            Iterator<?> i = uploadedItems.iterator();
 	            while (i.hasNext()) {
 	                fileItem = (FileItem) i.next();
 	                if (fileItem.isFormField() == false) {

@@ -4,11 +4,14 @@
  */
 package server.exception;
 
-import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.http.HttpServletResponse;
+
 import util.AllConstants;
+
+import com.google.gson.Gson;
 
 /**
  *
