@@ -98,7 +98,6 @@ public class RestFul extends HttpServlet {
         resp.setHeader("Access-Control-Allow-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
         resp.setHeader("Access-Control-Allow-Methods", ACCESS_CONTROL_ALLOW_METHODS);
         resp.setHeader("Access-Control-Expose-Headers", ACCESS_CONTROL_ALLOW_HEADERS);
-        System.out.println("cors:"+req.getMethod() + " is coming..." + ",contextPath:" + contextPath(req));
 
 //        if (special.special(req, resp) == true) {
 //            return;

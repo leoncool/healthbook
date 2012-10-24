@@ -73,9 +73,12 @@ public class GetSubjectList extends HttpServlet {
             } else {
                 subList = subdao.findSubjectsByLoginID(loginID);
             }
+            DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
             for (Subject sub : subList) {
-                DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+            	if(sub.getVisibleSet().equalsIgnoreCase(AllConstants.ProgramConts.visibleSet_PUBLIC))
+            	{
                 jsubList.add(dbtoJUtil.convert_a_Subject(sub));
+            	}
             }
             System.out.println(jsubList.size());
             Gson gson = new Gson();
