@@ -12,6 +12,7 @@ import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -63,10 +64,12 @@ public class PostUnBindingDeviceSerial extends HttpServlet {
                 return;
             }
             UserDAO userDao = new UserDAO();
-            if (!userDao.existLogin(jDevice.getActive_by())) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
-                return;
-            }
+            
+				if (!userDao.existLogin(jDevice.getActive_by())) {
+				    ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
+				    return;
+				}
+			
             Date now = new Date();
             DeviceSerialDAO dsDao = new DeviceSerialDAO();
             DeviceBinding device = dsDao.getDeviceSerial(jDevice.getSerial_id());

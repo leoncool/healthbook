@@ -16,6 +16,7 @@ import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,10 +74,12 @@ public class PostDevice extends HttpServlet {
             }
             System.out.println("debug0");
             UserDAO userDao = new UserDAO();
-            if (!userDao.existLogin(jdevice.getOwner())) {
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
-                return;
-            }
+      
+				if (!userDao.existLogin(jdevice.getOwner())) {
+				    ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unauthorized_Access, null, null);
+				    return;
+				}
+	
             System.out.println("debug1");
             SubjectDAO subdao = new SubjectDAO();
             Subject subject = subdao.findDevicePurposeSubject(jdevice.getOwner());

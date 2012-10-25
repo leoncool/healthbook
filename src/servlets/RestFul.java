@@ -38,6 +38,7 @@ import static util.ServerUtil.isSearchUsers;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -202,7 +203,12 @@ public class RestFul extends HttpServlet {
         {
         	  System.out.println("isDeleteFollower");
         	  DeleteFollower proceReq = new DeleteFollower();
-              proceReq.processRequest(req, resp);
+              try {
+				proceReq.processRequest(req, resp);
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         else {
             PrintWriter out = resp.getWriter();
@@ -228,7 +234,12 @@ public class RestFul extends HttpServlet {
         if (isPostSubjectReq(ServletPath(req))) {
             System.out.println("api subject");
             PostSubject proceReq = new PostSubject();
-            proceReq.processRequest(req, resp);
+            try {
+				proceReq.processRequest(req, resp);
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } else if (isPostDatastreamReq(ServletPath(req))) {
             PostDatastream proceReq = new PostDatastream();
             proceReq.processRequest(req, resp);
@@ -241,7 +252,12 @@ public class RestFul extends HttpServlet {
         } else if (isPostFollower(ServletPath(req))) {
             System.out.println("Post New follower");
             PostNewFollower proceReq = new PostNewFollower();
-            proceReq.processRequest(req, resp);
+            try {
+				proceReq.processRequest(req, resp);
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } else if (isPostUserRegister(ServletPath(req))) {
             PostNewUserReg proceReq = new PostNewUserReg();
             proceReq.processRequest(req, resp);
