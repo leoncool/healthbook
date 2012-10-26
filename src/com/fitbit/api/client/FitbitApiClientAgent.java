@@ -1425,6 +1425,7 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
         setAccessToken(localUser);
         // Example: GET /1/user/228TQ4/foods/log/date/2010-02-25.json
         String url = APIUtil.constructFullUrl(getApiBaseUrl(), getApiVersion(), fitbitUser, type, date, APIFormat.JSON);
+        System.out.println("URL:"+url);
         Response res = httpGet(url, true);
         throwExceptionIfError(res);
         return res;
@@ -2723,12 +2724,12 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
     	resourceCredentials.setAccessTokenSecret("132d21616c4580e428214c83a5b293e7");
     	resourceCredentials.setTempToken("75dc7ee3a3b2cbf14f36d3d1ba1d68cd");
     	
-    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
-    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
-    	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
-    	//System.out.println("getResourceId:"+resourceCredentials.getResourceId());
-    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
-     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
+//    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
+//    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
+//    	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
+//    	//System.out.println("getResourceId:"+resourceCredentials.getResourceId());
+//    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
+//     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
         setOAuthAccessToken(resourceCredentials.getAccessToken(), resourceCredentials.getAccessTokenSecret(), resourceCredentials.getLocalUserId());
     }
 

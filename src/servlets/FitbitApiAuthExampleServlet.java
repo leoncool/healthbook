@@ -2,6 +2,7 @@ package servlets;
 
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
@@ -24,8 +25,10 @@ import com.fitbit.api.client.FitbitApiSubscriptionStorageInMemoryImpl;
 import com.fitbit.api.client.LocalUserDetail;
 import com.fitbit.api.client.service.FitbitAPIClientService;
 import com.fitbit.api.common.model.activities.Activities;
+import com.fitbit.api.common.model.activities.ActivityLog;
 import com.fitbit.api.common.model.user.UserInfo;
 import com.fitbit.api.model.APIResourceCredentials;
+import com.fitbit.api.model.FitbitUser;
 
 /**
  * Servlet implementation class FitbitApiAuthExampleServlet
@@ -81,12 +84,12 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
                     System.out.println("Unrecognized temporary token when atte");
                     throw new ServletException("Unrecognized temporary token when attempting to complete authorization: ");
                 }
-             	System.out.println("running here:"+resourceCredentials.getLocalUserId());
-            	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
-            	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
-            	System.out.println("getResourceId:"+resourceCredentials.getResourceId());
-            	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
-             	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
+//             	System.out.println("running here:"+resourceCredentials.getLocalUserId());
+//            	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
+//            	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
+//            	System.out.println("getResourceId:"+resourceCredentials.getResourceId());
+//            	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
+//             	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
             
         	//	resourceCredentials.setTempTokenVerifier("en9jhe0ho77p1ci4isg4sbb75b");
         	}
@@ -132,15 +135,17 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
                 }
             }
             try {
-            	System.out.println("running here:"+resourceCredentials.getLocalUserId());
-            	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
-            	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
-            	System.out.println("getResourceId:"+resourceCredentials.getResourceId());
-            	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
-             	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
+//            	System.out.println("running here:"+resourceCredentials.getLocalUserId());
+//            	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
+//            	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
+//            	System.out.println("getResourceId:"+resourceCredentials.getResourceId());
+//            	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
+//             	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
             
                 UserInfo userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail(resourceCredentials.getLocalUserId()));
-                request.setAttribute("userInfo", userInfo);
+
+            
+               request.setAttribute("userInfo", userInfo);
                 System.out.println(userInfo.getAvatar());
                 
                 request.getRequestDispatcher("/fitbitApiAuthExample.jsp").forward(request, response);
@@ -156,10 +161,18 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
 		
 					userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail(resourceCredentials.getLocalUserId()));
 					 request.setAttribute("userInfo", userInfo);
-					 LocalDate date=LocalDate.parse("2012-02-25");
-			
-					 Activities activities= apiClientService.getActivities(new LocalUserDetail(resourceCredentials.getLocalUserId()),date);
-					  System.out.println(activities.getActivities().size());
+					 LocalDate date=LocalDate.parse("2012-10-25");
+					    String localUserID=resourceCredentials.getLocalUserId();
+		                FitbitUser fitbitUser=new FitbitUser(localUserID);
+		            
+		                Activities activities=apiClientService.getClient().getActivities(new LocalUserDetail(resourceCredentials.getLocalUserId()), fitbitUser,date);
+		              List<ActivityLog> logList=activities.getActivities();
+		              System.out.println("logListSize:"+logList.size());
+		              for(ActivityLog log:logList)
+		              {
+		            	  System.out.println(log.getSteps());
+		              }
+		              System.out.println("totalSteps:"+activities.getSummary().getSteps());
 					 System.out.println(userInfo.getAvatar());
 				} catch (FitbitAPIException e) {
 					// TODO Auto-generated catch block

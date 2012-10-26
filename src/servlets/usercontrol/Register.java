@@ -4,6 +4,7 @@
  */
 package servlets.usercontrol;
 
+import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Users;
 
@@ -101,9 +102,11 @@ public class Register {
                 Session session = HibernateUtil.beginTransaction();
                 session.save(user);
                 HibernateUtil.commitTransaction();
+                
+                SubjectDAO subDao=new SubjectDAO();// create Default Subject and Datastreams
                 // out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 out.println(ReturnParser.returnValidResult(ValidDictionary.Valid));
-
+                
                 String emailSubject = "";
 //                if (language.equalsIgnoreCase("cn")) {
 //                    emailSubject = "Via Cloud 通知-注册确认信！";

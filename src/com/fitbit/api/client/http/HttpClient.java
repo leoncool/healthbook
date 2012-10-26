@@ -407,7 +407,7 @@ public class HttpClient implements Serializable {
     	if (log.isDebugEnabled()) {
     		log.debug("HTTP " + method + " " + url);
     	}
-    	
+    	System.out.println("HTTP " + method + " " + url);
         int retriedCount;
         int retry = retryCount + 1;
         Response res = null;
@@ -452,6 +452,7 @@ public class HttpClient implements Serializable {
                             }
                         }
                     }
+                    System.out.println();
                     
                     if (responseCode >= 200 && responseCode < 300) {
                     	break;
@@ -477,6 +478,9 @@ public class HttpClient implements Serializable {
             	if (log.isDebugEnabled() && null!=res) {
                     res.asString();
                 }
+            	if(res!=null){
+            	System.out.println("Res:"+res.asString());
+            	}
                 log.debug("Sleeping " + retryIntervalMillis + " millisecs for next retry.");
                 Thread.sleep(retryIntervalMillis);
             } catch (InterruptedException ignore) {
