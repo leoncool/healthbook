@@ -3,6 +3,7 @@
 	<name>healthbook</name>
 	<comment></comment>
 	<projects>
+		<project>healthlib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -134,7 +134,18 @@ public class ServerUtil {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
                 + "/[0-9]+[/]*$")) {
             return true;
-        } else {
+        }
+       else {        	
+            return false;
+        }
+    }
+    public static boolean isGetHealthDatastreams(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                + "[/]*$"))
+        	{
+        	return true;
+        	}else {        	
             return false;
         }
     }

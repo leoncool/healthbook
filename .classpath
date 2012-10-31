@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/healthlib"/>
 	<classpathentry exported="true" kind="lib" path="lib/fitbit/joda-time-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/fitbit/commons-lang-2.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/healthlib"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Gson"/>
