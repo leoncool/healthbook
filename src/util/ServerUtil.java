@@ -21,7 +21,11 @@ public class ServerUtil {
         String streamID = values[2];
         return streamID;
     }
-
+    public static String getHealthStreamID(String ServletPath) {
+        String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health + "/"+AllConstants.api_entryPoints.api_datastream+"/", "").split("/");
+        String streamID = values[0];
+        return streamID;
+    }
     public static String getDeviceID(String ServletPath) {
         String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_device + "/", "").split("/");
         String DeviceID = values[0];
@@ -149,7 +153,28 @@ public class ServerUtil {
             return false;
         }
     }
-
+    public static boolean isGetAHealthDatastream(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+" +"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
+    public static boolean isGetHealthDatastreamBlocks(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+/"+AllConstants.api_entryPoints.api_datablocks+"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
     public static boolean isGetDatastreamBlocks(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
                 + "/[0-9]+/" + AllConstants.api_entryPoints.api_datastream
@@ -179,7 +204,17 @@ public class ServerUtil {
             return false;
         }
     }
-
+    public static boolean isGetHealthDatapoints(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+/"+AllConstants.api_entryPoints.api_datapoints+"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
     public static boolean isGetDataPointsAllUnitsJackson(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
                 + "/[0-9]+/" + AllConstants.api_entryPoints.api_datastream

@@ -6,36 +6,7 @@ package servlets;
 
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
-import static util.ServerUtil.isDeleteADataBlock;
-import static util.ServerUtil.isDeleteADataStreamRequest;
-import static util.ServerUtil.isDeleteASubjectRequest;
-import static util.ServerUtil.isDeleteFollower;
-import static util.ServerUtil.isGetADatastream;
-import static util.ServerUtil.isGetDataPointsAllUnits;
-import static util.ServerUtil.isGetDataPointsAllUnitsDebug;
-import static util.ServerUtil.isGetDatastreamBlocks;
-import static util.ServerUtil.isGetDatastreamList;
-import static util.ServerUtil.isGetDeviceDataPointsAllUnits;
-import static util.ServerUtil.isGetDeviceList;
-import static util.ServerUtil.isGetDeviceSerialRegisters;
-import static util.ServerUtil.isGetFollowers;
-import static util.ServerUtil.isGetFollowings;
-import static util.ServerUtil.isGetSubjectsListReq;
-import static util.ServerUtil.isGetUserinfo;
-import static util.ServerUtil.isGetaDeviceBinding;
-import static util.ServerUtil.isListUsers;
-import static util.ServerUtil.isPostDataBlocksReq;
-import static util.ServerUtil.isPostDataPointsReq;
-import static util.ServerUtil.isPostDatastreamReq;
-import static util.ServerUtil.isPostDevice;
-import static util.ServerUtil.isPostDeviceDatapoints;
-import static util.ServerUtil.isPostDeviceSerialBinding;
-import static util.ServerUtil.isPostFollower;
-import static util.ServerUtil.isPostSubjectReq;
-import static util.ServerUtil.isPostUpload;
-import static util.ServerUtil.isPostUserRegister;
-import static util.ServerUtil.isSearchUsers;
-import static util.ServerUtil.isGetHealthDatastreams;
+import static util.ServerUtil.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +28,10 @@ import servlets.actions.get.GetFollowers;
 import servlets.actions.get.GetFollowings;
 import servlets.actions.get.GetSubjectList;
 import servlets.actions.get.GetaDatastream;
+import servlets.actions.get.health.GetHealthDataPoints;
+import servlets.actions.get.health.GetHealthDatastreamBlocks;
 import servlets.actions.get.health.GetHealthDatastreamsList;
+import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.users.GetUserInfo;
 import servlets.actions.get.users.ListUsers;
 import servlets.actions.get.users.SearchUsers;
@@ -164,7 +138,20 @@ public class RestFul extends HttpServlet {
 			GetUserInfo proceReq = new GetUserInfo();
 			proceReq.processRequest(req, resp);
 		} else if (isGetHealthDatastreams(ServletPath(req))) {
+			System.out.println("isGetHealthDatastreams:");
 			GetHealthDatastreamsList proceReq = new GetHealthDatastreamsList();
+			proceReq.processRequest(req, resp);
+		} else if (isGetAHealthDatastream(ServletPath(req))) {
+			System.out.println("isGetAHealthDatastream:");
+			GetaHealthDatastream proceReq = new GetaHealthDatastream();
+			proceReq.processRequest(req, resp);
+		} else if (isGetHealthDatastreamBlocks(ServletPath(req))) {
+			System.out.println("isGetHealthDatastreamBlocks:");
+			GetHealthDatastreamBlocks proceReq = new GetHealthDatastreamBlocks();
+			proceReq.processRequest(req, resp);
+		} else if (isGetHealthDatapoints(ServletPath(req))) {
+			System.out.println("isGetHealthDatapoints:");
+			GetHealthDataPoints proceReq = new GetHealthDataPoints();
 			proceReq.processRequest(req, resp);
 		} else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
