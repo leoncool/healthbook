@@ -5,7 +5,7 @@
 package servlets.device.actions;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataImportDAO;
+import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.models.Datastream;
 import health.hbase.models.HBaseDataImport;
@@ -123,7 +123,7 @@ public class GetDeviceDataPoints extends HttpServlet {
             int debug = 1;
             if (debug == 1) {
                 System.out.println("debuging.....going to hbase");
-                DataImportDAO diDao = new DataImportDAO();
+                DataPointDAO diDao = new DataPointDAO();
                 HBaseDataImport hbaseexport=null;
                 try {
                     hbaseexport = diDao.exportDatapoints(deviceID, start, end, blockid, mapUnits);

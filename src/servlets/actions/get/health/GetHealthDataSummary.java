@@ -5,7 +5,7 @@
 package servlets.actions.get.health;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataImportDAO;
+import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
@@ -148,7 +148,7 @@ public class GetHealthDataSummary extends HttpServlet {
             int debug = 1;
             if (debug == 1) {
                 System.out.println("debuging.....going to hbase");
-                DataImportDAO diDao = new DataImportDAO();
+                DataPointDAO diDao = new DataPointDAO();
                 System.out.println("datastreamID:" + datastream.getStreamId());
                 HBaseDataImport hbaseexport = null;
                 try {

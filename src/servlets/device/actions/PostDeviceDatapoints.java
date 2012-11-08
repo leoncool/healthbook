@@ -5,7 +5,7 @@
 package servlets.device.actions;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataImportDAO;
+import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
@@ -98,7 +98,7 @@ public class PostDeviceDatapoints extends HttpServlet {
                     return;
                 }
             }
-            DataImportDAO importDao = new DataImportDAO();
+            DataPointDAO importDao = new DataPointDAO();
             HBaseDataImport importData = new HBaseDataImport();
             importData.setData_points(jdataImport.getData_points());
             importData.setDatastream_id(deviceID);

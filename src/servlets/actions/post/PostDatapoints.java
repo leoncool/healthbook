@@ -5,7 +5,7 @@
 package servlets.actions.post;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataImportDAO;
+import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
@@ -126,9 +126,9 @@ public class PostDatapoints extends HttpServlet {
                     return;
                 }
             }
-            DataImportDAO importDao = null;
+            DataPointDAO importDao = null;
             try {
-                importDao = new DataImportDAO();
+                importDao = new DataPointDAO();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
