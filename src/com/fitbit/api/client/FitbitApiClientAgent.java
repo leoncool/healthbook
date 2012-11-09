@@ -32,6 +32,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import health.database.DAO.Ext_API_Info_DAO;
+import health.database.models.ExternalApiInfo;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -2711,25 +2714,26 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
 
     protected void setAccessToken(LocalUserDetail localUser) {
         // Get the access token for the user:
-        APIResourceCredentials resourceCredentials = credentialsCache.getResourceCredentials(localUser);
+     //   APIResourceCredentials resourceCredentials = credentialsCache.getResourceCredentials(localUser);
         // Set the access token in the client:
         System.out.println("hello");
-        
-        
-        resourceCredentials=new APIResourceCredentials("-", "d09e22d73e9e05b9f1f609eb7341f966", "132d21616c4580e428214c83a5b293e7");
-        
-        resourceCredentials.setTempTokenVerifier("en9jhe0ho77p1ci4isg4sbb75b");
-    	resourceCredentials.setLocalUserId("23KT43");
-    	resourceCredentials.setAccessToken("e5b795607038440788ffe2fb70bc0a64");
-    	resourceCredentials.setAccessTokenSecret("132d21616c4580e428214c83a5b293e7");
-    	resourceCredentials.setTempToken("75dc7ee3a3b2cbf14f36d3d1ba1d68cd");
+        System.out.println("localUser:"+localUser);  
+        System.out.println("localUser:"+localUser.getUserId());   
+        APIResourceCredentials resourceCredentials =new APIResourceCredentials("-", "d09e22d73e9e05b9f1f609eb7341f966", "132d21616c4580e428214c83a5b293e7");
+        Ext_API_Info_DAO ext_api_DAO=new Ext_API_Info_DAO();
+        ExternalApiInfo extapi=ext_api_DAO.getExt_API_INFO(localUser.getLoginID(), "fitbit", localUser.getUserId());
+        resourceCredentials.setTempTokenVerifier(extapi.getTempTokenVerifier());
+    	resourceCredentials.setLocalUserId(extapi.getExtId());
+    	resourceCredentials.setAccessToken(extapi.getAccessToken());
+    	resourceCredentials.setAccessTokenSecret(extapi.getTokenSecrect());
+    	resourceCredentials.setTempToken(extapi.getTempToken());
     	
-//    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
-//    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
-//    	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
-//    	//System.out.println("getResourceId:"+resourceCredentials.getResourceId());
-//    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
-//     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
+    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
+    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
+    	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
+    	//System.out.println("getResourceId:"+resourceCredentials.getResourceId());
+    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
+     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
         setOAuthAccessToken(resourceCredentials.getAccessToken(), resourceCredentials.getAccessTokenSecret(), resourceCredentials.getLocalUserId());
     }
 

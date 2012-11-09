@@ -26,6 +26,8 @@ import com.fitbit.api.client.LocalUserDetail;
 import com.fitbit.api.client.service.FitbitAPIClientService;
 import com.fitbit.api.common.model.activities.Activities;
 import com.fitbit.api.common.model.activities.ActivityLog;
+import com.fitbit.api.common.model.timeseries.Data;
+import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
 import com.fitbit.api.common.model.user.UserInfo;
 import com.fitbit.api.model.APIResourceCredentials;
 import com.fitbit.api.model.FitbitUser;
@@ -129,7 +131,7 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
                 
                 try {
                     // Get token credentials for user:
-                    apiClientService.getTokenCredentials(new LocalUserDetail(resourceCredentials.getLocalUserId()));
+                    apiClientService.getTokenCredentials(new LocalUserDetail("leoncool",resourceCredentials.getLocalUserId()));
                 } catch (FitbitAPIException e) {
                     throw new ServletException("Unable to finish authorization with Fitbit.", e);
                 }
@@ -142,7 +144,7 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
 //            	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
 //             	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
             
-                UserInfo userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail(resourceCredentials.getLocalUserId()));
+                UserInfo userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail("leoncool",resourceCredentials.getLocalUserId()));
 
             
                request.setAttribute("userInfo", userInfo);
@@ -159,19 +161,30 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
         	      UserInfo userInfo;
 				try {
 		
-					userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail(resourceCredentials.getLocalUserId()));
+					userInfo = apiClientService.getClient().getUserInfo(new LocalUserDetail("leoncool","23KT43"));
 					 request.setAttribute("userInfo", userInfo);
-					 LocalDate date=LocalDate.parse("2012-10-25");
+					 LocalDate date=LocalDate.parse("2012-10-08");
+					 LocalDate start=LocalDate.parse("2012-11-07");
+					 LocalDate end=LocalDate.parse("2012-11-08");
 					    String localUserID=resourceCredentials.getLocalUserId();
 		                FitbitUser fitbitUser=new FitbitUser(localUserID);
 		            
-		                Activities activities=apiClientService.getClient().getActivities(new LocalUserDetail(resourceCredentials.getLocalUserId()), fitbitUser,date);
+		                Activities activities=apiClientService.getClient().getActivities(new LocalUserDetail("leoncool","23KT43"), fitbitUser,date);
 		              List<ActivityLog> logList=activities.getActivities();
-		              System.out.println("logListSize:"+logList.size());
+		              
+		              List<Data> dataList=apiClientService.getClient().getTimeSeries(new LocalUserDetail("leoncool","23KT43"), fitbitUser, TimeSeriesResourceType.STEPS_TRACKER, start, end);
+
+		              System.out.println("logListSize:"+logList.size());	
+		              System.out.println("dataListSize:"+dataList.size());	
+		              for(Data log:dataList)
+		              {
+		            	  System.out.println(log.getDateTime()+" : "+log.getValue());
+		              }
 		              for(ActivityLog log:logList)
 		              {
 		            	  System.out.println(log.getSteps());
 		              }
+		              System.out.println("totalStepsGoal:"+activities.getActivityGoals().getSteps());
 		              System.out.println("totalSteps:"+activities.getSummary().getSteps());
 					 System.out.println(userInfo.getAvatar());
 				} catch (FitbitAPIException e) {
@@ -183,9 +196,8 @@ public class FitbitApiAuthExampleServlet extends HttpServlet {
         	}
         	else{
             try {
-            	System.out.println("going to authroisess");
-            	
-                response.sendRedirect(apiClientService.getResourceOwnerAuthorizationURL(new LocalUserDetail("23KT43"), exampleBaseUrl + "/FitbitApiAuthExampleServlet?completeAuthorization="));
+            	System.out.println("going to authroisess");            	
+                response.sendRedirect(apiClientService.getResourceOwnerAuthorizationURL(new LocalUserDetail("leoncool","23KT43"), exampleBaseUrl + "/FitbitApiAuthExampleServlet?completeAuthorization="));
             } catch (FitbitAPIException e) {
                 throw new ServletException("Exception during performing authorization", e);
             }

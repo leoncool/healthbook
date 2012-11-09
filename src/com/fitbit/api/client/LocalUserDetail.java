@@ -1,15 +1,20 @@
 package com.fitbit.api.client;
 
 public class LocalUserDetail {
-
+	private final String loginID;
 	private final String userId;
 	
-	public LocalUserDetail(String userId) {
+	public LocalUserDetail(String loginID,String userId) {
 		this.userId = userId;
+		this.loginID=loginID;
 	}
 	
 	public String getUserId() {
 		return userId;
+	}
+
+	public String getLoginID() {
+		return loginID;
 	}
 
 	@Override

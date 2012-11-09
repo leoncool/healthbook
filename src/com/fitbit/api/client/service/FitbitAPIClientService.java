@@ -105,7 +105,7 @@ public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
         AccessToken accessToken = client.getOAuthAccessToken(tempToken, tempTokenSecret, resourceCredentials.getTempTokenVerifier());
         resourceCredentials.setAccessToken(accessToken.getToken());
         resourceCredentials.setAccessTokenSecret(accessToken.getTokenSecret());
-        resourceCredentials.setResourceId(accessToken.getEncodedUserId());
+        resourceCredentials.setResourceId(accessToken.getEncodedUserId()); 
     }
 
     public Activities getActivities(LocalUserDetail user, LocalDate date) throws FitbitAPIException {
@@ -246,7 +246,7 @@ public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
 
                 sub.setLastUpdateNotificationDate(new Date());
 
-                APIResourceCredentials credentials = credentialsCache.getResourceCredentials(new LocalUserDetail(resource.getSubscriptionId()));
+                APIResourceCredentials credentials = credentialsCache.getResourceCredentials(new LocalUserDetail(null,resource.getSubscriptionId()));
 
                 String cacheKeyWithUserId =
                         APIUtil.constructFullUrl(
