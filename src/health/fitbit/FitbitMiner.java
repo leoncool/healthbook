@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import com.fitbit.api.FitbitAPIException;
 import com.fitbit.api.client.FitbitAPIEntityCache;
@@ -25,6 +26,8 @@ import com.fitbit.api.client.service.FitbitAPIClientService;
 import com.fitbit.api.common.model.activities.Activities;
 import com.fitbit.api.common.model.activities.ActivityLog;
 import com.fitbit.api.common.model.timeseries.Data;
+import com.fitbit.api.common.model.timeseries.IntradayData;
+import com.fitbit.api.common.model.timeseries.IntradaySummary;
 import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
 import com.fitbit.api.common.model.user.UserInfo;
 import com.fitbit.api.model.FitbitUser;
@@ -64,7 +67,7 @@ public class FitbitMiner extends HttpServlet {
 					"config.properties"));
 			apiBaseUrl = properties.getProperty("apiBaseUrl");
 			fitbitSiteBaseUrl = properties.getProperty("fitbitSiteBaseUrl");
-			
+
 			clientConsumerKey = properties.getProperty("clientConsumerKey");
 			clientSecret = properties.getProperty("clientSecret");
 		} catch (IOException e) {
@@ -101,6 +104,21 @@ public class FitbitMiner extends HttpServlet {
 			Activities activities = apiClientService.getClient()
 					.getActivities(new LocalUserDetail("leoncool", "23KT43"),
 							fitbitUser, date);
+			LocalTime localtime1 = LocalTime.parse("01:00");
+			LocalTime localtime2 = LocalTime.parse("22:00");
+			IntradaySummary summary = apiClientService.getClient()
+					.getIntraDayTimeSeries(
+							new LocalUserDetail("leoncool", "23KT43"),
+							fitbitUser, TimeSeriesResourceType.STEPS, date,
+							localtime1, localtime2);
+			System.out.println("Size Summary:"
+					+ summary.getIntradayDataset().getDataset().size());
+			List<IntradayData> intraDataList=summary.getIntradayDataset().getDataset();
+			for(IntradayData data:intraDataList)
+			{
+				
+				System.out.println(data.getTime()+" "+data.getValue()+" ,level:"+data.getLevel());
+			}
 			List<ActivityLog> logList = activities.getActivities();
 
 			List<Data> dataList = apiClientService.getClient().getTimeSeries(
