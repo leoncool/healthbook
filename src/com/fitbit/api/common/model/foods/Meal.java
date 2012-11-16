@@ -1,12 +1,13 @@
 package com.fitbit.api.common.model.foods;
 
-import com.fitbit.api.FitbitAPIException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fitbit.api.FitbitAPIException;
 
 /**
  * User: gkutlu

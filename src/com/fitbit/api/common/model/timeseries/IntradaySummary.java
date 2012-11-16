@@ -3,8 +3,6 @@ package com.fitbit.api.common.model.timeseries;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-
 public class IntradaySummary {
 
     private Data summary;

@@ -1,14 +1,13 @@
 package com.fitbit.api.common.model.devices;
 
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.http.Response;
-import com.fitbit.api.common.model.user.UserInfo;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fitbit.api.common.model.user.UserInfo;
 
 public class ScaleUser {
 

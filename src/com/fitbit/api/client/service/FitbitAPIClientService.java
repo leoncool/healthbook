@@ -1,5 +1,15 @@
 package com.fitbit.api.client.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDate;
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.fitbit.api.APIUtil;
 import com.fitbit.api.FitbitAPIException;
 import com.fitbit.api.FitbitAPISecurityException;
@@ -13,16 +23,14 @@ import com.fitbit.api.client.http.AccessToken;
 import com.fitbit.api.client.http.TempCredentials;
 import com.fitbit.api.common.model.activities.Activities;
 import com.fitbit.api.common.model.foods.Foods;
-import com.fitbit.api.model.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDate;
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
+import com.fitbit.api.model.APICollectionType;
+import com.fitbit.api.model.APIFormat;
+import com.fitbit.api.model.APIResourceCredentials;
+import com.fitbit.api.model.ApiRateLimitStatus;
+import com.fitbit.api.model.FitbitUser;
+import com.fitbit.api.model.SubscriptionDetail;
+import com.fitbit.api.model.UpdateNotification;
+import com.fitbit.api.model.UpdatedResource;
 
 public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
     protected static final Log log = LogFactory.getLog(FitbitAPIClientService.class);
@@ -52,6 +60,7 @@ public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
     public APIResourceCredentials getResourceCredentialsByUser(LocalUserDetail user) {
         if (null == credentialsCache) {
             return null;
+            
         }
         return credentialsCache.getResourceCredentials(user);
     }
@@ -91,6 +100,7 @@ public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
     public void getTokenCredentials(LocalUserDetail user) throws FitbitAPIException {
         // Get cached resource credentials:
         APIResourceCredentials resourceCredentials = getResourceCredentialsByUser(user);
+        System.out.println("''''''''getTokenCredentials userID:+"+":"+user.getUserId());
         if (resourceCredentials == null) {
             throw new FitbitAPIException("User " + user.getUserId() + " does not have resource credentials. Need to grant authorization first.");
         }

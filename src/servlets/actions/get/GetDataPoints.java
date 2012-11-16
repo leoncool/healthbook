@@ -163,6 +163,7 @@ public class GetDataPoints extends HttpServlet {
                 if (encodings != null && encodings.indexOf("gzip") != -1 && iftoZip == true) {
                     // Go with GZIP
                     response.setHeader("Content-Encoding", "gzip");
+                    System.out.println("Using Gzip to compress.......");
                     outStream = new GZIPOutputStream(response.getOutputStream());
                 } else {
                     outStream = response.getOutputStream();
@@ -195,6 +196,7 @@ public class GetDataPoints extends HttpServlet {
                 if (encodings != null && encodings.indexOf("gzip") != -1 && iftoZip == true) {
                     // Go with GZIP
                     response.setHeader("Content-Encoding", "gzip");
+                    System.out.println("Using Gzip to compress.......");
                     outStream = new GZIPOutputStream(response.getOutputStream());
                 } else {
                     outStream = response.getOutputStream();

@@ -1,5 +1,16 @@
 package com.fitbit.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import com.fitbit.api.client.http.OAuth;
 import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
 import com.fitbit.api.model.APICollectionType;
@@ -7,17 +18,6 @@ import com.fitbit.api.model.APIFormat;
 import com.fitbit.api.model.APIVersion;
 import com.fitbit.api.model.ApiCollectionProperty;
 import com.fitbit.api.model.FitbitResourceOwner;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.UUID;
 
 public class APIUtil {
 

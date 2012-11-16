@@ -1,14 +1,14 @@
 package com.fitbit.api.common.model.activities;
 
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.http.Response;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fitbit.api.FitbitAPIException;
+import com.fitbit.api.client.http.Response;
 
 public class Activities {
 

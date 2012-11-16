@@ -26,21 +26,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.fitbit.api.client.http;
 
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.Configuration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.Proxy.Type;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.security.AccessControlException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.fitbit.api.FitbitAPIException;
+import com.fitbit.api.client.Configuration;
 /**
  * A utility class to handle HTTP request/response.
  * @author Yusuke Yamamoto - yusuke at mac.com

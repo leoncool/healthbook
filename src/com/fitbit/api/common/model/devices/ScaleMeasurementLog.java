@@ -1,14 +1,15 @@
 package com.fitbit.api.common.model.devices;
 
-import com.fitbit.api.common.service.FitbitApiService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fitbit.api.common.service.FitbitApiService;
 
 public class ScaleMeasurementLog {
 

@@ -26,9 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.fitbit.api;
 
-import com.fitbit.api.client.http.Response;
-
 import java.util.List;
+
+import com.fitbit.api.client.http.Response;
 
 public class FitbitAPIException extends Exception {
     private int statusCode = -1;

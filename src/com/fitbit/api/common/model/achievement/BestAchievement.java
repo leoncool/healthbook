@@ -1,8 +1,9 @@
 package com.fitbit.api.common.model.achievement;
 
-import com.fitbit.api.common.service.FitbitApiService;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fitbit.api.common.service.FitbitApiService;
 
 /**
  * Created by IntelliJ IDEA.

@@ -1,7 +1,6 @@
 package health.fitbit;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -9,9 +8,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 import com.fitbit.api.FitbitAPIException;
 import com.fitbit.api.client.FitbitAPIEntityCache;
@@ -23,14 +19,7 @@ import com.fitbit.api.client.FitbitApiSubscriptionStorage;
 import com.fitbit.api.client.FitbitApiSubscriptionStorageInMemoryImpl;
 import com.fitbit.api.client.LocalUserDetail;
 import com.fitbit.api.client.service.FitbitAPIClientService;
-import com.fitbit.api.common.model.activities.Activities;
-import com.fitbit.api.common.model.activities.ActivityLog;
-import com.fitbit.api.common.model.timeseries.Data;
-import com.fitbit.api.common.model.timeseries.IntradayData;
-import com.fitbit.api.common.model.timeseries.IntradaySummary;
-import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
 import com.fitbit.api.common.model.user.UserInfo;
-import com.fitbit.api.model.FitbitUser;
 
 /**
  * Servlet implementation class FitbitMiner
@@ -95,48 +84,49 @@ public class FitbitMiner extends HttpServlet {
 							credentialsCache), clientConsumerKey, clientSecret,
 					credentialsCache, entityCache, subscriptionStore);
 			userInfo = apiClientService.getClient().getUserInfo(
-					new LocalUserDetail("leoncool", "23KT43"));
+					new LocalUserDetail("leoncool", "-"));
 			request.setAttribute("userInfo", userInfo);
-			LocalDate date = LocalDate.parse("2012-11-08");
-			LocalDate start = LocalDate.parse("2012-11-07");
-			LocalDate end = LocalDate.parse("2012-11-08");
-			FitbitUser fitbitUser = new FitbitUser("23KT43");
-			Activities activities = apiClientService.getClient()
-					.getActivities(new LocalUserDetail("leoncool", "23KT43"),
-							fitbitUser, date);
-			LocalTime localtime1 = LocalTime.parse("01:00");
-			LocalTime localtime2 = LocalTime.parse("22:00");
-			IntradaySummary summary = apiClientService.getClient()
-					.getIntraDayTimeSeries(
-							new LocalUserDetail("leoncool", "23KT43"),
-							fitbitUser, TimeSeriesResourceType.STEPS, date,
-							localtime1, localtime2);
-			System.out.println("Size Summary:"
-					+ summary.getIntradayDataset().getDataset().size());
-			List<IntradayData> intraDataList=summary.getIntradayDataset().getDataset();
-			for(IntradayData data:intraDataList)
-			{
-				
-				System.out.println(data.getTime()+" "+data.getValue()+" ,level:"+data.getLevel());
-			}
-			List<ActivityLog> logList = activities.getActivities();
-
-			List<Data> dataList = apiClientService.getClient().getTimeSeries(
-					new LocalUserDetail("leoncool", "23KT43"), fitbitUser,
-					TimeSeriesResourceType.STEPS_TRACKER, start, end);
-
-			System.out.println("logListSize:" + logList.size());
-			System.out.println("dataListSize:" + dataList.size());
-			for (Data log : dataList) {
-				System.out.println(log.getDateTime() + " : " + log.getValue());
-			}
-			for (ActivityLog log : logList) {
-				System.out.println(log.getSteps());
-			}
-			System.out.println("totalStepsGoal:"
-					+ activities.getActivityGoals().getSteps());
-			System.out.println("totalSteps:"
-					+ activities.getSummary().getSteps());
+//			LocalDate date = LocalDate.parse("2012-10-08");
+//			LocalDate start = LocalDate.parse("2012-10-07");
+//			LocalDate end = LocalDate.parse("2012-11-08");
+//			FitbitUser fitbitUser = new FitbitUser("23KT43");
+//		
+//			LocalTime localtime1 = LocalTime.parse("01:00");
+//			LocalTime localtime2 = LocalTime.parse("22:00");
+//			IntradaySummary summary = apiClientService.getClient()
+//					.getIntraDayTimeSeries(
+//							new LocalUserDetail("leoncool", "23KT43"),
+//							fitbitUser, TimeSeriesResourceType.STEPS, date
+//							);
+//			System.out.println("Size Summary:"
+//					+ summary.getIntradayDataset().getDataset().size());
+//			List<IntradayData> intraDataList=summary.getIntradayDataset().getDataset();
+//			for(IntradayData data:intraDataList)
+//			{				
+//				System.out.println(data.getTime()+" "+data.getValue());
+//			}
+//			
+//			Activities activities = apiClientService.getClient()
+//					.getActivities(new LocalUserDetail("leoncool", "23KT43"),
+//							fitbitUser, date);
+//			List<ActivityLog> logList = activities.getActivities();
+//
+//			List<Data> dataList = apiClientService.getClient().getTimeSeries(
+//					new LocalUserDetail("leoncool", "23KT43"), fitbitUser,
+//					TimeSeriesResourceType.STEPS_TRACKER, start, end);
+//
+//			System.out.println("logListSize:" + logList.size());
+//			System.out.println("dataListSize:" + dataList.size());
+//			for (Data log : dataList) {
+//				System.out.println(log.getDateTime() + " : " + log.getValue());
+//			}
+//			for (ActivityLog log : logList) {
+//				System.out.println("Log"+log.getSteps());
+//			}
+//			System.out.println("totalStepsGoal:"
+//					+ activities.getActivityGoals().getSteps());
+//			System.out.println("totalSteps:"
+//					+ activities.getSummary().getSteps());
 			System.out.println(userInfo.getAvatar());
 		} catch (FitbitAPIException e) {
 			// TODO Auto-generated catch block

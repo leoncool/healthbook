@@ -6,7 +6,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/fitbit/commons-lang-2.6.jar">
+	<classpathentry exported="true" kind="lib" path="lib/fitbit/commons-lang-2.6.jar">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>

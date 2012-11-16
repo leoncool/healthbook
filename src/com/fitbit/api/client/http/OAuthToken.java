@@ -26,10 +26,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.fitbit.api.client.http;
 
-import com.fitbit.api.FitbitAPIException;
+import java.io.Serializable;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.io.Serializable;
+
+import com.fitbit.api.FitbitAPIException;
 
 abstract class OAuthToken implements Serializable {
 

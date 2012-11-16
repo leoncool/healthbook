@@ -26,7 +26,7 @@ public class FitbitApiCredentialsCacheMapImpl implements FitbitApiCredentialsCac
 
     @Override
     public APIResourceCredentials saveResourceCredentials(LocalUserDetail user, APIResourceCredentials resourceCredentials) {
-        mapTempTokenResourceCredentials.put(resourceCredentials.getTempToken(), resourceCredentials);
+     	mapTempTokenResourceCredentials.put(resourceCredentials.getTempToken(), resourceCredentials);
         return mapUserIdResourceCredentials.put(user, resourceCredentials);
     }
 

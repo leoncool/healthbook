@@ -1,11 +1,12 @@
 package com.fitbit.api.model;
 
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.http.Response;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fitbit.api.FitbitAPIException;
+import com.fitbit.api.client.http.Response;
 
 public class ApiRateLimitStatus {
     int remainingHits;

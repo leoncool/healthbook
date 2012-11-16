@@ -1,9 +1,10 @@
 package com.fitbit.api.common.model.achievement;
 
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.http.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.fitbit.api.FitbitAPIException;
+import com.fitbit.api.client.http.Response;
 
 /**
  * Created by IntelliJ IDEA.

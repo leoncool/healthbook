@@ -3,8 +3,9 @@
 <%@page import="com.fitbit.api.common.model.user.UserInfo"%>
 <% System.out.println("sadfdf"); %>
 <html>
-<head><title>Simple jsp page</title></head>
+<head><title>Succesfully Authorised!</title></head>
 <body>
+Succesfully Authorised!!!
 <table>
     <tr>
         <td>Full Name:</td>

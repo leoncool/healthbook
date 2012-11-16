@@ -4,7 +4,6 @@
  */
 package servlets.actions.get.health;
 
-import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
@@ -25,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
 import util.AllConstants;
-import util.ServerUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

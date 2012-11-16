@@ -1,9 +1,9 @@
 package com.fitbit.api.common.model.foods;
 
+import java.util.UUID;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.UUID;
 
 /**
  * User: Dzmitry Krutko

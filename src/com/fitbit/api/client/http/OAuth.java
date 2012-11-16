@@ -26,11 +26,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package com.fitbit.api.client.http;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -43,6 +38,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Yusuke Yamamoto - yusuke at mac.com
@@ -85,9 +86,10 @@ public class OAuth implements Serializable {
         base.append(encode(normalizeRequestParameters(signatureBaseParams)));
         String oauthBaseString = base.toString();
         log("OAuth base string:", oauthBaseString);
+        System.out.println("OAuth base string:"+oauthBaseString);
         String signature = generateSignature(oauthBaseString, otoken);
         log("OAuth signature:", signature);
-
+        System.out.println("OAuth signature::"+signature);
         oauthHeaderParams.add(new PostParameter("oauth_signature", signature));
         return "OAuth " + encodeParameters(oauthHeaderParams, ",", true);
     }

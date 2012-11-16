@@ -1,28 +1,17 @@
 package com.fitbit.api.client;
 
-import com.fitbit.api.APIUtil;
-import com.fitbit.api.FitbitAPIException;
-import com.fitbit.api.client.http.*;
-import com.fitbit.api.common.model.achievement.Achievements;
-import com.fitbit.api.common.model.achievement.LifetimeAchievements;
-import com.fitbit.api.common.model.activities.*;
-import com.fitbit.api.common.model.body.*;
-import com.fitbit.api.common.model.bp.Bp;
-import com.fitbit.api.common.model.bp.BpLog;
-import com.fitbit.api.common.model.devices.*;
-import com.fitbit.api.common.model.foods.*;
-import com.fitbit.api.common.model.glucose.Glucose;
-import com.fitbit.api.common.model.heart.Heart;
-import com.fitbit.api.common.model.heart.HeartLog;
-import com.fitbit.api.common.model.sleep.Sleep;
-import com.fitbit.api.common.model.sleep.SleepLog;
-import com.fitbit.api.common.model.timeseries.*;
-import com.fitbit.api.common.model.units.UnitSystem;
-import com.fitbit.api.common.model.units.VolumeUnits;
-import com.fitbit.api.common.model.user.FriendStats;
-import com.fitbit.api.common.model.user.UserInfo;
-import com.fitbit.api.common.service.FitbitApiService;
-import com.fitbit.api.model.*;
+import health.database.DAO.Ext_API_Info_DAO;
+import health.database.models.ExternalApiInfo;
+
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -32,13 +21,68 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import health.database.DAO.Ext_API_Info_DAO;
-import health.database.models.ExternalApiInfo;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.fitbit.api.APIUtil;
+import com.fitbit.api.FitbitAPIException;
+import com.fitbit.api.client.http.AccessToken;
+import com.fitbit.api.client.http.HttpClient;
+import com.fitbit.api.client.http.PostParameter;
+import com.fitbit.api.client.http.Response;
+import com.fitbit.api.client.http.TempCredentials;
+import com.fitbit.api.common.model.achievement.Achievements;
+import com.fitbit.api.common.model.achievement.LifetimeAchievements;
+import com.fitbit.api.common.model.activities.Activities;
+import com.fitbit.api.common.model.activities.Activity;
+import com.fitbit.api.common.model.activities.ActivityCategory;
+import com.fitbit.api.common.model.activities.ActivityLog;
+import com.fitbit.api.common.model.activities.ActivityReference;
+import com.fitbit.api.common.model.activities.LoggedActivityReference;
+import com.fitbit.api.common.model.body.Body;
+import com.fitbit.api.common.model.body.BodyWithGoals;
+import com.fitbit.api.common.model.body.DataPeriod;
+import com.fitbit.api.common.model.body.FatLog;
+import com.fitbit.api.common.model.body.WeightLog;
+import com.fitbit.api.common.model.bp.Bp;
+import com.fitbit.api.common.model.bp.BpLog;
+import com.fitbit.api.common.model.devices.BodyType;
+import com.fitbit.api.common.model.devices.Device;
+import com.fitbit.api.common.model.devices.Scale;
+import com.fitbit.api.common.model.devices.ScaleInvite;
+import com.fitbit.api.common.model.devices.ScaleInviteSendingResult;
+import com.fitbit.api.common.model.devices.ScaleMeasurementLog;
+import com.fitbit.api.common.model.devices.ScaleUser;
+import com.fitbit.api.common.model.foods.Food;
+import com.fitbit.api.common.model.foods.FoodFormType;
+import com.fitbit.api.common.model.foods.FoodLog;
+import com.fitbit.api.common.model.foods.FoodUnit;
+import com.fitbit.api.common.model.foods.Foods;
+import com.fitbit.api.common.model.foods.LoggedFood;
+import com.fitbit.api.common.model.foods.Meal;
+import com.fitbit.api.common.model.foods.NutritionalValuesEntry;
+import com.fitbit.api.common.model.foods.Water;
+import com.fitbit.api.common.model.foods.WaterLog;
+import com.fitbit.api.common.model.glucose.Glucose;
+import com.fitbit.api.common.model.heart.Heart;
+import com.fitbit.api.common.model.heart.HeartLog;
+import com.fitbit.api.common.model.sleep.Sleep;
+import com.fitbit.api.common.model.sleep.SleepLog;
+import com.fitbit.api.common.model.timeseries.Data;
+import com.fitbit.api.common.model.timeseries.IntradaySummary;
+import com.fitbit.api.common.model.timeseries.TimePeriod;
+import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
+import com.fitbit.api.common.model.units.UnitSystem;
+import com.fitbit.api.common.model.units.VolumeUnits;
+import com.fitbit.api.common.model.user.FriendStats;
+import com.fitbit.api.common.model.user.UserInfo;
+import com.fitbit.api.common.service.FitbitApiService;
+import com.fitbit.api.model.APICollectionType;
+import com.fitbit.api.model.APIFormat;
+import com.fitbit.api.model.APIVersion;
+import com.fitbit.api.model.ApiCollectionProperty;
+import com.fitbit.api.model.ApiQuotaType;
+import com.fitbit.api.model.ApiRateLimitStatus;
+import com.fitbit.api.model.ApiSubscription;
+import com.fitbit.api.model.FitbitUser;
+import com.fitbit.api.model.SubscriptionDetail;
 
 
 @SuppressWarnings({"NonPrivateFieldAccessedInSynchronizedContext"})
@@ -235,6 +279,9 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
      * @param encodedUserId userId
      */
     public void setOAuthAccessToken(String token, String tokenSecret, String encodedUserId) {
+    	System.out.println("*************token:"+token);
+    	System.out.println("*************tokenSecret:"+tokenSecret);
+    	System.out.println("*************encodedUserId:"+encodedUserId);
         setOAuthAccessToken(new AccessToken(token, tokenSecret));
     }
 
@@ -2059,7 +2106,7 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
         setAccessToken(localUser);
         // Example: GET /1/user/-/profile.json
         String url = APIUtil.contextualizeUrl(getApiBaseUrl(), getApiVersion(), "/user/" + fitbitUser.getId() + "/profile", APIFormat.JSON);
-
+        System.out.println("URL:"+url);
         try {
             Response response = httpGet(url, true);
             throwExceptionIfError(response);
@@ -2717,26 +2764,26 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
      //   APIResourceCredentials resourceCredentials = credentialsCache.getResourceCredentials(localUser);
         // Set the access token in the client:
         System.out.println("hello");
-        System.out.println("localUser:"+localUser);  
         System.out.println("localUser:"+localUser.getUserId());   
-        APIResourceCredentials resourceCredentials =new APIResourceCredentials("-", "d09e22d73e9e05b9f1f609eb7341f966", "132d21616c4580e428214c83a5b293e7");
+       // APIResourceCredentials resourceCredentials =new APIResourceCredentials("-", "", "");
         Ext_API_Info_DAO ext_api_DAO=new Ext_API_Info_DAO();
         ExternalApiInfo extapi=ext_api_DAO.getExt_API_INFO(localUser.getLoginID(), "fitbit", localUser.getUserId());
-        resourceCredentials.setTempTokenVerifier(extapi.getTempTokenVerifier());
-    	resourceCredentials.setLocalUserId(extapi.getExtId());
-    	resourceCredentials.setAccessToken(extapi.getAccessToken());
-    	resourceCredentials.setAccessTokenSecret(extapi.getTokenSecrect());
-    	resourceCredentials.setTempToken(extapi.getTempToken());
-    	
-    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
-    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
-    	System.out.println("getAccessToken:"+resourceCredentials.getAccessToken());
-    	//System.out.println("getResourceId:"+resourceCredentials.getResourceId());
-    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
-     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
-        setOAuthAccessToken(resourceCredentials.getAccessToken(), resourceCredentials.getAccessTokenSecret(), resourceCredentials.getLocalUserId());
+//        resourceCredentials.setTempTokenVerifier(extapi.getTempTokenVerifier());
+//    	resourceCredentials.setLocalUserId(extapi.getExtId());
+//    	resourceCredentials.setAccessToken(extapi.getAccessToken());
+//    	resourceCredentials.setAccessTokenSecret(extapi.getTokenSecrect());
+//    	resourceCredentials.setTempToken(extapi.getTempToken());
+//    	resourceCredentials.setTempTokenSecret(extapi.getTokenSecrect());
+//    	System.out.println("Test here:"+resourceCredentials.getLocalUserId());
+//    	System.out.println("setAccessToken:"+resourceCredentials.getAccessToken());
+//    	System.out.println("getTempToken:"+resourceCredentials.getTempToken());
+//    	System.out.println("getResourceId:"+resourceCredentials.getResourceId());
+//    	System.out.println("getTempTokenVerifier:"+resourceCredentials.getTempTokenVerifier());
+//     	System.out.println("getAccessTokenSecret:"+resourceCredentials.getAccessTokenSecret());
+   //     setOAuthAccessToken(resourceCredentials.getAccessToken(), resourceCredentials.getAccessTokenSecret(), resourceCredentials.getLocalUserId());
+        setOAuthAccessToken(extapi.getAccessToken(), extapi.getTokenSecrect(), extapi.getExtId());
     }
-
+ 
     protected void clearAccessToken() {
         // Set the access token in the client to null:
         setOAuthAccessToken(null);
