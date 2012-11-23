@@ -75,7 +75,7 @@ public class GetSubjectList extends HttpServlet {
             }
             DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
             for (Subject sub : subList) {
-            	if(sub.getVisibleSet().equalsIgnoreCase(AllConstants.ProgramConts.visibleSet_PUBLIC))
+            	if(sub.getVisibleSet()!=null&&sub.getVisibleSet().equalsIgnoreCase(AllConstants.ProgramConts.visibleSet_PUBLIC))
             	{
                 jsubList.add(dbtoJUtil.convert_a_Subject(sub));
             	}
