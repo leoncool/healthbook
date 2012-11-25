@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions.get.health;
+package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DataPointDAO;
@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.zip.GZIPOutputStream;
 
+import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +48,7 @@ import com.google.gson.stream.JsonWriter;
  * 
  * @author Leon
  */
-public class GetHealthDataPoints extends HttpServlet {
+public class GetHealthDataPointsByTitle extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -156,24 +157,28 @@ public class GetHealthDataPoints extends HttpServlet {
 								null, null);
 				return;
 			}
-			String streamID = ServerUtil
-					.getHealthStreamID(ServletPath(request));
-
-			DatastreamDAO dstreamDao = new DatastreamDAO();
-			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-			Datastream datastream = dstreamDao.getDatastream(streamID, true,
-					false);
+	
+			  String streamTitle = ServerUtil.getHealthStreamTitle(ServletPath(request));
+	            
+	            DatastreamDAO dstreamDao = new DatastreamDAO();
+	            DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+	            Datastream datastream=null;
+	            try{
+	            datastream = dstreamDao.getDatastreamByTitle(subject.getId(),streamTitle, true, false);
+	            }catch(NonUniqueResultException ex)
+	            {
+	            	 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, streamTitle);
+	                 return;
+	            }
+	            if (datastream == null) {
+	                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_StreamTitle, null, streamTitle);
+	                return;
+	            }
 			if (blockid != null
 					&& dstreamDao.getDatastreamBlock(blockid) == null) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Invalid_Datablock_ID,
 						null, blockid);
-				return;
-			}
-			if (datastream == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_StreamID, null,
-						streamID);
 				return;
 			}
 			HashMap<String, String> mapUnits = new HashMap<String, String>();
@@ -217,11 +222,11 @@ public class GetHealthDataPoints extends HttpServlet {
 				try {
 					if(request.getParameter(AllConstants.api_entryPoints.request_api_dataformat)!=null)
 					{
-						hbaseexport = diDao.exportDatapoints(streamID, start, end,
+						hbaseexport = diDao.exportDatapoints(datastream.getStreamId(), start, end,
 								blockid, mapUnits,DateUtil.millisecFormat);
 					}
 					else{
-						hbaseexport = diDao.exportDatapoints(streamID, start, end,
+						hbaseexport = diDao.exportDatapoints(datastream.getStreamId(), start, end,
 								blockid, mapUnits,null);
 					}
 					
@@ -246,7 +251,7 @@ public class GetHealthDataPoints extends HttpServlet {
 					hbaseexport.setBlock_id(blockid);
 					hbaseexport.setData_points(new ArrayList<JsonDataPoints>());
 
-					hbaseexport.setDatastream_id(streamID);
+					hbaseexport.setDatastream_id(datastream.getStreamId());
 					hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
 							datastream, mapUnits).getUnits_list());
 					// hbaseexport.setDeviceid(streamID);

@@ -126,7 +126,7 @@ public class GetDeviceDataPoints extends HttpServlet {
                 DataPointDAO diDao = new DataPointDAO();
                 HBaseDataImport hbaseexport=null;
                 try {
-                    hbaseexport = diDao.exportDatapoints(deviceID, start, end, blockid, mapUnits);
+                    hbaseexport = diDao.exportDatapoints(deviceID, start, end, blockid, mapUnits,null);
                 } catch (ErrorCodeException ex) {
                     Logger.getLogger(GetDeviceDataPoints.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (Throwable ex) {

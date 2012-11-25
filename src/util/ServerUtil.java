@@ -26,6 +26,11 @@ public class ServerUtil {
         String streamID = values[0];
         return streamID;
     }
+    public static String getHealthStreamTitle(String ServletPath) {
+        String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health + "/"+AllConstants.api_entryPoints.api_title+"/", "").split("/");
+        String streamTitle = values[0];
+        return streamTitle;
+    }
     public static String getDeviceID(String ServletPath) {
         String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_device + "/", "").split("/");
         String DeviceID = values[0];
@@ -164,6 +169,17 @@ public class ServerUtil {
             return false;
         }
     }
+    public static boolean isGetAHealthDatastreamByTitle(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_title
+                + "/[-a-zA-Z0-9_]+" +"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
     public static boolean isGetHealthDatastreamBlocks(String ServletPath)
     {
     	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
@@ -209,6 +225,17 @@ public class ServerUtil {
     	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
                 +"/"+AllConstants.api_entryPoints.api_datastream
                 + "/[-a-zA-Z0-9]+/"+AllConstants.api_entryPoints.api_datapoints+"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
+    public static boolean isGetHealthDatapointsByTitle(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_title
+                + "/[-a-zA-Z0-9_]+/"+AllConstants.api_entryPoints.api_datapoints+"[/]*$"))
         	{
         	return true;
         	}else {        	

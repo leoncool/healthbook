@@ -39,7 +39,8 @@ import static util.ServerUtil.isPostSubjectReq;
 import static util.ServerUtil.isPostUpload;
 import static util.ServerUtil.isPostUserRegister;
 import static util.ServerUtil.isSearchUsers;
-
+import static util.ServerUtil.isGetAHealthDatastreamByTitle;
+import static util.ServerUtil.isGetHealthDatapointsByTitle;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -65,6 +66,8 @@ import servlets.actions.get.health.GetHealthDataPoints;
 import servlets.actions.get.health.GetHealthDatastreamBlocks;
 import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
+import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
+import servlets.actions.get.health.bytitle.GetaHealthDatastreaByTitle;
 import servlets.actions.get.users.GetUserInfo;
 import servlets.actions.get.users.ListUsers;
 import servlets.actions.get.users.SearchUsers;
@@ -185,6 +188,16 @@ public class RestFul extends HttpServlet {
 		} else if (isGetHealthDatapoints(ServletPath(req))) {
 			System.out.println("isGetHealthDatapoints:");
 			GetHealthDataPoints proceReq = new GetHealthDataPoints();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetHealthDatapointsByTitle(ServletPath(req))) {
+			System.out.println("isGetHealthDatapointsByTitle:");
+			GetHealthDataPointsByTitle proceReq = new GetHealthDataPointsByTitle();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+			System.out.println("isGetAHealthDatastreamByTitle:");
+			GetaHealthDatastreaByTitle proceReq = new GetaHealthDatastreaByTitle();
 			proceReq.processRequest(req, resp);
 		} else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
