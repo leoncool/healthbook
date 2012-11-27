@@ -1,4 +1,4 @@
-package health.fitbit;
+package servlets;
 
 import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
@@ -53,9 +53,9 @@ import com.fitbit.api.model.FitbitUser;
  */
 @WebServlet(
 	    name = "FitbitTimer", 
-	    urlPatterns = {"/FitbitTimer"}, 
-	    loadOnStartup=1
+	    urlPatterns = {"/FitbitTimer"}
 	)
+//    loadOnStartup=0
 public class FitbitTimer extends HttpServlet {
 	private static final long serialVersionUID = 1L;  
 	private static Timer timer;
@@ -94,16 +94,21 @@ public class FitbitTimer extends HttpServlet {
 			System.out.println(getClass().getClassLoader().toString());
 			properties.load(getClass().getClassLoader().getResourceAsStream(
 					"config.properties"));
+			System.out.println("------After getting Property File-------");
 			apiBaseUrl = properties.getProperty("apiBaseUrl");
+			System.out.println("------Getting apiBaseUrl Property File-------");
 			fitbitSiteBaseUrl = properties.getProperty("fitbitSiteBaseUrl");
-
+			System.out.println("------Getting fitbitSiteBaseUrl Property File-------");
 			clientConsumerKey = properties.getProperty("clientConsumerKey");
+			System.out.println("------Getting clientConsumerKey Property File-------");
 			clientSecret = properties.getProperty("clientSecret");
+			System.out.println("------Getting clientSecret Property File-------");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
+			System.out.println("------Initializing DataPointDAO-------");
 			datapointDao = new DataPointDAO();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -142,6 +147,7 @@ public class FitbitTimer extends HttpServlet {
 	        				{
 	        					long calculate=start.getTime()-i*day;
 	        					Date temp_date=new Date(calculate);
+	        					System.out.println("Getting "+temp_date+" ");
 	        					LocalDate fitbitDate=LocalDate.fromDateFields(temp_date);
 	        					importStepsData(apiinfo, fitbitDate, apiClientService);	    
 	        					importFloorsData(apiinfo, fitbitDate, apiClientService);
@@ -161,6 +167,7 @@ public class FitbitTimer extends HttpServlet {
 	        				{
 	        					long calculate=start.getTime()-i*day;
 	        					Date temp_date=new Date(calculate);
+	        					System.out.println("Getting "+temp_date+" ");
 	        					LocalDate fitbitDate=LocalDate.fromDateFields(temp_date);
 	        					importStepsData(apiinfo, fitbitDate, apiClientService);	    
 	        					importFloorsData(apiinfo, fitbitDate, apiClientService);
@@ -225,8 +232,8 @@ public class FitbitTimer extends HttpServlet {
 			System.out.println("-------No record-----"+fitbitDate.toString());
 			return;
 		}
-		System.out.println("Size Summary:"
-				+ stepSummary.getIntradayDataset().getDataset().size());
+//		System.out.println("Size Summary:"
+//				+ stepSummary.getIntradayDataset().getDataset().size());
 		List<IntradayData> intraDataList=stepSummary.getIntradayDataset().getDataset();	 
 		HBaseDataImport hbaseImport=new HBaseDataImport();
 		
@@ -241,7 +248,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-			System.out.println(" "+cal.getTime()+" "+data.getValue());
+		//	System.out.println(" "+cal.getTime()+" "+data.getValue());
 			JsonDataPoints jdatapoint=new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue=new JsonDataValues();
@@ -271,8 +278,8 @@ public class FitbitTimer extends HttpServlet {
 			System.out.println("-------No record-----"+fitbitDate.toString());
 			return;
 		}
-		System.out.println("Size Summary:"
-				+ stepSummary.getIntradayDataset().getDataset().size());
+//		System.out.println("Size Summary:"
+//				+ stepSummary.getIntradayDataset().getDataset().size());
 		List<IntradayData> intraDataList=stepSummary.getIntradayDataset().getDataset();	 
 		HBaseDataImport hbaseImport=new HBaseDataImport();
 		
@@ -287,7 +294,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-			System.out.println(" "+cal.getTime()+" "+data.getValue());
+		//	System.out.println(" "+cal.getTime()+" "+data.getValue());
 			JsonDataPoints jdatapoint=new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue=new JsonDataValues();
@@ -317,8 +324,8 @@ public class FitbitTimer extends HttpServlet {
 			System.out.println("-------No record-----"+fitbitDate.toString());
 			return;
 		}
-		System.out.println("Size Summary:"
-				+ stepSummary.getIntradayDataset().getDataset().size());
+//		System.out.println("Size Summary:"
+//				+ stepSummary.getIntradayDataset().getDataset().size());
 		List<IntradayData> intraDataList=stepSummary.getIntradayDataset().getDataset();	 
 		HBaseDataImport hbaseImport=new HBaseDataImport();
 		
@@ -333,7 +340,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-			System.out.println(" "+cal.getTime()+" "+data.getValue());
+		//	System.out.println(" "+cal.getTime()+" "+data.getValue());
 			JsonDataPoints jdatapoint=new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue=new JsonDataValues();
