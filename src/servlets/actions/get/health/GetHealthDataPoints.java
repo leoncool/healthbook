@@ -92,24 +92,22 @@ public class GetHealthDataPoints extends HttpServlet {
 
 				if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) != null) {
-	
-					Date date = DateUtil.YearMonthDay_DateFormat
-							.parse(request
-									.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay));
-					System.out.println("DateRequest:"+date);
-					Calendar calStart = Calendar.getInstance(DateUtil.UTC);
-					Calendar calEnd = Calendar.getInstance(DateUtil.UTC);
-					calStart.setTime(date);
-					calEnd.setTime(date);
-					calStart.set(Calendar.HOUR_OF_DAY, 0);
-					calStart.set(Calendar.MINUTE, 0);
-					start = calStart.getTimeInMillis();
-					calEnd.set(Calendar.HOUR_OF_DAY, 23);
-					calEnd.set(Calendar.MINUTE, 59);
-					end = calEnd.getTimeInMillis();
-					System.out.println("Date Request start"+calStart.getTime());
-					System.out.println("Date Request end"+calEnd.getTime());
-					System.out.println("using Date Request:"+start+" "+end);
+					String yearMonthDateString=request
+							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
+					System.out.println("Date Request "+yearMonthDateString);
+					DateUtil dateUtil=new DateUtil();
+					Date date = dateUtil.convert(yearMonthDateString,dateUtil.YearMonthDay_DateFormat);
+									System.out.println("DateRequest:"+date);
+									Calendar calStart = Calendar.getInstance(DateUtil.UTC);
+									Calendar calEnd = Calendar.getInstance(DateUtil.UTC);
+									calStart.setTime(date);
+									calEnd.setTime(date);
+									calStart.set(Calendar.HOUR_OF_DAY, 0);
+									calStart.set(Calendar.MINUTE, 0);
+									start = calStart.getTimeInMillis();
+									calEnd.set(Calendar.HOUR_OF_DAY, 23);
+									calEnd.set(Calendar.MINUTE, 59);
+									end = calEnd.getTimeInMillis();
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -217,8 +215,9 @@ public class GetHealthDataPoints extends HttpServlet {
 				try {
 					if(request.getParameter(AllConstants.api_entryPoints.request_api_dataformat)!=null)
 					{
+						DateUtil dateUtil=new DateUtil();
 						hbaseexport = diDao.exportDatapoints(streamID, start, end,
-								blockid, mapUnits,DateUtil.millisecFormat);
+								blockid, mapUnits,dateUtil.millisecFormat);
 					}
 					else{
 						hbaseexport = diDao.exportDatapoints(streamID, start, end,

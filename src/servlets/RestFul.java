@@ -55,7 +55,7 @@ import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.get.GetDataPoints;
-import servlets.actions.get.GetDataPointsLocalDebug;
+//import servlets.actions.get.GetDataPointsLocalDebug;
 import servlets.actions.get.GetDatastreamBlocks;
 import servlets.actions.get.GetDatastreamsList;
 import servlets.actions.get.GetFollowers;
@@ -144,10 +144,12 @@ public class RestFul extends HttpServlet {
 			System.out.println("Action: Get A Datastream");
 			GetaDatastream proceReq = new GetaDatastream();
 			proceReq.processRequest(req, resp);
-		} else if (isGetDataPointsAllUnitsDebug(ServletPath(req))) {
-			GetDataPointsLocalDebug proceReq = new GetDataPointsLocalDebug();
-			proceReq.processRequest(req, resp);
-		} else if (isGetFollowers(ServletPath(req))) {
+		} 
+//		else if (isGetDataPointsAllUnitsDebug(ServletPath(req))) {
+//			GetDataPointsLocalDebug proceReq = new GetDataPointsLocalDebug();
+//			proceReq.processRequest(req, resp);
+//		}
+		else if (isGetFollowers(ServletPath(req))) {
 			System.out.println("getfollower:");
 			GetFollowers proceReq = new GetFollowers();
 			proceReq.processRequest(req, resp);

@@ -68,12 +68,13 @@ public class GetDeviceDataPoints extends HttpServlet {
             long start = 0;
             long end = 0;
             String blockid = null;
+            DateUtil dateUtil=new DateUtil();
             try {
                 if (request.getParameter(AllConstants.api_entryPoints.request_api_start) != null) {
-                    start = DateUtil.parseMillisecFormatToLong(request.getParameter(AllConstants.api_entryPoints.request_api_start));
+                    start = Long.parseLong(request.getParameter(AllConstants.api_entryPoints.request_api_start));
                 }
                 if (request.getParameter(AllConstants.api_entryPoints.request_api_end) != null) {
-                    end = DateUtil.parseMillisecFormatToLong(request.getParameter(AllConstants.api_entryPoints.request_api_end));
+                    end = Long.parseLong(request.getParameter(AllConstants.api_entryPoints.request_api_end));
                 }
                 if (request.getParameter(AllConstants.api_entryPoints.request_api_blockid) != null) {
                     blockid = request.getParameter(AllConstants.api_entryPoints.request_api_blockid);
