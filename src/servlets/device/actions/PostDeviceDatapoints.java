@@ -5,9 +5,9 @@
 package servlets.device.actions;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamUnits;
 import health.database.models.Users;
@@ -98,7 +98,7 @@ public class PostDeviceDatapoints extends HttpServlet {
                     return;
                 }
             }
-            DataPointDAO importDao = new DataPointDAO();
+            HBaseDatapointDAO importDao = new HBaseDatapointDAO();
             HBaseDataImport importData = new HBaseDataImport();
             importData.setData_points(jdataImport.getData_points());
             importData.setDatastream_id(deviceID);

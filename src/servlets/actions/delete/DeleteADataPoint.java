@@ -5,9 +5,9 @@
 package servlets.actions.delete;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.input.util.DBtoJsonUtil;
@@ -77,7 +77,7 @@ public class DeleteADataPoint extends HttpServlet {
 			}
 			
 			try {
-				DataPointDAO dpDap=new DataPointDAO();
+				HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
 				dpDap.delete_A_Datapoint(streamID, 0); //has not finished yet
 			} catch (Exception ex) {
 				ex.printStackTrace();

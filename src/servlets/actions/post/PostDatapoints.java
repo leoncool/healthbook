@@ -5,10 +5,10 @@
 package servlets.actions.post;
 
 import static util.JsonUtil.ServletPath;
-import health.database.DAO.DataPointDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
@@ -126,10 +126,10 @@ public class PostDatapoints extends HttpServlet {
                     return;
                 }
             }
-            DataPointDAO importDao = null;
+            HBaseDatapointDAO importDao = null;
             try {
-                importDao = new DataPointDAO();
-            } catch (IOException ex) {
+                importDao = new HBaseDatapointDAO();
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
                 return;
@@ -149,11 +149,7 @@ public class PostDatapoints extends HttpServlet {
                 ex.printStackTrace();
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_date_format, null, null);
                 return;
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
-                return;
-            } catch (ParseException ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
                 return;
