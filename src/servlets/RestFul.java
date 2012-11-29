@@ -38,6 +38,7 @@ import static util.ServerUtil.isPostFollower;
 import static util.ServerUtil.isPostSubjectReq;
 import static util.ServerUtil.isPostUpload;
 import static util.ServerUtil.isPostUserRegister;
+import static util.ServerUtil.isGetUserToken;
 import static util.ServerUtil.isSearchUsers;
 import static util.ServerUtil.isGetAHealthDatastreamByTitle;
 import static util.ServerUtil.isGetHealthDatapointsByTitle;
@@ -55,6 +56,7 @@ import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.get.GetDataPoints;
+import servlets.actions.get.GetAUserToken;
 //import servlets.actions.get.GetDataPointsLocalDebug;
 import servlets.actions.get.GetDatastreamBlocks;
 import servlets.actions.get.GetDatastreamsList;
@@ -201,7 +203,12 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetaHealthDatastreaByTitle proceReq = new GetaHealthDatastreaByTitle();
 			proceReq.processRequest(req, resp);
-		} else if (isListUsers(ServletPath(req))) {
+		} 
+		else if (isGetUserToken(ServletPath(req))) {
+			System.out.println("isGetUserToken:");
+			GetAUserToken proceReq = new GetAUserToken();
+			proceReq.processRequest(req, resp);
+		}else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
 			proceReq.processRequest(req, resp);
 		} else {
@@ -301,6 +308,7 @@ public class RestFul extends HttpServlet {
 				e.printStackTrace();
 			}
 		} else if (isPostUserRegister(ServletPath(req))) {
+			System.out.println("Post isPostUserRegister");
 			PostNewUserReg proceReq = new PostNewUserReg();
 			proceReq.processRequest(req, resp);
 		} else if (isPostDevice(ServletPath(req))) {
@@ -313,10 +321,16 @@ public class RestFul extends HttpServlet {
 			PostBindingDeviceSerial proceReq = new PostBindingDeviceSerial();
 			proceReq.processRequest(req, resp);
 		} else if (isPostUpload(ServletPath(req))) {
-			System.out.println("isPostUpload");
+			System.out.println("Post Ruqeest isPostUpload");
 			Upload proceReq = new Upload();
 			proceReq.processRequest(req, resp);
-		} else {
+		} 
+		else if (isGetUserToken(ServletPath(req))) {
+			System.out.println("Post Ruqeest isGetUserToken:");
+			GetAUserToken proceReq = new GetAUserToken();
+			proceReq.processRequest(req, resp);
+		}
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}

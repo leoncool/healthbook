@@ -118,12 +118,21 @@ public class ServerUtil {
     }
 
     public static boolean isPostUserRegister(String ServletPath) {
-        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user + "[/]*$")) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_register + "[/]*$")) {
             return true;
         } else {
             return false;
         }
     }
+
+    public static boolean isGetUserToken(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_GetToken + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+      
     public static boolean isPostUpload(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + "upload" + "[/]*$")) {
             return true;
@@ -368,5 +377,6 @@ public class ServerUtil {
             return false;
         }
     }
+    
 
 }

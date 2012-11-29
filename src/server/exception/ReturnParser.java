@@ -35,6 +35,7 @@ public class ReturnParser {
 
     public static void outputErrorException(HttpServletResponse resp, String errorCode, String description, String targetObject) throws IOException {
         PrintWriter out = resp.getWriter();
+        System.out.println(returnErrorException(errorCode, description, targetObject));
         out.println(returnErrorException(errorCode, description, targetObject));
         out.close();
         resp.setStatus(httpstatusCode(errorCode));
@@ -59,7 +60,7 @@ public class ReturnParser {
                 AllConstants.ErrorDictionary.unknownFault)) {
             code = AllConstants.HttpStatusCode.INTERNAL_SERVER_ERROR;
         } else {
-            code = AllConstants.HttpStatusCode.INTERNAL_SERVER_ERROR;
+            code = AllConstants.HttpStatusCode.NOT_FOUND;
         }
         return code;
     }
