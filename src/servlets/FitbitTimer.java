@@ -53,7 +53,9 @@ import com.fitbit.api.model.FitbitUser;
 /**
  * Servlet implementation class FitbitTimer
  */
-@WebServlet(name = "FitbitTimer", urlPatterns = { "/FitbitTimer" }, loadOnStartup = 0)
+@WebServlet(name = "FitbitTimer", urlPatterns = { "/FitbitTimer" }
+//,loadOnStartup = 0
+)
 // loadOnStartup=0
 public class FitbitTimer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
