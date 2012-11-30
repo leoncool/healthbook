@@ -31,9 +31,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
+import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.JsonUtil;
-import util.ServerUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

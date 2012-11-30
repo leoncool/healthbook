@@ -2,7 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package util;
+package servlets.util;
+
+import util.AllConstants;
 
 /**
  *
@@ -118,12 +120,21 @@ public class ServerUtil {
     }
 
     public static boolean isPostUserRegister(String ServletPath) {
-        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user + "[/]*$")) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_register + "[/]*$")) {
             return true;
         } else {
             return false;
         }
     }
+
+    public static boolean isGetUserToken(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_GetToken + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+      
     public static boolean isPostUpload(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + "upload" + "[/]*$")) {
             return true;
@@ -180,6 +191,7 @@ public class ServerUtil {
             return false;
         }
     }
+    
     public static boolean isGetHealthDatastreamBlocks(String ServletPath)
     {
     	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
@@ -236,6 +248,17 @@ public class ServerUtil {
     	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
                 +"/"+AllConstants.api_entryPoints.api_title
                 + "/[-a-zA-Z0-9_]+/"+AllConstants.api_entryPoints.api_datapoints+"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
+    public static boolean isGetHealthDataSummariesByTitle(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health
+                +"/"+AllConstants.api_entryPoints.api_title
+                + "/[-a-zA-Z0-9_]+/"+AllConstants.api_entryPoints.api_datasummaries+"[/]*$"))
         	{
         	return true;
         	}else {        	
@@ -368,5 +391,6 @@ public class ServerUtil {
             return false;
         }
     }
+    
 
 }

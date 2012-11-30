@@ -4,43 +4,45 @@
  */
 package servlets;
 
+import static servlets.util.ServerUtil.isDeleteADataBlock;
+import static servlets.util.ServerUtil.isDeleteADataStreamRequest;
+import static servlets.util.ServerUtil.isDeleteASubjectRequest;
+import static servlets.util.ServerUtil.isDeleteFollower;
+import static servlets.util.ServerUtil.isGetADatastream;
+import static servlets.util.ServerUtil.isGetAHealthDatastream;
+import static servlets.util.ServerUtil.isGetAHealthDatastreamByTitle;
+import static servlets.util.ServerUtil.isGetDataPointsAllUnits;
+import static servlets.util.ServerUtil.isGetDataPointsAllUnitsDebug;
+import static servlets.util.ServerUtil.isGetDatastreamBlocks;
+import static servlets.util.ServerUtil.isGetDatastreamList;
+import static servlets.util.ServerUtil.isGetDeviceDataPointsAllUnits;
+import static servlets.util.ServerUtil.isGetDeviceList;
+import static servlets.util.ServerUtil.isGetDeviceSerialRegisters;
+import static servlets.util.ServerUtil.isGetFollowers;
+import static servlets.util.ServerUtil.isGetFollowings;
+import static servlets.util.ServerUtil.isGetHealthDatapoints;
+import static servlets.util.ServerUtil.isGetHealthDatapointsByTitle;
+import static servlets.util.ServerUtil.isGetHealthDatastreamBlocks;
+import static servlets.util.ServerUtil.isGetHealthDatastreams;
+import static servlets.util.ServerUtil.isGetSubjectsListReq;
+import static servlets.util.ServerUtil.isGetUserToken;
+import static servlets.util.ServerUtil.isGetUserinfo;
+import static servlets.util.ServerUtil.isGetaDeviceBinding;
+import static servlets.util.ServerUtil.isListUsers;
+import static servlets.util.ServerUtil.isPostDataBlocksReq;
+import static servlets.util.ServerUtil.isPostDataPointsReq;
+import static servlets.util.ServerUtil.isPostDatastreamReq;
+import static servlets.util.ServerUtil.isPostDevice;
+import static servlets.util.ServerUtil.isPostDeviceDatapoints;
+import static servlets.util.ServerUtil.isPostDeviceSerialBinding;
+import static servlets.util.ServerUtil.isGetHealthDataSummariesByTitle;
+import static servlets.util.ServerUtil.isPostFollower;
+import static servlets.util.ServerUtil.isPostSubjectReq;
+import static servlets.util.ServerUtil.isPostUpload;
+import static servlets.util.ServerUtil.isPostUserRegister;
+import static servlets.util.ServerUtil.isSearchUsers;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
-import static util.ServerUtil.isDeleteADataBlock;
-import static util.ServerUtil.isDeleteADataStreamRequest;
-import static util.ServerUtil.isDeleteASubjectRequest;
-import static util.ServerUtil.isDeleteFollower;
-import static util.ServerUtil.isGetADatastream;
-import static util.ServerUtil.isGetAHealthDatastream;
-import static util.ServerUtil.isGetDataPointsAllUnits;
-import static util.ServerUtil.isGetDataPointsAllUnitsDebug;
-import static util.ServerUtil.isGetDatastreamBlocks;
-import static util.ServerUtil.isGetDatastreamList;
-import static util.ServerUtil.isGetDeviceDataPointsAllUnits;
-import static util.ServerUtil.isGetDeviceList;
-import static util.ServerUtil.isGetDeviceSerialRegisters;
-import static util.ServerUtil.isGetFollowers;
-import static util.ServerUtil.isGetFollowings;
-import static util.ServerUtil.isGetHealthDatapoints;
-import static util.ServerUtil.isGetHealthDatastreamBlocks;
-import static util.ServerUtil.isGetHealthDatastreams;
-import static util.ServerUtil.isGetSubjectsListReq;
-import static util.ServerUtil.isGetUserinfo;
-import static util.ServerUtil.isGetaDeviceBinding;
-import static util.ServerUtil.isListUsers;
-import static util.ServerUtil.isPostDataBlocksReq;
-import static util.ServerUtil.isPostDataPointsReq;
-import static util.ServerUtil.isPostDatastreamReq;
-import static util.ServerUtil.isPostDevice;
-import static util.ServerUtil.isPostDeviceDatapoints;
-import static util.ServerUtil.isPostDeviceSerialBinding;
-import static util.ServerUtil.isPostFollower;
-import static util.ServerUtil.isPostSubjectReq;
-import static util.ServerUtil.isPostUpload;
-import static util.ServerUtil.isPostUserRegister;
-import static util.ServerUtil.isSearchUsers;
-import static util.ServerUtil.isGetAHealthDatastreamByTitle;
-import static util.ServerUtil.isGetHealthDatapointsByTitle;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -55,6 +57,7 @@ import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.get.GetDataPoints;
+import servlets.actions.get.GetAUserToken;
 //import servlets.actions.get.GetDataPointsLocalDebug;
 import servlets.actions.get.GetDatastreamBlocks;
 import servlets.actions.get.GetDatastreamsList;
@@ -67,6 +70,7 @@ import servlets.actions.get.health.GetHealthDatastreamBlocks;
 import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
+import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreaByTitle;
 import servlets.actions.get.users.GetUserInfo;
 import servlets.actions.get.users.ListUsers;
@@ -201,7 +205,17 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetaHealthDatastreaByTitle proceReq = new GetaHealthDatastreaByTitle();
 			proceReq.processRequest(req, resp);
-		} else if (isListUsers(ServletPath(req))) {
+		} 
+		else if (isGetHealthDataSummariesByTitle(ServletPath(req))) {
+			System.out.println("isGetAHealthDatastreamByTitle:");
+			GetHealthDataSummariesByTitle proceReq = new GetHealthDataSummariesByTitle();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetUserToken(ServletPath(req))) {
+			System.out.println("isGetUserToken:");
+			GetAUserToken proceReq = new GetAUserToken();
+			proceReq.processRequest(req, resp);
+		}else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
 			proceReq.processRequest(req, resp);
 		} else {
@@ -301,6 +315,7 @@ public class RestFul extends HttpServlet {
 				e.printStackTrace();
 			}
 		} else if (isPostUserRegister(ServletPath(req))) {
+			System.out.println("Post isPostUserRegister");
 			PostNewUserReg proceReq = new PostNewUserReg();
 			proceReq.processRequest(req, resp);
 		} else if (isPostDevice(ServletPath(req))) {
@@ -313,10 +328,16 @@ public class RestFul extends HttpServlet {
 			PostBindingDeviceSerial proceReq = new PostBindingDeviceSerial();
 			proceReq.processRequest(req, resp);
 		} else if (isPostUpload(ServletPath(req))) {
-			System.out.println("isPostUpload");
+			System.out.println("Post Ruqeest isPostUpload");
 			Upload proceReq = new Upload();
 			proceReq.processRequest(req, resp);
-		} else {
+		} 
+		else if (isGetUserToken(ServletPath(req))) {
+			System.out.println("Post Ruqeest isGetUserToken:");
+			GetAUserToken proceReq = new GetAUserToken();
+			proceReq.processRequest(req, resp);
+		}
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}

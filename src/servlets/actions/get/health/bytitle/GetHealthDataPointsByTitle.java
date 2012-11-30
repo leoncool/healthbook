@@ -11,6 +11,7 @@ import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
+import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.util.DBtoJsonUtil;
@@ -35,9 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
+import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.DateUtil;
-import util.ServerUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -68,7 +70,26 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
+		System.out.println("before checkAndGetLoginFromToken");
+		Users accessUser = null;
+		PermissionFilter filter = new PermissionFilter();
+		String loginID = filter.checkAndGetLoginFromToken(request, response);
 
+		UserDAO userDao = new UserDAO();
+		if (loginID == null) {
+			if (filter.getCheckResult().equalsIgnoreCase(
+					filter.INVALID_LOGIN_TOKEN_ID)) {
+				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
+				  return;
+			}
+			else{
+				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
+				  return;
+			}
+		} else {
+			accessUser = userDao.getLogin(loginID);
+		}
+		
 		// PrintWriter out = response.getWriter();
 		OutputStream outStream = null;
 		try {
@@ -116,7 +137,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						AllConstants.ErrorDictionary.Invalid_date_format, null,
 						null);
 				return;
 			}
@@ -134,20 +155,13 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						AllConstants.ErrorDictionary.Invalid_Datablock_ID,
 						null, null);
 				return;
-			}
-			String loginID = "leoncool";
-			if (request
-					.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
-				loginID = request
-						.getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			}
-			UserDAO userDao = new UserDAO();
-			if (!userDao.existLogin(loginID)) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-						null);
-				return;
-			}
+			}			
+//			if (!userDao.existLogin(loginID)) {
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+//						null);
+//				return;
+//			}
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
