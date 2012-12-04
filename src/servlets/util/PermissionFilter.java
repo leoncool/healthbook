@@ -5,6 +5,7 @@ import health.database.models.LoginToken;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +49,12 @@ public static final String INVALID_LOGIN_TOKEN_ID=AllConstants.ErrorDictionary.I
 		   {
 			   setCheckResult(AllConstants.ErrorDictionary.Invalid_login_token_id);
 			   ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null, tokenID);
+               return null;
+		   }
+		   else if(token.getExpireTime()!=null&&token.getExpireTime().before(new Date()))
+		   {
+			   setCheckResult(AllConstants.ErrorDictionary.login_token_expired);
+			   ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.login_token_expired, null, tokenID);
                return null;
 		   }
 		   else{			   

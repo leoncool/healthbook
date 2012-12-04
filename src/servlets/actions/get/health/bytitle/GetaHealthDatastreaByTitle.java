@@ -68,6 +68,10 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 					filter.INVALID_LOGIN_TOKEN_ID)) {
 				return;
 			}
+			else if(filter.getCheckResult().equalsIgnoreCase(AllConstants.ErrorDictionary.login_token_expired))
+			{
+				return;
+			}
 			else{
 				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
 			}

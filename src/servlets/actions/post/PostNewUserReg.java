@@ -7,9 +7,14 @@ package servlets.actions.post;
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.LoginToken;
 import health.database.models.Subject;
+import health.database.models.UserDetails;
 import health.database.models.Users;
+import health.input.jsonmodels.JsonDatastream;
 import health.input.jsonmodels.JsonUser;
+import health.input.jsonmodels.JsonUserToken;
+import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,6 +23,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -29,11 +35,15 @@ import org.hibernate.Session;
 
 import server.exception.ReturnParser;
 import util.AllConstants;
+import util.DateUtil;
 import util.HibernateUtil;
 import util.JsonUtil;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * 
@@ -89,21 +99,101 @@ public class PostNewUserReg extends HttpServlet {
 				user.setCreatedTime(now);
 
 				// save MD5 password
-				String MD5password = null;
+				boolean using_MD5Password = false;
 				MessageDigest md5;
-				md5 = MessageDigest.getInstance("MD5");
-				md5.update(juser.getPassword().getBytes());
-				BigInteger hashPw = new BigInteger(1, md5.digest());
-				MD5password = hashPw.toString(16);
-				while (MD5password.length() < 32) {
-					MD5password = "0" + MD5password;
+				if (using_MD5Password) {
+					//using MD5 for password
+					String MD5password = null;
+					md5 = MessageDigest.getInstance("MD5");
+					md5.update(juser.getPassword().getBytes());
+					BigInteger hashPw = new BigInteger(1, md5.digest());
+					MD5password = hashPw.toString(16);
+					while (MD5password.length() < 32) {
+						MD5password = "0" + MD5password;
+					}
+					user.setPassword(MD5password);
+				} else {
+					user.setPassword(juser.getPassword());
 				}
-				user.setPassword(MD5password);
+				
+				if(juser.getLanguage()!=null){
 				user.setLanguage(juser.getLanguage());
-				user.setScreenname(juser.getScreenname());
-				user.setGender("male");//need to be changed
+				}else{
+					user.setLanguage("en");
+				}
+				if(juser.getScreenname()==null)
+				{
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.MISSING_DATA, null,
+							"screen name");
+					return;
+				}
+				if (juser.getGender() == null) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.MISSING_DATA, null,
+							"gender");
+					return;
+				}
+				if (juser.getBirthday() == null) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.MISSING_DATA, null,
+							"birthday");
+					return;
+				}
+				user.setScreenname(juser.getScreenname());						
+				user.setGender(juser.getGender());
+				try {
+					DateUtil dateUtil = new DateUtil();
+					Date birthday = dateUtil.convert(juser.getBirthday(),
+							dateUtil.birthdayFormat);
+				} catch (ParseException ex) {
+					ex.printStackTrace();
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR,
+									null, "birthday");
+					return;
+				}
+				user.setBirthday(juser.getBirthday());
+
+				UserDetails userDetail = new UserDetails();
+				try {
+					if (juser.getHeight_cm() != null) {
+						userDetail.setHeight(Double.parseDouble(juser
+								.getHeight_cm()));
+					}
+				} catch (NumberFormatException ex) {
+					ex.printStackTrace();
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Input_Json_Format_Error,
+									null, "height");
+					return;
+				}
+				try {
+					if (juser.getWeight_kg() != null) {
+						userDetail.setWeight(Double.parseDouble(juser
+								.getWeight_kg()));
+					}
+				} catch (NumberFormatException ex) {
+					ex.printStackTrace();
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Input_Json_Format_Error,
+									null, "weight");
+					return;
+				}
+				if (juser.getCountry() != null) {
+					userDetail.setCountry(juser.getCountry());
+				}
+				userDetail.setUsers(user);
+				user.setUserDetails(userDetail);
 				Session session = HibernateUtil.beginTransaction();
 				session.save(user);
+				session.save(userDetail);
 				HibernateUtil.commitTransaction();
 				SubjectDAO subjDao = new SubjectDAO();
 				Subject default_sub = subjDao.createDefaultSubject(user
@@ -121,9 +211,25 @@ public class PostNewUserReg extends HttpServlet {
 					e.printStackTrace();
 				}
 				// out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-				out.println(ReturnParser
-						.returnValidResult(AllConstants.ValidDictionary.Valid));
-
+				// out.println(ReturnParser
+				// .returnValidResult(AllConstants.ValidDictionary.Valid));
+				JsonUserToken jsonUserToken = new JsonUserToken();
+				String ipAddress = request.getRemoteAddr();
+				LoginToken token = userdao.requestNewLoginToken(
+						user.getLoginID(), ipAddress, null);
+				jsonUserToken.setPassword(null);
+				jsonUserToken.setLoginid(user.getLoginID());
+				jsonUserToken.setToken(token.getTokenID());
+				jsonUserToken.setExpire_in_seconds(null);//null for now
+				JsonElement je = gson.toJsonTree(jsonUserToken);
+				JsonObject jo = new JsonObject();
+				jo.addProperty(AllConstants.ProgramConts.result,
+						AllConstants.ProgramConts.succeed);
+				// jo.addProperty(AllConstants.api_entryPoints.request_api_loginid,
+				// subject.getLoginID());
+				jo.add("usertoken", je);
+				System.out.println(jo.toString());
+				out.println(gson.toJson(jo));
 				String emailSubject = "";
 				// if (language.equalsIgnoreCase("cn")) {
 				// emailSubject = "Via Cloud 通知-注册确认信！";
@@ -169,6 +275,12 @@ public class PostNewUserReg extends HttpServlet {
 					AllConstants.ErrorDictionary.Input_Json_Format_Error, null,
 					null);
 			ex.printStackTrace();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, null,
+					e.getMessage());
 		} finally {
 			out.close();
 		}
