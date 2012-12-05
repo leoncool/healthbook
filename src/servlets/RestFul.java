@@ -218,6 +218,10 @@ public class RestFul extends HttpServlet {
 		}else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
 			proceReq.processRequest(req, resp);
+		}else if (isPostUserRegister(ServletPath(req))) {
+			System.out.println("Post isPostUserRegister");
+			PostNewUserReg proceReq = new PostNewUserReg();
+			proceReq.processRequest(req, resp);
 		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");

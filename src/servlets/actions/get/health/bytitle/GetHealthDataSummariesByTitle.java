@@ -78,8 +78,8 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 						AllConstants.ErrorDictionary.Invalid_login_token_id,
 						null, null);
 				return;
-			}	else if(filter.getCheckResult().equalsIgnoreCase(AllConstants.ErrorDictionary.login_token_expired))
-			{
+			} else if (filter.getCheckResult().equalsIgnoreCase(
+					AllConstants.ErrorDictionary.login_token_expired)) {
 				return;
 			} else {
 				ReturnParser.outputErrorException(response,
@@ -98,24 +98,23 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 			long start = 0;
 			long end = 0;
 			Date date = null;
-			Date startDate=null;
-			Date endDate=null;
+			Date startDate = null;
+			Date endDate = null;
 			try {
 				if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_start) != null
-						&&request
-						.getParameter(AllConstants.api_entryPoints.request_api_end) != null) {
+						&& request
+								.getParameter(AllConstants.api_entryPoints.request_api_end) != null) {
 					start = Long
 							.parseLong(request
 									.getParameter(AllConstants.api_entryPoints.request_api_start));
 					end = Long
 							.parseLong(request
 									.getParameter(AllConstants.api_entryPoints.request_api_end));
-				}
-				else if (request
+				} else if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_startDate) != null
-						&&request
-						.getParameter(AllConstants.api_entryPoints.request_api_endDate) != null) {
+						&& request
+								.getParameter(AllConstants.api_entryPoints.request_api_endDate) != null) {
 					String startDateString = request
 							.getParameter(AllConstants.api_entryPoints.request_api_startDate);
 					String endDateString = request
@@ -129,8 +128,7 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 					endDate = new Date();
 					endDate = dateUtil.convert(endDateString,
 							dateUtil.YearMonthDay_DateFormat);
-				}
-				else if (request
+				} else if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) != null) {
 					String yearMonthDateString = request
 							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
@@ -141,11 +139,10 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 							dateUtil.YearMonthDay_DateFormat);
 					System.out.println("DateRequest:" + date);
 
-				}
-				else{
+				} else {
 					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_date_format, null,
-							null);
+							AllConstants.ErrorDictionary.Invalid_date_format,
+							null, null);
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -203,18 +200,15 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 			if (date != null) {
 				summaryList = dsummaryDao.getDataSummaries(
 						datastream.getStreamId(), unitID, date);
-			} else if(start!=0&&end!=0){
+			} else if (start != 0 && end != 0) {
 				summaryList = dsummaryDao.getDataSummariesByStartAndEndTime(
 						datastream.getStreamId(), unitID, start, end);
-			}
-			else if(startDate!=null&&endDate!=null
-					)
-			{
+			} else if (startDate != null && endDate != null) {
 				summaryList = dsummaryDao.getDataSummariesByStartAndEndTime(
-						datastream.getStreamId(), unitID, startDate.getTime(), endDate.getTime());
+						datastream.getStreamId(), unitID, startDate.getTime(),
+						endDate.getTime());
 			}
-			for(DataSummary summary:summaryList)
-			{
+			for (DataSummary summary : summaryList) {
 				jsummaryList.add(dbtoJUtil.convertDataSummary(summary));
 			}
 			outStream = null;
@@ -236,7 +230,7 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 					AllConstants.ProgramConts.succeed);
 			jo.addProperty("total_size", Integer.toString(jsummaryList.size()));
 			jo.add("datasummary_list", je);
-			
+
 			OutputStreamWriter osWriter = new OutputStreamWriter(outStream);
 			JsonWriter jwriter = new JsonWriter(osWriter);
 			String callbackStr = null;

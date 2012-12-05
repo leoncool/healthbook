@@ -73,9 +73,24 @@ public class PostNewUserReg extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		JsonUtil jutil = new JsonUtil();
 		Gson gson = new Gson();
+		JsonUser juser = null;
 		try {
-			JsonUser juser = gson.fromJson(
-					jutil.readJsonStrFromHttpRequest(request), JsonUser.class);
+			juser = gson.fromJson(jutil.readJsonStrFromHttpRequest(request),
+					JsonUser.class);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Input_Json_Format_Error, null,
+					null);
+			return;
+		}
+		try {
+			if (juser == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Input_Json_Format_Error,
+						null, null);
+				return;
+			}
 			if (juser.getLoginid() == null || juser.getPassword() == null
 					|| juser.getEmail() == null) {
 				ReturnParser.outputErrorException(response,
@@ -102,7 +117,7 @@ public class PostNewUserReg extends HttpServlet {
 				boolean using_MD5Password = false;
 				MessageDigest md5;
 				if (using_MD5Password) {
-					//using MD5 for password
+					// using MD5 for password
 					String MD5password = null;
 					md5 = MessageDigest.getInstance("MD5");
 					md5.update(juser.getPassword().getBytes());
@@ -115,14 +130,13 @@ public class PostNewUserReg extends HttpServlet {
 				} else {
 					user.setPassword(juser.getPassword());
 				}
-				
-				if(juser.getLanguage()!=null){
-				user.setLanguage(juser.getLanguage());
-				}else{
+
+				if (juser.getLanguage() != null) {
+					user.setLanguage(juser.getLanguage());
+				} else {
 					user.setLanguage("en");
 				}
-				if(juser.getScreenname()==null)
-				{
+				if (juser.getScreenname() == null) {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.MISSING_DATA, null,
 							"screen name");
@@ -140,7 +154,7 @@ public class PostNewUserReg extends HttpServlet {
 							"birthday");
 					return;
 				}
-				user.setScreenname(juser.getScreenname());						
+				user.setScreenname(juser.getScreenname());
 				user.setGender(juser.getGender());
 				try {
 					DateUtil dateUtil = new DateUtil();
@@ -220,7 +234,7 @@ public class PostNewUserReg extends HttpServlet {
 				jsonUserToken.setPassword(null);
 				jsonUserToken.setLoginid(user.getLoginID());
 				jsonUserToken.setToken(token.getTokenID());
-				jsonUserToken.setExpire_in_seconds(null);//null for now
+				jsonUserToken.setExpire_in_seconds(null);// null for now
 				JsonElement je = gson.toJsonTree(jsonUserToken);
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,

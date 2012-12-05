@@ -47,12 +47,14 @@ public static final String INVALID_LOGIN_TOKEN_ID=AllConstants.ErrorDictionary.I
 		   LoginToken token=userdao.getLoginToken(tokenID);
 		   if(token==null)
 		   {
+			   System.out.println("Token :"+tokenID);
 			   setCheckResult(AllConstants.ErrorDictionary.Invalid_login_token_id);
 			   ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null, tokenID);
                return null;
 		   }
 		   else if(token.getExpireTime()!=null&&token.getExpireTime().before(new Date()))
 		   {
+			   System.out.println("Token Expired:"+tokenID);
 			   setCheckResult(AllConstants.ErrorDictionary.login_token_expired);
 			   ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.login_token_expired, null, tokenID);
                return null;
@@ -63,6 +65,7 @@ public static final String INVALID_LOGIN_TOKEN_ID=AllConstants.ErrorDictionary.I
 		   }
 	   }
 	   else{
+		   System.out.println("Emply Token:"+tokenID);
 		   setCheckResult(EMPTY_TOKENID);
 		   return null;
 	   }

@@ -79,20 +79,23 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 		if (loginID == null) {
 			if (filter.getCheckResult().equalsIgnoreCase(
 					filter.INVALID_LOGIN_TOKEN_ID)) {
-				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
-				  return;
-			}	else if(filter.getCheckResult().equalsIgnoreCase(AllConstants.ErrorDictionary.login_token_expired))
-			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_login_token_id,
+						null, null);
 				return;
-			}
-			else{
-				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
-				  return;
+			} else if (filter.getCheckResult().equalsIgnoreCase(
+					AllConstants.ErrorDictionary.login_token_expired)) {
+				return;
+			} else {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_login_token_id,
+						null, null);
+				return;
 			}
 		} else {
 			accessUser = userDao.getLogin(loginID);
 		}
-		
+
 		// PrintWriter out = response.getWriter();
 		OutputStream outStream = null;
 		try {
@@ -117,12 +120,13 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 
 				if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) != null) {
-	String yearMonthDateString=request
-			.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
-	System.out.println("Date Request "+yearMonthDateString);
-	DateUtil dateUtil=new DateUtil();
-	Date date = dateUtil.convert(yearMonthDateString,dateUtil.YearMonthDay_DateFormat);
-					System.out.println("DateRequest:"+date);
+					String yearMonthDateString = request
+							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
+					System.out.println("Date Request " + yearMonthDateString);
+					DateUtil dateUtil = new DateUtil();
+					Date date = dateUtil.convert(yearMonthDateString,
+							dateUtil.YearMonthDay_DateFormat);
+					System.out.println("DateRequest:" + date);
 					Calendar calStart = Calendar.getInstance(DateUtil.UTC);
 					Calendar calEnd = Calendar.getInstance(DateUtil.UTC);
 					calStart.setTime(date);
@@ -133,9 +137,9 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 					calEnd.set(Calendar.HOUR_OF_DAY, 23);
 					calEnd.set(Calendar.MINUTE, 59);
 					end = calEnd.getTimeInMillis();
-//					System.out.println("Date Request start"+calStart.getTime());
-//					System.out.println("Date Request end"+calEnd.getTime());
-//					System.out.println("using Date Request:"+start+" "+end);
+					// System.out.println("Date Request start"+calStart.getTime());
+					// System.out.println("Date Request end"+calEnd.getTime());
+					// System.out.println("using Date Request:"+start+" "+end);
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -158,13 +162,13 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						AllConstants.ErrorDictionary.Invalid_Datablock_ID,
 						null, null);
 				return;
-			}			
-//			if (!userDao.existLogin(loginID)) {
-//				ReturnParser.outputErrorException(response,
-//						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-//						null);
-//				return;
-//			}
+			}
+			// if (!userDao.existLogin(loginID)) {
+			// ReturnParser.outputErrorException(response,
+			// AllConstants.ErrorDictionary.Unauthorized_Access, null,
+			// null);
+			// return;
+			// }
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
@@ -175,23 +179,28 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 								null, null);
 				return;
 			}
-	
-			  String streamTitle = ServerUtil.getHealthStreamTitle(ServletPath(request));
-	            
-	            DatastreamDAO dstreamDao = new DatastreamDAO();
-	            DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-	            Datastream datastream=null;
-	            try{
-	            datastream = dstreamDao.getDatastreamByTitle(subject.getId(),streamTitle, true, false);
-	            }catch(NonUniqueResultException ex)
-	            {
-	            	 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, streamTitle);
-	                 return;
-	            }
-	            if (datastream == null) {
-	                ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Unknown_StreamTitle, null, streamTitle);
-	                return;
-	            }
+
+			String streamTitle = ServerUtil
+					.getHealthStreamTitle(ServletPath(request));
+
+			DatastreamDAO dstreamDao = new DatastreamDAO();
+			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+			Datastream datastream = null;
+			try {
+				datastream = dstreamDao.getDatastreamByTitle(subject.getId(),
+						streamTitle, true, false);
+			} catch (NonUniqueResultException ex) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						streamTitle);
+				return;
+			}
+			if (datastream == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
+						streamTitle);
+				return;
+			}
 			if (blockid != null
 					&& dstreamDao.getDatastreamBlock(blockid) == null) {
 				ReturnParser.outputErrorException(response,
@@ -238,17 +247,18 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				System.out.println("datastreamID:" + datastream.getStreamId());
 				HBaseDataImport hbaseexport = null;
 				try {
-					if(request.getParameter(AllConstants.api_entryPoints.request_api_dataformat)!=null)
-					{
-						DateUtil dateUtil=new DateUtil();
-						hbaseexport = diDao.exportDatapoints(datastream.getStreamId(), start, end,
-								blockid, mapUnits,dateUtil.millisecFormat);
+					if (request
+							.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
+						DateUtil dateUtil = new DateUtil();
+						hbaseexport = diDao.exportDatapoints(
+								datastream.getStreamId(), start, end, blockid,
+								mapUnits, dateUtil.millisecFormat);
+					} else {
+						hbaseexport = diDao.exportDatapoints(
+								datastream.getStreamId(), start, end, blockid,
+								mapUnits, null);
 					}
-					else{
-						hbaseexport = diDao.exportDatapoints(datastream.getStreamId(), start, end,
-								blockid, mapUnits,null);
-					}
-					
+
 				} catch (ErrorCodeException ex) {
 					ex.printStackTrace();
 					ReturnParser.outputErrorException(response,
