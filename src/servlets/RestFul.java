@@ -41,6 +41,9 @@ import static servlets.util.ServerUtil.isPostSubjectReq;
 import static servlets.util.ServerUtil.isPostUpload;
 import static servlets.util.ServerUtil.isPostUserRegister;
 import static servlets.util.ServerUtil.isSearchUsers;
+import static servlets.util.ServerUtil.isPostUserRegister;
+import static servlets.util.ServerUtil.isGetUserAvatar;
+import static servlets.util.ServerUtil.isPostUserAvatar;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 import java.io.IOException;
@@ -71,7 +74,9 @@ import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreaByTitle;
+
 import servlets.actions.get.users.GetAUserToken;
+import servlets.actions.get.users.GetUserAvatar;
 import servlets.actions.get.users.GetUserInfo;
 import servlets.actions.get.users.ListUsers;
 import servlets.actions.get.users.SearchUsers;
@@ -81,6 +86,7 @@ import servlets.actions.post.PostDatastreamBlocks;
 import servlets.actions.post.PostNewFollower;
 import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
+import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceBindingList;
@@ -126,7 +132,8 @@ public class RestFul extends HttpServlet {
 		// }
 		req.setCharacterEncoding("UTF-8");
 		resp.setCharacterEncoding("UTF-8");
-		System.out.println("ServletPath(req):" + ServletPath(req));
+		System.out.println(req.getMethod() + " is coming..." + ",contextPath:"
+				+ contextPath(req) + "allow originls");
 		if (ServletPath(req).equals("/" + api_entryPoints.version1)) {
 			System.out.println("severlet Path is /");
 		} else if (isGetSubjectsListReq(ServletPath(req))) {
@@ -222,7 +229,12 @@ public class RestFul extends HttpServlet {
 			System.out.println("Post isPostUserRegister");
 			PostNewUserReg proceReq = new PostNewUserReg();
 			proceReq.processRequest(req, resp);
-		} else {
+		} else if (isGetUserAvatar(ServletPath(req))) {
+			System.out.println("isGetUserAvatar");
+			GetUserAvatar proceReq = new GetUserAvatar();
+			proceReq.processRequest(req, resp);
+		} 
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
@@ -334,6 +346,11 @@ public class RestFul extends HttpServlet {
 		} else if (isPostUpload(ServletPath(req))) {
 			System.out.println("Post Ruqeest isPostUpload");
 			Upload proceReq = new Upload();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isPostUserAvatar(ServletPath(req))) {
+			System.out.println("PostUserProfilePicture");
+			PostUserProfilePicture proceReq = new PostUserProfilePicture();
 			proceReq.processRequest(req, resp);
 		} 
 		else if (isGetUserToken(ServletPath(req))) {

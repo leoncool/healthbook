@@ -126,7 +126,20 @@ public class ServerUtil {
             return false;
         }
     }
-
+    public static boolean isPostUserAvatar(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_avatar + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isGetUserAvatar(String ServletPath) {
+        if (ServletPath.startsWith(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_avatar+"/")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public static boolean isGetUserToken(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_GetToken + "[/]*$")) {
             return true;
