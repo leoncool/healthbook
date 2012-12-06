@@ -44,6 +44,7 @@ import static servlets.util.ServerUtil.isSearchUsers;
 import static servlets.util.ServerUtil.isPostUserRegister;
 import static servlets.util.ServerUtil.isGetUserAvatar;
 import static servlets.util.ServerUtil.isPostUserAvatar;
+import static servlets.util.ServerUtil.isGetMyAccountData;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 import java.io.IOException;
@@ -76,6 +77,7 @@ import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreaByTitle;
 
 import servlets.actions.get.users.GetAUserToken;
+import servlets.actions.get.users.GetMyAccountData;
 import servlets.actions.get.users.GetUserAvatar;
 import servlets.actions.get.users.GetUserInfo;
 import servlets.actions.get.users.ListUsers;
@@ -234,6 +236,11 @@ public class RestFul extends HttpServlet {
 			GetUserAvatar proceReq = new GetUserAvatar();
 			proceReq.processRequest(req, resp);
 		} 
+		 else if (isGetMyAccountData(ServletPath(req))) {
+				System.out.println("isGetMyAccountData");
+				GetMyAccountData proceReq = new GetMyAccountData();
+				proceReq.processRequest(req, resp);
+			} 
 		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
