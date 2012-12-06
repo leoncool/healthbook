@@ -5,13 +5,17 @@
 package servlets.actions.get.users;
 
 import health.database.DAO.DatastreamDAO;
+import health.database.DAO.FollowingDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.Follower;
 import health.database.models.LoginToken;
 import health.database.models.Subject;
 import health.database.models.Users;
+import health.database.models.merge.UserInfo;
 import health.input.jsonmodels.JsonDatastream;
 import health.input.jsonmodels.JsonSubject;
+import health.input.jsonmodels.JsonUserInfo;
 import health.input.jsonmodels.JsonUserToken;
 import health.input.util.DBtoJsonUtil;
 
@@ -20,6 +24,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,6 +38,7 @@ import util.JsonUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * 
@@ -136,14 +142,35 @@ public class GetAUserToken extends HttpServlet {
 			LoginToken token=userdao.requestNewLoginToken(username, ipAddress, expireTime);
 			jsonUserToken.setPassword(null);		
 			jsonUserToken.setToken(token.getTokenID());
-	            JsonElement je = gson.toJsonTree(jsonUserToken);
-	            JsonObject jo = new JsonObject();
-	            jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
-	        //    jo.addProperty(AllConstants.api_entryPoints.request_api_loginid, subject.getLoginID());
-	            jo.add("usertoken", je);
-	            System.out.println(jo.toString());
-	            out.println(gson.toJson(jo));
 			
+			 DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+//           dbtoJUtil.convert_a_Subject(null)
+			 UserDAO userDao=new UserDAO();
+           UserInfo userinfo = userDao.getUserInfo(user.getLoginID());
+           if (userinfo == null) {
+               ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_LoginID, null, null);
+               return;
+           }
+           FollowingDAO followingDao = new FollowingDAO();
+           List<Follower> follwerList = followingDao.getFollowers(user.getLoginID());
+           List<Follower> follweringList = followingDao.getFollowerings(user.getLoginID());
+           Map<String,String> followerMap=null;
+        	Map<String,String> followeringsMap=null;
+        	
+           JsonUserInfo juserinfo = dbtoJUtil.convert_a_userinfo(userinfo,followerMap,followeringsMap);
+           juserinfo.setTotal_followers(Integer.toString(follwerList.size()));
+           juserinfo.setTotal_followings(Integer.toString(follweringList.size()));
+           JsonElement je = gson.toJsonTree(juserinfo);
+           JsonObject jo = new JsonObject();
+         
+           
+           JsonElement je_usertoken = gson.toJsonTree(jsonUserToken);
+           jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
+           jo.add("usertoken", je_usertoken);
+           jo.add("userinfo", je);    
+           JsonWriter jwriter = new JsonWriter(response.getWriter());
+           gson.toJson(jo, jwriter);
+					
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ReturnParser.outputErrorException(response,
