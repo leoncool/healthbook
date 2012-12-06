@@ -109,7 +109,7 @@ public class PostUserProfilePicture extends HttpServlet {
 				fileItem = (FileItem) i.next();
 				if (!fileItem.isFormField()) {
 					if (fileItem.getSize() > 0) {
-						File uploadedFile = null;
+					
 						String myFileName = FilenameUtils.getName(fileItem
 								.getName());				
 						
@@ -117,12 +117,6 @@ public class PostUserProfilePicture extends HttpServlet {
 						int mid = myFileName.lastIndexOf(".");
 						String ext = myFileName.substring(mid + 1,
 								myFileName.length());
-					//	uploadedFile = File.createTempFile("upload-", ext);
-						uploadedFile = new File(filePath
-								+ accessUser.getLoginID() + "." + ext);
-						// System.out.println("final file name:"+myFileName+"."
-						// + ext);
-						fileItem.write(uploadedFile);							
 						UserAvatar avatar = accessUser.getUserAvatar();
 						if (avatar == null) {
 							avatar = new UserAvatar();
@@ -130,9 +124,31 @@ public class PostUserProfilePicture extends HttpServlet {
 							avatar.setId(uuid.toString());
 							avatar.setUsers(accessUser);
 							accessUser.setUserAvatar(avatar);
+							File existingAvatar=new File(filePath+avatar.getUrl());
+							if(existingAvatar.exists())
+							{
+								existingAvatar.delete();
+							}
 						}
-						avatar.setUrl(accessUser.getLoginID() + "."
-								+ "jpg");
+					//	uploadedFile = File.createTempFile("upload-", ext);
+						String filePathAndName=filePath
+								+ accessUser.getLoginID() + "." + ext;
+						File uploadedFile = new File(filePathAndName);
+						if(uploadedFile.exists())
+						{
+							if(uploadedFile.delete())
+							{
+								System.out.println("Deleted");
+							}
+							else{
+								System.out.println("not Exist or delete problem");
+							}
+						}
+						// System.out.println("final file name:"+myFileName+"."
+						// + ext);
+						fileItem.write(uploadedFile);							
+						
+						avatar.setUrl(filePathAndName);
 						Session session = HibernateUtil.beginTransaction();
 						session.update(accessUser);
 						session.saveOrUpdate(accessUser.getUserAvatar());

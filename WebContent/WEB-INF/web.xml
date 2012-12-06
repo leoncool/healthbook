@@ -43,9 +43,4 @@
     <extension>json</extension>
     <mime-type>application/json</mime-type>
   </mime-mapping>
-     <listener>
-    <listener-class>
-      org.apache.commons.fileupload.servlet.FileCleanerCleanup
-    </listener-class>
-  </listener>
 </web-app>
