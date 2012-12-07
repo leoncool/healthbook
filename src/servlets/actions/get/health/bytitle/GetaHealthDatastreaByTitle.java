@@ -6,6 +6,7 @@ package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
+import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
@@ -67,13 +68,13 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 			if (filter.getCheckResult().equalsIgnoreCase(
 					filter.INVALID_LOGIN_TOKEN_ID)) {
 				return;
-			}
-			else if(filter.getCheckResult().equalsIgnoreCase(AllConstants.ErrorDictionary.login_token_expired))
-			{
+			} else if (filter.getCheckResult().equalsIgnoreCase(
+					AllConstants.ErrorDictionary.login_token_expired)) {
 				return;
-			}
-			else{
-				  ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Invalid_login_token_id, null,null);
+			} else {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_login_token_id,
+						null, null);
 			}
 		} else {
 			accessUser = userDao.getLogin(loginID);
@@ -81,7 +82,7 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 		PrintWriter out = response.getWriter();
 
 		try {
-		
+
 			// if (request
 			// .getParameter(AllConstants.api_entryPoints.request_api_loginid)
 			// != null) {
@@ -97,12 +98,25 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				ReturnParser
-						.outputErrorException(
-								response,
-								AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
-								null, null);
-				return;
+				// ReturnParser.outputErrorException(response,
+				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
+				// null,
+				// null);
+				// return;
+				try {
+					subject = subjDao.createDefaultSubject(loginID);
+					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
+
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
+							subject.getId());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+					e.printStackTrace();
+				}
 			}
 			String streamTitle = ServerUtil
 					.getHealthStreamTitle(ServletPath(request));

@@ -6,6 +6,7 @@ package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
+import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
@@ -172,12 +173,24 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				ReturnParser
-						.outputErrorException(
-								response,
-								AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
-								null, null);
-				return;
+//				ReturnParser.outputErrorException(response,
+//				AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
+//				null);
+//		return;
+				try {
+					subject = subjDao.createDefaultSubject(loginID);
+					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
+
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
+							subject.getId());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+					e.printStackTrace();
+				}
 			}
 
 			String streamTitle = ServerUtil
