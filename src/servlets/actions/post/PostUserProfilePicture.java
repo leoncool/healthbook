@@ -25,24 +25,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
+
+import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
+import util.AllConstants;
+import util.HibernateUtil;
+import util.ServerConfigUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
-
-import server.exception.ReturnParser;
-import servlets.util.PermissionFilter;
-import servlets.util.ServerConfigs;
-import servlets.util.ServerUtil;
-import util.AllConstants;
-import util.HibernateUtil;
 
 /**
  * 
@@ -95,12 +92,12 @@ public class PostUserProfilePicture extends HttpServlet {
 		try {
 			DiskFileItemFactory factory = new DiskFileItemFactory();
 			ServletFileUpload upload = new ServletFileUpload(factory);
-			factory.setRepository(new File(ServerConfigs.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation)));
+			factory.setRepository(new File(ServerConfigUtil.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation)));
 			List uploadedItems = null;
 			FileItem fileItem = null;
 			uploadedItems = upload.parseRequest(request);
 			Iterator i = uploadedItems.iterator();
-			String filePath = ServerConfigs.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation);
+			String filePath = ServerConfigUtil.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation);
 			if (!new File(filePath).exists()) {
 				new File(filePath).mkdirs();
 				//filePath = "F:/healthProfilePictures/";
@@ -109,7 +106,6 @@ public class PostUserProfilePicture extends HttpServlet {
 				fileItem = (FileItem) i.next();
 				if (!fileItem.isFormField()) {
 					if (fileItem.getSize() > 0) {
-					
 						String myFileName = FilenameUtils.getName(fileItem
 								.getName());				
 						
@@ -146,9 +142,9 @@ public class PostUserProfilePicture extends HttpServlet {
 						}
 						// System.out.println("final file name:"+myFileName+"."
 						// + ext);
-						fileItem.write(uploadedFile);							
-						
-						avatar.setUrl(filePathAndName);
+						fileItem.write(uploadedFile);	
+						avatar.setUrl(accessUser.getLoginID() + "."
+								+ "jpg");
 						Session session = HibernateUtil.beginTransaction();
 						session.update(accessUser);
 						session.saveOrUpdate(accessUser.getUserAvatar());

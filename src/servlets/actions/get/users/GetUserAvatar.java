@@ -13,18 +13,17 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import server.exception.ReturnParser;
-import servlets.util.ServerConfigs;
-import util.AllConstants;
+import org.apache.commons.net.io.Util;
 
-import com.google.gson.JsonSyntaxException;
+import server.exception.ReturnParser;
+import util.AllConstants;
+import util.ServerConfigUtil;
 
 /**
  *
@@ -51,7 +50,7 @@ public class GetUserAvatar extends HttpServlet {
         	String avatarFileName=ServletPath(request).replaceFirst(Pattern.quote(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_avatar+"/"), "");
         //	System.out.println("avatarFileName:"+avatarFileName);
         	
-        	File avatarFile=new File(ServerConfigs.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation)+avatarFileName);
+        	File avatarFile=new File(ServerConfigUtil.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation)+avatarFileName);
        // 	System.out.println("file location trying to find:"+ServerConfigs.getConfigValue(AllConstants.ServerConfigs.UserAvatarLocation)+avatarFileName);
         	if(avatarFile.exists())
         	{
@@ -62,10 +61,7 @@ public class GetUserAvatar extends HttpServlet {
                   ServletOutputStream op = response.getOutputStream();
                   byte[] bbuf = new byte[1024];
                   DataInputStream in = new DataInputStream(new FileInputStream(avatarFile));
-                  while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-                      op.write(bbuf, 0, length);
-                  }
-
+                  Util.copyStream(in, op);
                   in.close();
                   op.flush();
                   op.close();
