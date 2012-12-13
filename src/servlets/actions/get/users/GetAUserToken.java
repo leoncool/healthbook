@@ -162,8 +162,7 @@ public class GetAUserToken extends HttpServlet {
            juserinfo.setTotal_followings(Integer.toString(follweringList.size()));
            JsonElement je = gson.toJsonTree(juserinfo);
            JsonObject jo = new JsonObject();
-         
-           
+                   
            JsonElement je_usertoken = gson.toJsonTree(jsonUserToken);
            jo.addProperty(AllConstants.ProgramConts.result, AllConstants.ProgramConts.succeed);
            jo.add("usertoken", je_usertoken);

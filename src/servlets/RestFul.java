@@ -320,6 +320,7 @@ public class RestFul extends HttpServlet {
 				e.printStackTrace();
 			}
 		} else if (isPostDatastreamReq(ServletPath(req))) {
+			System.out.println("isPostDatastreamReq");
 			PostDatastream proceReq = new PostDatastream();
 			proceReq.processRequest(req, resp);
 		} else if (isPostDataPointsReq(ServletPath(req))) {
