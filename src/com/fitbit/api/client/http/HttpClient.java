@@ -459,7 +459,7 @@ public class HttpClient implements Serializable {
                             }
                         }
                     }
-                    System.out.println();
+//                    System.out.println();
                     
                     if (responseCode >= 200 && responseCode < 300) {
                     	break;

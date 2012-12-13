@@ -74,7 +74,8 @@ public class GetUserAvatar extends HttpServlet {
         }catch(Exception ex)
         {
         	ex.printStackTrace();
-            ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
+        	  response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+         //   ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
         }
         finally {
         }

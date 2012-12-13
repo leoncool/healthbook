@@ -2,6 +2,7 @@
     <wb-module deploy-name="healthbook">
         <wb-resource deploy-path="/" source-path="/WebContent"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/Test"/>
         <dependent-module archiveName="healthlib.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/healthlib/healthlib">
             <dependency-type>uses</dependency-type>
         </dependent-module>

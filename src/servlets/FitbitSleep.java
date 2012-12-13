@@ -53,11 +53,11 @@ import com.fitbit.api.model.FitbitUser;
 /**
  * Servlet implementation class FitbitTimer
  */
-@WebServlet(name = "FitbitTimer", urlPatterns = { "/FitbitTimer" },
-loadOnStartup = 0
+@WebServlet(name = "FitbitSleep", urlPatterns = { "/FitbitSleep" }
+//,loadOnStartup = 0
 )
 // loadOnStartup=0
-public class FitbitTimer extends HttpServlet {
+public class FitbitSleep extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Timer timer;
 	private String apiBaseUrl;
@@ -126,84 +126,74 @@ public class FitbitTimer extends HttpServlet {
 						credentialsCache), clientConsumerKey, clientSecret,
 				credentialsCache, entityCache, subscriptionStore);
 		System.out.println("starting Fitbit Timer.......");
-		timer = new Timer();
-		timer.schedule(new RemindTask(), 0, // initial delay
-				5 * 60 * 1000); // subsequent rate
+//		timer = new Timer();
+//		timer.schedule(new RemindTask(), 0, // initial delay
+//				5 * 60 * 1000); // subsequent rate
+		try {
+			Date start = new Date();
+			Ext_API_Info_DAO extDao=new Ext_API_Info_DAO();
+			ExternalApiInfo apiinfo=extDao.getExt_API_INFO("leoncool", "fitbit",null);
+			if (apiinfo.getLateDataUpdate() == null) {
+				long one_month = 1000 * 60 * 60 * 24 * 30L;
+				long day = 1000 * 60 * 60 * 24L;
+				// long calculate=start.getTime()-one_month;
+				// start=new Date(calculate);
+				for (int i = 0; i < 30; i++) {
+					long calculate = start.getTime() - i * day;
+					Date temp_date = new Date(calculate);
+					System.out.println("Getting " + temp_date + " ");
+					LocalDate fitbitDate = LocalDate
+							.fromDateFields(temp_date);
+					importSleep(apiinfo, fitbitDate,
+							apiClientService);
+					
+					Date now = new Date();
+					apiinfo.setLateDataUpdate(now);
+					extDao.Update_A_ExtAPI(apiinfo);
+				}
+			} else {
+				start = apiinfo.getLateDataUpdate();
+				long one_month = 1000 * 60 * 60 * 24 * 30L;
+				long day = 1000 * 60 * 60 * 24L;
+				// long calculate=start.getTime()-one_month;
+				// start=new Date(calculate);
+				for (int i = 0; i < 10; i++) {
+					long calculate = start.getTime() - i * day;
+					Date temp_date = new Date(calculate);
+					System.out.println("Getting " + temp_date + " ");
+					LocalDate fitbitDate = LocalDate
+							.fromDateFields(temp_date);
+					importSleep(apiinfo, fitbitDate,
+							apiClientService);
+				
+					Date now = new Date();
+					apiinfo.setLateDataUpdate(now);
+					extDao.Update_A_ExtAPI(apiinfo);
+				}
+				//
+				// start=apiinfo.getLateDataUpdate();
+				// LocalDate fitbitDate=LocalDate.fromDateFields(start);
+				// importStepsData(apiinfo, fitbitDate,
+				// apiClientService);
+				// importFloorsData(apiinfo, fitbitDate,
+				// apiClientService);
+				// import_Calories_burned_Data(apiinfo, fitbitDate,
+				// apiClientService);
+				// Date now=new Date();
+				// apiinfo.setLateDataUpdate(now);
+				// extDao.Update_A_ExtAPI(apiinfo);
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	class RemindTask extends TimerTask {
 		Ext_API_Info_DAO extDao = new Ext_API_Info_DAO();
 
 		public void run() {
-			List<ExternalApiInfo> apiinfoList = extDao
-					.getExt_API_INFO_List(AllConstants.ExternalAPIConsts.fitbit_device);
-
-			for (ExternalApiInfo apiinfo : apiinfoList) {
-
-				try {
-					Date start = new Date();
-
-					if (apiinfo.getLateDataUpdate() == null) {
-						long one_month = 1000 * 60 * 60 * 24 * 30L;
-						long day = 1000 * 60 * 60 * 24L;
-						// long calculate=start.getTime()-one_month;
-						// start=new Date(calculate);
-						for (int i = 0; i < 30; i++) {
-							long calculate = start.getTime() - i * day;
-							Date temp_date = new Date(calculate);
-							System.out.println("Getting " + temp_date + " ");
-							LocalDate fitbitDate = LocalDate
-									.fromDateFields(temp_date);
-							importStepsData(apiinfo, fitbitDate,
-									apiClientService);
-							importFloorsData(apiinfo, fitbitDate,
-									apiClientService);
-							import_Calories_burned_Data(apiinfo, fitbitDate,
-									apiClientService);
-							Date now = new Date();
-							apiinfo.setLateDataUpdate(now);
-							extDao.Update_A_ExtAPI(apiinfo);
-						}
-					} else {
-						start = apiinfo.getLateDataUpdate();
-						long one_month = 1000 * 60 * 60 * 24 * 30L;
-						long day = 1000 * 60 * 60 * 24L;
-						// long calculate=start.getTime()-one_month;
-						// start=new Date(calculate);
-						for (int i = 0; i < 5; i++) {
-							long calculate = start.getTime() - i * day;
-							Date temp_date = new Date(calculate);
-							System.out.println("Getting " + temp_date + " ");
-							LocalDate fitbitDate = LocalDate
-									.fromDateFields(temp_date);
-							importStepsData(apiinfo, fitbitDate,
-									apiClientService);
-							importFloorsData(apiinfo, fitbitDate,
-									apiClientService);
-							import_Calories_burned_Data(apiinfo, fitbitDate,
-									apiClientService);
-							Date now = new Date();
-							apiinfo.setLateDataUpdate(now);
-							extDao.Update_A_ExtAPI(apiinfo);
-						}
-						//
-						// start=apiinfo.getLateDataUpdate();
-						// LocalDate fitbitDate=LocalDate.fromDateFields(start);
-						// importStepsData(apiinfo, fitbitDate,
-						// apiClientService);
-						// importFloorsData(apiinfo, fitbitDate,
-						// apiClientService);
-						// import_Calories_burned_Data(apiinfo, fitbitDate,
-						// apiClientService);
-						// Date now=new Date();
-						// apiinfo.setLateDataUpdate(now);
-						// extDao.Update_A_ExtAPI(apiinfo);
-					}
-
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
+	
 
 		}
 	}
@@ -211,7 +201,7 @@ public class FitbitTimer extends HttpServlet {
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public FitbitTimer() {
+	public FitbitSleep() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -233,7 +223,68 @@ public class FitbitTimer extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
+	public void importSleep(ExternalApiInfo apiinfo, LocalDate fitbitDate,
+			FitbitAPIClientService<FitbitApiClientAgent> apiClientService)
+			throws FitbitAPIException, NumberFormatException,
+			ErrorCodeException, IOException, ParseException {
+		FitbitUser fitbitUser = new FitbitUser(apiinfo.getExtId());
 
+		IntradaySummary stepSummary = apiClientService.getClient()
+				.getIntraDayTimeSeries(
+						new LocalUserDetail(apiinfo.getLoginID(),
+								apiinfo.getExtId()), fitbitUser,
+						TimeSeriesResourceType.AWAKENINGS_COUNT, fitbitDate);
+		if (stepSummary	 == null || stepSummary.getIntradayDataset() == null
+				|| stepSummary.getIntradayDataset().getDataset() == null) {
+			System.out.println("-------No record-----" + fitbitDate.toString());
+			return;
+		}
+		// System.out.println("Size Summary:"
+		// + stepSummary.getIntradayDataset().getDataset().size());
+		List<IntradayData> intraDataList = stepSummary.getIntradayDataset()
+				.getDataset();
+		HBaseDataImport hbaseImport = new HBaseDataImport();
+
+		List<JsonDataPoints> jdataPList = new ArrayList<JsonDataPoints>();
+		Datastream ds = healthDSdao.getDefaultDatastreamOfType(
+				apiinfo.getLoginID(), "steps");
+
+		double summaryValue=0;
+			for (IntradayData data : intraDataList) {
+				Calendar cal = Calendar.getInstance(DateUtil.UTC);
+				cal.setTime(fitbitDate.toDate());
+				LocalTime tempLocalTime = LocalTime.parse(data.getTime());
+				cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
+				cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
+				cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
+				 System.out.println(" "+cal.getTime()+" "+data.getValue());
+				JsonDataPoints jdatapoint = new JsonDataPoints();
+				jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
+				JsonDataValues jvalue = new JsonDataValues();
+				jvalue.setUnit_id(ds.getDatastreamUnitsList().get(0)
+						.getUnitID());
+				jvalue.setVal(Double.toString(data.getValue()));
+				List<JsonDataValues> jsonvalueList = new ArrayList<JsonDataValues>();
+				jsonvalueList.add(jvalue);
+			
+				jdatapoint.setValue_list(jsonvalueList);
+				jdataPList.add(jdatapoint);
+				summaryValue=summaryValue+data.getValue();
+			}
+
+			hbaseImport.setData_points(jdataPList);
+			hbaseImport.setDatastream_id(ds.getStreamId());
+			datapointDao.importDatapoints(hbaseImport);
+			DataSummary: {
+			DataSummary datasummry = new DataSummary();
+			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
+			datasummry.setValue(summaryValue);
+			datasummry.setDstreamID(ds.getStreamId());
+			datasummry.setDate(fitbitDate.toDate());
+			datasummry.setTitle(ds.getTitle());
+//			dsummaryDao.create_A_DataSummary(datasummry);
+		}
+	}
 	public void importStepsData(ExternalApiInfo apiinfo, LocalDate fitbitDate,
 			FitbitAPIClientService<FitbitApiClientAgent> apiClientService)
 			throws FitbitAPIException, NumberFormatException,
