@@ -153,7 +153,7 @@ public class JsonpFilter implements Filter {
 		if (string == null || string.length() == 0) {
 			return "\"\"";
 		}
-
+ 
 		char b;
 		char c = 0;
 		int i;

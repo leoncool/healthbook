@@ -68,10 +68,11 @@ public class GetaHealthDatastream extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
-						null);
-				return;
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
+//						null);
+//				return;
+				subject = subjDao.createDefaultSubject(loginID);
 			}
             String streamID = ServerUtil.getHealthStreamID(ServletPath(request));
             

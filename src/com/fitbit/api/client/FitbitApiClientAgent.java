@@ -279,9 +279,9 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
      * @param encodedUserId userId
      */
     public void setOAuthAccessToken(String token, String tokenSecret, String encodedUserId) {
-    	System.out.println("*************token:"+token);
-    	System.out.println("*************tokenSecret:"+tokenSecret);
-    	System.out.println("*************encodedUserId:"+encodedUserId);
+//    	System.out.println("*************token:"+token);
+//    	System.out.println("*************tokenSecret:"+tokenSecret);
+//    	System.out.println("*************encodedUserId:"+encodedUserId);
         setOAuthAccessToken(new AccessToken(token, tokenSecret));
     }
 
@@ -2763,8 +2763,8 @@ public class FitbitApiClientAgent extends FitbitAPIClientSupport implements Seri
         // Get the access token for the user:
      //   APIResourceCredentials resourceCredentials = credentialsCache.getResourceCredentials(localUser);
         // Set the access token in the client:
-        System.out.println("hello");
-        System.out.println("localUser:"+localUser.getUserId());   
+//        System.out.println("hello");
+//        System.out.println("localUser:"+localUser.getUserId());   
        // APIResourceCredentials resourceCredentials =new APIResourceCredentials("-", "", "");
         Ext_API_Info_DAO ext_api_DAO=new Ext_API_Info_DAO();
         ExternalApiInfo extapi=ext_api_DAO.getExt_API_INFO(localUser.getLoginID(), "fitbit", localUser.getUserId());

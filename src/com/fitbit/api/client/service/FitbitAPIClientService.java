@@ -100,7 +100,7 @@ public class FitbitAPIClientService<C extends FitbitApiClientAgent> {
     public void getTokenCredentials(LocalUserDetail user) throws FitbitAPIException {
         // Get cached resource credentials:
         APIResourceCredentials resourceCredentials = getResourceCredentialsByUser(user);
-        System.out.println("''''''''getTokenCredentials userID:+"+":"+user.getUserId());
+//        System.out.println("''''''''getTokenCredentials userID:+"+":"+user.getUserId());
         if (resourceCredentials == null) {
             throw new FitbitAPIException("User " + user.getUserId() + " does not have resource credentials. Need to grant authorization first.");
         }
