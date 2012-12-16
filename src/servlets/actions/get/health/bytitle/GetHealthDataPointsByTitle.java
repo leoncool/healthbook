@@ -178,7 +178,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 //				null);
 //		return;
 				try {
-					subject = subjDao.createDefaultSubject(loginID);
+					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
 					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
@@ -200,7 +200,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getDatastreamByTitle(subject.getId(),
+				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
 						streamTitle, true, false);
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,

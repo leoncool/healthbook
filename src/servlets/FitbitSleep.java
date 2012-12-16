@@ -274,7 +274,7 @@ public class FitbitSleep extends HttpServlet {
 
 			hbaseImport.setData_points(jdataPList);
 			hbaseImport.setDatastream_id(ds.getStreamId());
-			datapointDao.importDatapoints(hbaseImport);
+			datapointDao.importDatapointsDatapoints(hbaseImport);
 			DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
@@ -336,7 +336,7 @@ public class FitbitSleep extends HttpServlet {
 
 			hbaseImport.setData_points(jdataPList);
 			hbaseImport.setDatastream_id(ds.getStreamId());
-			datapointDao.importDatapoints(hbaseImport);
+			datapointDao.importDatapointsDatapoints(hbaseImport);
 			DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
@@ -395,7 +395,7 @@ public class FitbitSleep extends HttpServlet {
 		}
 		hbaseImport.setData_points(jdataPList);
 		hbaseImport.setDatastream_id(ds.getStreamId());
-		datapointDao.importDatapoints(hbaseImport);
+		datapointDao.importDatapointsDatapoints(hbaseImport);
 		DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
@@ -455,7 +455,7 @@ public class FitbitSleep extends HttpServlet {
 		}
 		hbaseImport.setData_points(jdataPList);
 		hbaseImport.setDatastream_id(ds.getStreamId());
-		datapointDao.importDatapoints(hbaseImport);
+		datapointDao.importDatapointsDatapoints(hbaseImport);
 		DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();

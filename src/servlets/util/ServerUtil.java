@@ -5,6 +5,7 @@
 package servlets.util;
 
 import util.AllConstants;
+import util.AllConstants.api_entryPoints;
 
 /**
  *
@@ -21,6 +22,11 @@ public class ServerUtil {
     public static String getStreamID(String ServletPath) {
         String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "/", "").split("/");
         String streamID = values[2];
+        return streamID;
+    }
+    public static String getDefault_Subject_StreamID(String ServletPath) {
+        String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject + "/"+api_entryPoints.api_datastream+"/", "").split("/");
+        String streamID = values[0];
         return streamID;
     }
     public static String getHealthStreamID(String ServletPath) {
@@ -133,6 +139,22 @@ public class ServerUtil {
             return false;
         }
     }
+    
+    public static boolean isPostDefaultSuject_DatastreamReq(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject + "/" + AllConstants.api_entryPoints.api_datastream + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isPostDefaultSuject_Datastream_DatapointsReq(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject + "/" + AllConstants.api_entryPoints.api_datastream +
+        		"/"+"[-a-zA-Z0-9]+/"+api_entryPoints.api_datapoints+"[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public static boolean isGetUserAvatar(String ServletPath) {
         if (ServletPath.startsWith(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_user+"/"+AllConstants.api_entryPoints.api_avatar+"/")) {
             return true;
@@ -169,6 +191,37 @@ public class ServerUtil {
             return true;
         }
        else {        	
+            return false;
+        }
+    }
+    public static boolean isGetDefault_Subject_DatastreamList(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject
+                + "[/]*$")) {
+            return true;
+        }
+       else {        	
+            return false;
+        }
+    }
+    public static boolean isGetDefault_Subject_Datastream(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject
+                +"/"+AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+" +"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
+            return false;
+        }
+    }
+    public static boolean isGetDefault_Subject_Datastream_Datapoints(String ServletPath)
+    {
+    	if(ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject
+                +"/"+AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+/"+AllConstants.api_entryPoints.api_datapoints+"[/]*$"))
+        	{
+        	return true;
+        	}else {        	
             return false;
         }
     }

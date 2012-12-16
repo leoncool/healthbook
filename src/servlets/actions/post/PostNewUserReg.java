@@ -227,7 +227,7 @@ public class PostNewUserReg extends HttpServlet {
 				session.save(avatar);
 				HibernateUtil.commitTransaction();
 				SubjectDAO subjDao = new SubjectDAO();
-				Subject default_sub = subjDao.createDefaultSubject(user
+				Subject default_sub = subjDao.createDefaultHealthSubject(user
 						.getLoginID());
 				HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 				try {

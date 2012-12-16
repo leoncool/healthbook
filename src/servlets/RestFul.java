@@ -4,47 +4,7 @@
  */
 package servlets;
 
-import static servlets.util.ServerUtil.isDeleteADataBlock;
-import static servlets.util.ServerUtil.isDeleteADataStreamRequest;
-import static servlets.util.ServerUtil.isDeleteASubjectRequest;
-import static servlets.util.ServerUtil.isDeleteFollower;
-import static servlets.util.ServerUtil.isGetADatastream;
-import static servlets.util.ServerUtil.isGetAHealthDatastream;
-import static servlets.util.ServerUtil.isGetAHealthDatastreamByTitle;
-import static servlets.util.ServerUtil.isGetDataPointsAllUnits;
-import static servlets.util.ServerUtil.isGetDataPointsAllUnitsDebug;
-import static servlets.util.ServerUtil.isGetDatastreamBlocks;
-import static servlets.util.ServerUtil.isGetDatastreamList;
-import static servlets.util.ServerUtil.isGetDeviceDataPointsAllUnits;
-import static servlets.util.ServerUtil.isGetDeviceList;
-import static servlets.util.ServerUtil.isGetDeviceSerialRegisters;
-import static servlets.util.ServerUtil.isGetFollowers;
-import static servlets.util.ServerUtil.isGetFollowings;
-import static servlets.util.ServerUtil.isGetHealthDatapoints;
-import static servlets.util.ServerUtil.isGetHealthDatapointsByTitle;
-import static servlets.util.ServerUtil.isGetHealthDatastreamBlocks;
-import static servlets.util.ServerUtil.isGetHealthDatastreams;
-import static servlets.util.ServerUtil.isGetSubjectsListReq;
-import static servlets.util.ServerUtil.isGetUserToken;
-import static servlets.util.ServerUtil.isGetUserinfo;
-import static servlets.util.ServerUtil.isGetaDeviceBinding;
-import static servlets.util.ServerUtil.isListUsers;
-import static servlets.util.ServerUtil.isPostDataBlocksReq;
-import static servlets.util.ServerUtil.isPostDataPointsReq;
-import static servlets.util.ServerUtil.isPostDatastreamReq;
-import static servlets.util.ServerUtil.isPostDevice;
-import static servlets.util.ServerUtil.isPostDeviceDatapoints;
-import static servlets.util.ServerUtil.isPostDeviceSerialBinding;
-import static servlets.util.ServerUtil.isGetHealthDataSummariesByTitle;
-import static servlets.util.ServerUtil.isPostFollower;
-import static servlets.util.ServerUtil.isPostSubjectReq;
-import static servlets.util.ServerUtil.isPostUpload;
-import static servlets.util.ServerUtil.isPostUserRegister;
-import static servlets.util.ServerUtil.isSearchUsers;
-import static servlets.util.ServerUtil.isPostUserRegister;
-import static servlets.util.ServerUtil.isGetUserAvatar;
-import static servlets.util.ServerUtil.isPostUserAvatar;
-import static servlets.util.ServerUtil.isGetMyAccountData;
+import static servlets.util.ServerUtil.*;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 import java.io.IOException;
@@ -74,8 +34,11 @@ import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
-import servlets.actions.get.health.bytitle.GetaHealthDatastreaByTitle;
+import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
 
+import servlets.actions.get.throughdefaultsubjects.GetDataPointsSingleStreamUnit;
+import servlets.actions.get.throughdefaultsubjects.GetDefaultDatastreamByID;
+import servlets.actions.get.throughdefaultsubjects.GetDefaultDatastreamsList;
 import servlets.actions.get.users.GetAUserToken;
 import servlets.actions.get.users.GetMyAccountData;
 import servlets.actions.get.users.GetUserAvatar;
@@ -90,6 +53,8 @@ import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
 import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
+import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
+import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceBindingList;
 import servlets.device.actions.GetDeviceDataPoints;
@@ -212,13 +177,29 @@ public class RestFul extends HttpServlet {
 		} 
 		else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
-			GetaHealthDatastreaByTitle proceReq = new GetaHealthDatastreaByTitle();
+			GetaHealthDatastreamByTitle proceReq = new GetaHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
 		} 
 		else if (isGetHealthDataSummariesByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetHealthDataSummariesByTitle proceReq = new GetHealthDataSummariesByTitle();
 			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetDefault_Subject_DatastreamList(ServletPath(req))) {
+			System.out.println("isGetDefault_Subject_DatastreamList:");
+			GetDefaultDatastreamsList proceReq = new GetDefaultDatastreamsList();
+			proceReq.processRequest(req, resp);
+			
+		} 
+		else if (isGetDefault_Subject_Datastream(ServletPath(req))) {
+			System.out.println("isGetDefault_Subject_Datastream:");
+			GetDefaultDatastreamByID proceReq = new GetDefaultDatastreamByID();
+			proceReq.processRequest(req, resp);			
+		} 
+		else if (isGetDefault_Subject_Datastream_Datapoints(ServletPath(req))) {
+			System.out.println("isGetDefault_Subject_Datastream_Datapoints:");
+			GetDataPointsSingleStreamUnit proceReq = new GetDataPointsSingleStreamUnit();
+			proceReq.processRequest(req, resp);			
 		} 
 		else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("isGetUserToken:");
@@ -359,6 +340,16 @@ public class RestFul extends HttpServlet {
 		else if (isPostUserAvatar(ServletPath(req))) {
 			System.out.println("PostUserProfilePicture");
 			PostUserProfilePicture proceReq = new PostUserProfilePicture();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isPostDefaultSuject_DatastreamReq(ServletPath(req))) {
+			System.out.println("isPostDefaultSuject_DatastreamReq");
+			PostDatastreamThroughDefaultSubject proceReq = new PostDatastreamThroughDefaultSubject();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isPostDefaultSuject_Datastream_DatapointsReq(ServletPath(req))) {
+			System.out.println("isPostDefaultSuject_Datastream_DatapointsReq");
+			PostDatapointsThoughDefaultSubject proceReq = new PostDatapointsThoughDefaultSubject();
 			proceReq.processRequest(req, resp);
 		} 
 		else if (isGetUserToken(ServletPath(req))) {

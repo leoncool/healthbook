@@ -53,8 +53,9 @@ import com.fitbit.api.model.FitbitUser;
 /**
  * Servlet implementation class FitbitTimer
  */
-@WebServlet(name = "FitbitTimer", urlPatterns = { "/FitbitTimer" },
-loadOnStartup = 0
+@WebServlet(name = "FitbitTimer", urlPatterns = { "/FitbitTimer" }
+//,
+//loadOnStartup = 0
 )
 // loadOnStartup=0
 public class FitbitTimer extends HttpServlet {
@@ -285,7 +286,7 @@ public class FitbitTimer extends HttpServlet {
 
 			hbaseImport.setData_points(jdataPList);
 			hbaseImport.setDatastream_id(ds.getStreamId());
-			datapointDao.importDatapoints(hbaseImport);
+			datapointDao.importDatapointsDatapoints(hbaseImport);
 			DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
@@ -344,7 +345,7 @@ public class FitbitTimer extends HttpServlet {
 		}
 		hbaseImport.setData_points(jdataPList);
 		hbaseImport.setDatastream_id(ds.getStreamId());
-		datapointDao.importDatapoints(hbaseImport);
+		datapointDao.importDatapointsDatapoints(hbaseImport);
 		DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
@@ -404,7 +405,7 @@ public class FitbitTimer extends HttpServlet {
 		}
 		hbaseImport.setData_points(jdataPList);
 		hbaseImport.setDatastream_id(ds.getStreamId());
-		datapointDao.importDatapoints(hbaseImport);
+		datapointDao.importDatapointsDatapoints(hbaseImport);
 		DataSummary: {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();

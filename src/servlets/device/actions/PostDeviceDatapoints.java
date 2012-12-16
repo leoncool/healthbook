@@ -103,7 +103,7 @@ public class PostDeviceDatapoints extends HttpServlet {
             importData.setData_points(jdataImport.getData_points());
             importData.setDatastream_id(deviceID);
             importData.setBlock_id(jdataImport.getBlock_id());
-            importDao.importDatapoints(importData);
+            importDao.importDatapointsDatapoints(importData);
         } catch (JsonSyntaxException ex) {
             ex.printStackTrace();
         } catch (Exception ex) {

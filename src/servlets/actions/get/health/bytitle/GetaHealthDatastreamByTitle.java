@@ -38,7 +38,7 @@ import com.google.gson.JsonObject;
  * 
  * @author Leon
  */
-public class GetaHealthDatastreaByTitle extends HttpServlet {
+public class GetaHealthDatastreamByTitle extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -104,7 +104,7 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 				// null);
 				// return;
 				try {
-					subject = subjDao.createDefaultSubject(loginID);
+					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
 					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
@@ -125,7 +125,7 @@ public class GetaHealthDatastreaByTitle extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getDatastreamByTitle(subject.getId(),
+				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
 						streamTitle, true, false);
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,

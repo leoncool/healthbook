@@ -140,7 +140,7 @@ public class PostDatapoints extends HttpServlet {
             importData.setBlock_id(jdataImport.getBlock_id());
             JsonDataPointsPostResult jsonResult = new JsonDataPointsPostResult();
             try {
-                jsonResult.setTotal_stored_byte(importDao.importDatapoints(importData));
+                jsonResult.setTotal_stored_byte(importDao.importDatapointsDatapoints(importData));
             } catch (ErrorCodeException ex) {
                 ex.printStackTrace();
                 ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
