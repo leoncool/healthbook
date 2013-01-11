@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import servlets.actions.delete.DeleteADataPoint;
 import servlets.actions.delete.DeleteADatastream;
 import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
@@ -266,7 +267,13 @@ public class RestFul extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} else {
+		}
+		else if (isDeleteDataPointsReq(ServletPath(req))) {
+			System.out.println("isDeleteADataPointsRequest");
+			DeleteADataPoint proceReq = new DeleteADataPoint();
+			proceReq.processRequest(req, resp);
+		}
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}

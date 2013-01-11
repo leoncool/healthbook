@@ -466,5 +466,13 @@ public class ServerUtil {
         }
     }
     
-
+    public static boolean isDeleteDataPointsReq(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject
+                + "/[0-9]+/" + AllConstants.api_entryPoints.api_datastream
+                + "/[-a-zA-Z0-9]+/" + AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

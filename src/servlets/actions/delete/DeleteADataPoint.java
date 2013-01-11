@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import server.exception.ReturnParser;
 import servlets.util.ServerUtil;
 import util.AllConstants;
+import util.AllConstants.api_entryPoints;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -75,14 +76,59 @@ public class DeleteADataPoint extends HttpServlet {
 						streamID);
 				return;
 			}
-			
-			try {
-				HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
-				dpDap.delete_A_Datapoint(streamID, 0); //has not finished yet
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			String atString=request.getParameter(api_entryPoints.request_api_at);
+			if(atString!=null)
+			{
+				long at=0;
+				try{
+					at=Long.parseLong(atString);
+				}
+				catch(Exception ex)
+				{
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_date_format, null,
+							null);
+					return;
+				}
+				try {
+					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
+					dpDap.delete_A_Datapoint(streamID, at); //has not finished yet
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+					return;
+				}	
+			}else if(request.getParameter(api_entryPoints.request_api_start)!=null||request.getParameter(api_entryPoints.request_api_end)!=null){
+				long start=0;
+				long end=0;
+				String startStr=request.getParameter(api_entryPoints.request_api_start);
+				String endStr=request.getParameter(api_entryPoints.request_api_end);
+				try{
+					if(startStr!=null)
+					{
+						start=Long.parseLong(startStr);
+					}
+					if(endStr!=null)
+					{
+						end=Long.parseLong(endStr);
+					}
+					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
+					dpDap.delete_range_Datapoint(streamID, start, end); //has not finished yet
+				}
+				catch(Exception ex)
+				{
+					ex.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_date_format, null,
+							null);
+					return;
+				}
+			}
+			else{
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
+						AllConstants.ErrorDictionary.MISSING_DATA, null,
 						null);
 				return;
 			}

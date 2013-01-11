@@ -135,9 +135,9 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
 					System.out.println("Date Request " + yearMonthDateString);
 					DateUtil dateUtil = new DateUtil();
-					date = new Date();
+					
 					date = dateUtil.convert(yearMonthDateString,
-							dateUtil.YearMonthDay_DateFormat);
+							dateUtil.YearMonthDay_DateFormat_pattern);
 					System.out.println("DateRequest:" + date);
 
 				} else {
