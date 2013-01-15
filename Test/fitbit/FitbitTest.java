@@ -68,14 +68,16 @@ public class FitbitTest {
 		LocalUserDetail userDetail=new LocalUserDetail(apiinfo.getLoginID(), apiinfo.getExtId());
 		FitbitUser fitbitUser = new FitbitUser(apiinfo.getExtId());
 		test.init();
-		
+		System.out.println(apiClientService.getClient().getDevices(userDetail).get(0).getLastSyncTime());
+		System.out.println(apiClientService.getClient().getDevices(userDetail).get(0).getId());
+
 	//	test.apiClientService.getClient().subscribe("1", userDetail, fitbitUser, APICollectionType.user,"dongdong");
-		List<ApiSubscription> subList=test.apiClientService.getClient().getSubscriptions(userDetail);
-		for(ApiSubscription sub:subList)
-		{
-			System.out.println(sub.getSubscriptionId());
-			System.out.println(sub.getOwnerId());
-		}
+//		List<ApiSubscription> subList=test.apiClientService.getClient().getSubscriptions(userDetail);
+//		for(ApiSubscription sub:subList)
+//		{
+//			System.out.println(sub.getSubscriptionId());
+//			System.out.println(sub.getOwnerId());
+//		}
 //	}
 	}
 }
