@@ -4,11 +4,13 @@ import health.database.DAO.DataSummaryDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.Ext_API_Info_DAO;
 import health.database.DAO.HealthDataStreamDAO;
+import health.database.DAO.SleepDataDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.DataSummary;
 import health.database.models.Datastream;
 import health.database.models.ExternalApiInfo;
 import health.database.models.FitbitLog;
+import health.database.models.SleepDataSummary;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataValues;
@@ -88,6 +90,7 @@ public class FitbitTimer extends HttpServlet {
 	private DatastreamDAO dstreamDao = new DatastreamDAO();
 	private HealthDataStreamDAO healthDSdao = new HealthDataStreamDAO();
 	private HBaseDatapointDAO datapointDao = null;
+	private SleepDataDAO sleepDataDao = new SleepDataDAO();
 	private static final int apiRateLimit = 150;
 
 	@Override
@@ -170,6 +173,9 @@ public class FitbitTimer extends HttpServlet {
 								.getTime()) > 3600000L) {
 					apiCounter = 0;
 					System.out.println("Counter reset" + apiinfo.getLoginID());
+					apiinfo.setApiCounter(apiCounter);
+					apiinfo.setLateDataUpdate(new Date());
+					extDao.Update_A_ExtAPI(apiinfo);
 				}
 				try {
 
@@ -222,11 +228,10 @@ public class FitbitTimer extends HttpServlet {
 								import_Calories_burned_Data(apiinfo,
 										fitbitDate, apiClientService);
 								apiCounter++;
-//								import_Sleep_Data(apiinfo, fitbitDate,
-//										apiClientService);
-								apiCounter = apiCounter + 2;
+								apiCounter= import_Sleep_Data(apiinfo, fitbitDate,
+							     apiClientService,apiCounter);
 								now = new Date();
-								apiinfo.setLateDataUpdate(now);
+//								apiinfo.setLateDataUpdate(now);
 								apiinfo.setApiCounter(apiCounter);
 								extDao.Update_A_ExtAPI(apiinfo);
 								fitbitlog = new FitbitLog();
@@ -261,10 +266,10 @@ public class FitbitTimer extends HttpServlet {
 							import_Calories_burned_Data(apiinfo, fitbitDate,
 									apiClientService);
 							apiCounter++;
-//							import_Sleep_Data(apiinfo, fitbitDate,
-//									apiClientService);
+							apiCounter= import_Sleep_Data(apiinfo, fitbitDate,
+								     apiClientService,apiCounter);
 							apiCounter = apiCounter + 2;
-							apiinfo.setLateDataUpdate(now);							
+//							apiinfo.setLateDataUpdate(now);
 
 							fitbitlog.setFetchTime(now);
 							if (fitbitDate.isEqual(lastSyncTime.toLocalDate())) {
@@ -277,14 +282,14 @@ public class FitbitTimer extends HttpServlet {
 							}
 							fitbitlog
 									.setFetchData("steps;floors;calories;sleep;");
-						
+
 							LocalDate endDate = LocalDate.now();
 							LocalDate startDate = endDate.minusDays(30);
 							importdistanceSummary(apiinfo, startDate, endDate,
 									apiClientService);
 							apiCounter++;
 							extDao.update_FitbitLog(fitbitlog);
-							
+
 							apiinfo.setApiCounter(apiCounter);
 							extDao.Update_A_ExtAPI(apiinfo);
 						} else {
@@ -306,10 +311,10 @@ public class FitbitTimer extends HttpServlet {
 									import_Calories_burned_Data(apiinfo,
 											fitbitDate, apiClientService);
 									apiCounter++;
-//									import_Sleep_Data(apiinfo, fitbitDate,
-//											apiClientService);
+									apiCounter= import_Sleep_Data(apiinfo, fitbitDate,
+										     apiClientService,apiCounter);
 									apiCounter = apiCounter + 2;
-									apiinfo.setLateDataUpdate(now);
+//									apiinfo.setLateDataUpdate(now);
 									apiinfo.setApiCounter(apiCounter);
 									extDao.Update_A_ExtAPI(apiinfo);
 									FitbitLog log = new FitbitLog();
@@ -325,8 +330,7 @@ public class FitbitTimer extends HttpServlet {
 									} else {
 										log.setFinished(true);
 									}
-									log
-											.setFetchData("steps;floors;calories;sleep;");
+									log.setFetchData("steps;floors;calories;sleep;");
 									extDao.create_FitbitLog(log);
 									tempDate = tempDate.plusDays(1);
 								}
@@ -445,7 +449,7 @@ public class FitbitTimer extends HttpServlet {
 				apiinfo.getLoginID(), "steps");
 
 		double summaryValue = 0;
-		System.out.println("totalSize:" + intraDataList.size());
+//		System.out.println("totalSize:" + intraDataList.size());
 		for (IntradayData data : intraDataList) {
 			Calendar cal = Calendar.getInstance(DateUtil.UTC);
 			cal.setTime(fitbitDate.toDate());
@@ -453,7 +457,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-//			System.out.println(" " + cal.getTime() + " " + data.getValue());
+			// System.out.println(" " + cal.getTime() + " " + data.getValue());
 			JsonDataPoints jdatapoint = new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue = new JsonDataValues();
@@ -474,6 +478,7 @@ public class FitbitTimer extends HttpServlet {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
 			datasummry.setValue(summaryValue);
+			datasummry.setLoginID(ds.getOwner());
 			datasummry.setDstreamID(ds.getStreamId());
 			datasummry.setDate(fitbitDate.toDate());
 			datasummry.setTitle(ds.getTitle());
@@ -533,6 +538,7 @@ public class FitbitTimer extends HttpServlet {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
 			datasummry.setValue(summaryValue);
+			datasummry.setLoginID(ds.getOwner());
 			datasummry.setDstreamID(ds.getStreamId());
 			datasummry.setDate(fitbitDate.toDate());
 			datasummry.setTitle(ds.getTitle());
@@ -593,6 +599,7 @@ public class FitbitTimer extends HttpServlet {
 			DataSummary datasummry = new DataSummary();
 			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
 			datasummry.setValue(summaryValue);
+			datasummry.setLoginID(ds.getOwner());
 			datasummry.setDstreamID(ds.getStreamId());
 			datasummry.setDate(fitbitDate.toDate());
 			datasummry.setTitle(ds.getTitle());
@@ -600,25 +607,29 @@ public class FitbitTimer extends HttpServlet {
 		}
 	}
 
-	public void import_Sleep_Data(ExternalApiInfo apiinfo,
-			LocalDate fitbitDate,
-			FitbitAPIClientService<FitbitApiClientAgent> apiClientService)
-			throws FitbitAPIException, NumberFormatException,
+	public int import_Sleep_Data(ExternalApiInfo apiinfo, LocalDate fitbitDate,
+			FitbitAPIClientService<FitbitApiClientAgent> apiClientService,
+			int apiCounter) throws FitbitAPIException, NumberFormatException,
 			ErrorCodeException, IOException, ParseException {
 		FitbitUser fitbitUser = new FitbitUser(apiinfo.getExtId());
 
 		Sleep sleep = apiClientService.getClient().getSleep(
 				new LocalUserDetail(apiinfo.getLoginID(), apiinfo.getExtId()),
 				fitbitUser, fitbitDate);
+		apiCounter++;
+		if (sleep == null) {
+			System.out.println("null sleep data");
+			return apiCounter;
+		}
 
-		if (sleep == null)
-			return;
 		SleepSummary sleepSummary = sleep.getSummary();
-
+		Date now = new Date();
 		if (sleepSummary != null && sleepSummary.getTotalSleepRecords() > 0) {
 			// exist sleep record
 			List<SleepLog> sleepLogList = sleep.getSleepLogs();
+			List<SleepDataSummary> sleepdataList = new ArrayList<SleepDataSummary>();
 			for (SleepLog log : sleepLogList) {
+
 				DateTimeFormatter formatter = new DateTimeFormatterBuilder()
 						.append(DateTimeFormat.forPattern(
 								"yyyy-MM-dd'T'HH:mm:ss.SSS").getParser())
@@ -626,38 +637,63 @@ public class FitbitTimer extends HttpServlet {
 
 				LocalDateTime startTime = LocalDateTime.parse(
 						log.getStartTime(), formatter);
+
 				// LocalDate startDate=LocalDate.parse(log.getStartTime(),fmt);
 				LocalDateTime endTime = startTime.plusMillis((int) log
 						.getDuration());
-				System.out.println(log.getStartTime());
-				System.out.println(log.getTimeInBed());
-				System.out.println(log.getDuration());
-				System.out.println(log.getEfficiency());
+
 				HBaseDataImport hbaseImport = new HBaseDataImport();
 				List<JsonDataPoints> jdataPList = new ArrayList<JsonDataPoints>();
 				Datastream ds = healthDSdao.getDefaultDatastreamOfType(
 						apiinfo.getLoginID(), "sleep");
-				// endTime.t#
+
+				// Following is for creating sleep data summaries
+				SleepDataSummary sleepdatasummary = new SleepDataSummary();
+				sleepdatasummary.setDate(fitbitDate.toDate());
+				sleepdatasummary.setStartTime(startTime.toDate());
+				sleepdatasummary.setDstreamID(ds.getStreamId());
+				sleepdatasummary.setLoginID(ds.getOwner());
+				sleepdatasummary.setEfficiency(log.getEfficiency());
+				sleepdatasummary.setAwakeningCount(log.getAwakeningsCount());
+
+				sleepdatasummary.setEndtime(startTime.plusMillis(
+						(int) log.getDuration()).toDate());
+				sleepdatasummary.setInBedMinutes(log.getTimeInBed());
+				sleepdatasummary.setMinutesAfterWakeup(log
+						.getMinutesAfterWakeup());
+				sleepdatasummary.setMinutesAsleep(log.getMinutesAsleep());
+				sleepdatasummary.setMinutesAwake(log.getMinutesAwake());
+				sleepdatasummary.setMinutesToFallAsleep(log
+						.getMinutesToFallAsleep());
+				sleepdatasummary.setUpdated(now);
+				sleepdatasummary.setTotalSleepRecords(sleepSummary
+						.getTotalSleepRecords());
+				sleepdataList.add(sleepdatasummary);
+				// end
+
+				// same date sleep
 				if (startTime.toLocalDate().isEqual(endTime.toLocalDate())) {
 					System.out.println("****same Date Sleep****"
 							+ startTime.toLocalDate().toString());
-					IntradaySummary stepSummary = apiClientService.getClient()
-							.getIntraDayTimeSeries(
+					IntradaySummary calroiesSummary = apiClientService
+							.getClient().getIntraDayTimeSeries(
 									new LocalUserDetail(apiinfo.getLoginID(),
 											apiinfo.getExtId()), fitbitUser,
 									TimeSeriesResourceType.CALORIES_OUT,
 									startTime.toLocalDate(),
 									startTime.toLocalTime(),
 									endTime.toLocalTime());
-					if (stepSummary == null
-							|| stepSummary.getIntradayDataset() == null
-							|| stepSummary.getIntradayDataset().getDataset() == null) {
+					apiCounter++;
+					if (calroiesSummary == null
+							|| calroiesSummary.getIntradayDataset() == null
+							|| calroiesSummary.getIntradayDataset()
+									.getDataset() == null) {
 						System.out.println("-------No record-----"
 								+ startTime.toLocalDate().toString());
-						return;
+						return apiCounter;
 					}
 					//
-					List<IntradayData> intraDataList = stepSummary
+					List<IntradayData> intraDataList = calroiesSummary
 							.getIntradayDataset().getDataset();
 					int counter = 0;
 					int end = intraDataList.size() - 1;
@@ -695,13 +731,14 @@ public class FitbitTimer extends HttpServlet {
 						counter++;
 					}
 				} else {
+					//two days sleep
 					System.out.println("startTime.toLocalDate()"
 							+ startTime.toLocalDate() + ","
 							+ "endTime.toLocalDate()" + endTime.toLocalDate());
 					if (!startTime.toLocalDate().plusDays(1)
 							.isEqual(endTime.toLocalDate())) {
 						System.out.println("Error--Sleeping far too long");
-						return;
+						return apiCounter;
 					}
 					System.out.println("****Different Dates****"
 							+ startTime.toLocalDate().toString());
@@ -713,6 +750,7 @@ public class FitbitTimer extends HttpServlet {
 									startTime.toLocalDate(),
 									startTime.toLocalTime(),
 									LocalTime.parse("23:59:00"));
+					apiCounter++;
 					IntradaySummary stepSummary2 = apiClientService.getClient()
 							.getIntraDayTimeSeries(
 									new LocalUserDetail(apiinfo.getLoginID(),
@@ -721,19 +759,20 @@ public class FitbitTimer extends HttpServlet {
 									endTime.toLocalDate(),
 									LocalTime.parse("00:00:00"),
 									endTime.toLocalTime());
+					apiCounter++;
 					if (stepSummary1 == null
 							|| stepSummary1.getIntradayDataset() == null
 							|| stepSummary1.getIntradayDataset().getDataset() == null) {
 						System.out.println("-------No record-----"
 								+ startTime.toLocalDate().toString());
-						return;
+						return apiCounter;
 					}
 					if (stepSummary2 == null
 							|| stepSummary2.getIntradayDataset() == null
 							|| stepSummary2.getIntradayDataset().getDataset() == null) {
 						System.out.println("-------No record-----"
 								+ startTime.toLocalDate().toString());
-						return;
+						return apiCounter;
 					}
 					//
 					List<IntradayData> intraDataList1 = stepSummary1
@@ -764,8 +803,8 @@ public class FitbitTimer extends HttpServlet {
 								tempLocalTime.getMinuteOfHour());
 						cal.set(Calendar.SECOND,
 								tempLocalTime.getSecondOfMinute());
-//						System.out.println(" " + cal.getTime() + " "
-//								+ data.getValue());
+						// System.out.println(" " + cal.getTime() + " "
+						// + data.getValue());
 						JsonDataPoints jdatapoint = new JsonDataPoints();
 						jdatapoint
 								.setAt(Long.toString(cal.getTime().getTime()));
@@ -795,8 +834,8 @@ public class FitbitTimer extends HttpServlet {
 								tempLocalTime.getMinuteOfHour());
 						cal.set(Calendar.SECOND,
 								tempLocalTime.getSecondOfMinute());
-						System.out.println(" " + cal.getTime() + " "
-								+ data.getValue());
+//						System.out.println(" " + cal.getTime() + " "
+//								+ data.getValue());
 						JsonDataPoints jdatapoint = new JsonDataPoints();
 						jdatapoint
 								.setAt(Long.toString(cal.getTime().getTime()));
@@ -817,11 +856,15 @@ public class FitbitTimer extends HttpServlet {
 					}
 					jdataPList.get(jdataPList.size() - 1).setTimetag("end");
 				}
-
+				sleepDataDao.create_SameDay_SleepSummaries(sleepdataList);
 				hbaseImport.setData_points(jdataPList);
 				hbaseImport.setDatastream_id(ds.getStreamId());
-				datapointDao.importDatapointsDatapoints(hbaseImport);
+				datapointDao.importDatapointsDatapoints(hbaseImport);	
 			}
+			return apiCounter++;
+		} else {
+			System.out.println("no sleep data");
+			return apiCounter++;
 		}
 
 		// System.out.println("Size Summary:"
@@ -862,6 +905,7 @@ public class FitbitTimer extends HttpServlet {
 				DataSummaryDAO dsummaryDao = new DataSummaryDAO();
 				datasummry.setValue(Double.parseDouble(data.getValue()));
 				datasummry.setDstreamID(ds.getStreamId());
+				datasummry.setLoginID(ds.getOwner());
 				datasummry
 						.setDate(LocalDate
 								.parse(data.getDateTime(),
@@ -893,12 +937,13 @@ public class FitbitTimer extends HttpServlet {
 		Datastream ds = healthDSdao.getDefaultDatastreamOfType(
 				apiinfo.getLoginID(), "calories_burned");
 		for (Data data : dataSummaries) {
-			System.out.println(data.getDateTime() + "," + data.getValue());
+//			System.out.println(data.getDateTime() + "," + data.getValue());
 			DataSummary: {
 				DataSummary datasummry = new DataSummary();
 				DataSummaryDAO dsummaryDao = new DataSummaryDAO();
 				datasummry.setValue(Double.parseDouble(data.getValue()));
 				datasummry.setDstreamID(ds.getStreamId());
+				datasummry.setLoginID(ds.getOwner());
 				datasummry
 						.setDate(LocalDate
 								.parse(data.getDateTime(),
@@ -922,8 +967,8 @@ public class FitbitTimer extends HttpServlet {
 		LocalDate endDate = LocalDate.now();
 
 		LocalDate startDate = endDate.minusDays(90);
-		LocalDate localDate = LocalDate.parse("2013-1-15");
-		timer.importStepsData(info, localDate, apiClientService);
+		LocalDate localDate = LocalDate.parse("2013-1-13");
+		System.out.println(timer.import_Sleep_Data(info, localDate, apiClientService,0));
 		// timer.importCaloriesSummary(info, startDate, endDate,
 		// apiClientService);
 		// timer.(info, localDate, apiClientService);

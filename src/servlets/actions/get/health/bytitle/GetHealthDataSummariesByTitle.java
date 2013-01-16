@@ -8,13 +8,16 @@ import static util.JsonUtil.ServletPath;
 import health.database.DAO.DataSummaryDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
+import health.database.DAO.SleepDataDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.DataSummary;
 import health.database.models.Datastream;
+import health.database.models.SleepDataSummary;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.input.jsonmodels.JsonDataSummary;
+import health.input.jsonmodels.JsonSleepDataSummary;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
@@ -36,6 +39,7 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.DateUtil;
+import util.AllConstants.HealthConts;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -135,7 +139,7 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
 					System.out.println("Date Request " + yearMonthDateString);
 					DateUtil dateUtil = new DateUtil();
-					
+
 					date = dateUtil.convert(yearMonthDateString,
 							dateUtil.YearMonthDay_DateFormat_pattern);
 					System.out.println("DateRequest:" + date);
@@ -156,10 +160,11 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-//				ReturnParser.outputErrorException(response,
-//				AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
-//				null);
-//		return;
+				// ReturnParser.outputErrorException(response,
+				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
+				// null,
+				// null);
+				// return;
 				try {
 					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
@@ -181,8 +186,8 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
-						streamTitle, true, false);
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, false);
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -207,33 +212,74 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 			Gson gson = new Gson();
 			System.out.println("debuging.....going to get Data Summaries");
 			System.out.println("datastreamID:" + datastream.getStreamId());
-			List<DataSummary> summaryList = new ArrayList<DataSummary>();
-			List<JsonDataSummary> jsummaryList = new ArrayList<JsonDataSummary>();
-			DataSummaryDAO dsummaryDao = new DataSummaryDAO();
-			if (date != null) {
-				summaryList = dsummaryDao.getDataSummaries(
-						datastream.getStreamId(), unitID, date);
-			} else if (start != 0 && end != 0) {
-				summaryList = dsummaryDao.getDataSummariesByStartAndEndTime(
-						datastream.getStreamId(), unitID, start, end);
-			} else if (startDate != null && endDate != null) {
-				summaryList = dsummaryDao.getDataSummariesByStartAndEndTime(
-						datastream.getStreamId(), unitID, startDate.getTime(),
-						endDate.getTime());
-			}
-			for (DataSummary summary : summaryList) {
-				jsummaryList.add(dbtoJUtil.convertDataSummary(summary));
-			}
-			outStream = null;
-			boolean iftoZip = true;
-			String encodings = request.getHeader("Accept-Encoding");
-			if (encodings != null && encodings.indexOf("gzip") != -1
-					&& iftoZip == true) {
-				// Go with GZIP
-				response.setHeader("Content-Encoding", "gzip");
-				outStream = new GZIPOutputStream(response.getOutputStream());
+			List jsummaryList = null;
+			if (streamTitle
+					.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_sleep)) {
+				//deal with sleep summary request
+				List<SleepDataSummary> summaryList = new ArrayList<SleepDataSummary>();
+				jsummaryList = new ArrayList<JsonSleepDataSummary>();
+				SleepDataDAO dsummaryDao = new SleepDataDAO();
+				if (date != null) {
+					summaryList = dsummaryDao.getSleepDataSummaries(
+							datastream.getStreamId(), unitID, date);
+				} else if (start != 0 && end != 0) {
+					summaryList = dsummaryDao
+							.getSleepDataSummariesByStartAndEndTime(
+									datastream.getStreamId(), unitID, start,
+									end);
+				} else if (startDate != null && endDate != null) {
+					summaryList = dsummaryDao
+							.getSleepDataSummariesByStartAndEndTime(
+									datastream.getStreamId(), unitID,
+									startDate.getTime(), endDate.getTime());
+				}
+				for (SleepDataSummary summary : summaryList) {
+					jsummaryList.add(dbtoJUtil.convertSleepDataSummary(summary));
+				}
+				outStream = null;
+				boolean iftoZip = true;
+				String encodings = request.getHeader("Accept-Encoding");
+				if (encodings != null && encodings.indexOf("gzip") != -1
+						&& iftoZip == true) {
+					// Go with GZIP
+					response.setHeader("Content-Encoding", "gzip");
+					outStream = new GZIPOutputStream(response.getOutputStream());
+				} else {
+					outStream = response.getOutputStream();
+				}
 			} else {
-				outStream = response.getOutputStream();
+				// Normal Data Summary:
+				List<DataSummary> summaryList = new ArrayList<DataSummary>();
+				jsummaryList = new ArrayList<JsonDataSummary>();
+				DataSummaryDAO dsummaryDao = new DataSummaryDAO();
+				if (date != null) {
+					summaryList = dsummaryDao.getDataSummaries(
+							datastream.getStreamId(), unitID, date);
+				} else if (start != 0 && end != 0) {
+					summaryList = dsummaryDao
+							.getDataSummariesByStartAndEndTime(
+									datastream.getStreamId(), unitID, start,
+									end);
+				} else if (startDate != null && endDate != null) {
+					summaryList = dsummaryDao
+							.getDataSummariesByStartAndEndTime(
+									datastream.getStreamId(), unitID,
+									startDate.getTime(), endDate.getTime());
+				}
+				for (DataSummary summary : summaryList) {
+					jsummaryList.add(dbtoJUtil.convertDataSummary(summary));
+				}
+				outStream = null;
+				boolean iftoZip = true;
+				String encodings = request.getHeader("Accept-Encoding");
+				if (encodings != null && encodings.indexOf("gzip") != -1
+						&& iftoZip == true) {
+					// Go with GZIP
+					response.setHeader("Content-Encoding", "gzip");
+					outStream = new GZIPOutputStream(response.getOutputStream());
+				} else {
+					outStream = response.getOutputStream();
+				}
 			}
 			response.setHeader("Vary", "Accept-Encoding");
 			Date timerStart = new Date();

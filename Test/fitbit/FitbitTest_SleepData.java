@@ -100,8 +100,8 @@ public class FitbitTest_SleepData {
 		for(SleepLog log:sleepLogList)
 		{
 			System.out.println(log.getStartTime());
-			System.out.println(log.getTimeInBed());
-			System.out.println(log.getDuration());
+			System.out.println(log.getTimeInBed());//minutes
+			System.out.println(log.getDuration()); //millisoncds
 			System.out.println(log.getEfficiency());
 			System.out.println(log.getMinutesAfterWakeup());
 			System.out.println(log.getMinutesAwake());
