@@ -414,7 +414,7 @@ public class HttpClient implements Serializable {
     	if (log.isDebugEnabled()) {
     		log.debug("HTTP " + method + " " + url);
     	}
-    	System.out.println("HTTP " + method + " " + url);
+//    	System.out.println("HTTP " + method + " " + url);
         int retriedCount;
         int retry = retryCount + 1;
         Response res = null;

@@ -86,10 +86,10 @@ public class OAuth implements Serializable {
         base.append(encode(normalizeRequestParameters(signatureBaseParams)));
         String oauthBaseString = base.toString();
         log("OAuth base string:", oauthBaseString);
-        System.out.println("OAuth base string:"+oauthBaseString);
+//        System.out.println("OAuth base string:"+oauthBaseString);
         String signature = generateSignature(oauthBaseString, otoken);
         log("OAuth signature:", signature);
-        System.out.println("OAuth signature::"+signature);
+//        System.out.println("OAuth signature::"+signature);
         oauthHeaderParams.add(new PostParameter("oauth_signature", signature));
         return "OAuth " + encodeParameters(oauthHeaderParams, ",", true);
     }
