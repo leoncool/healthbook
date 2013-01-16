@@ -90,11 +90,12 @@ public class FitbitTest_SleepData {
 		LocalDate endDate = LocalDate.now();
 		System.out.println(endDate.minusDays(1).toString());
 		Sleep sleep
-		=test.apiClientService.getClient().getSleep(userDetail, fitbitUser, endDate.minusDays(1));
+		=test.apiClientService.getClient().getSleep(userDetail, fitbitUser, endDate.minusDays(3));
 		SleepSummary sleepSummary=sleep.getSummary();
 		System.out.println("getTotalMinutesAsleep:"+sleepSummary.getTotalMinutesAsleep());
 		System.out.println("getTotalSleepRecords:"+sleepSummary.getTotalSleepRecords());
 		System.out.println("getTotalTimeInBed:"+sleepSummary.getTotalTimeInBed());
+		
 		List<SleepLog> sleepLogList=sleep.getSleepLogs();
 		for(SleepLog log:sleepLogList)
 		{
@@ -102,6 +103,10 @@ public class FitbitTest_SleepData {
 			System.out.println(log.getTimeInBed());
 			System.out.println(log.getDuration());
 			System.out.println(log.getEfficiency());
+			System.out.println(log.getMinutesAfterWakeup());
+			System.out.println(log.getMinutesAwake());
+			System.out.println(log.getAwakeningsCount());
+			System.out.println(log.getMinutesAsleep());
 		}
 		IntradaySummary stepSummary = apiClientService.getClient()
 				.getIntraDayTimeSeries(
