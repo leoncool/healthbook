@@ -82,7 +82,7 @@ public class FitbitTimer extends HttpServlet {
 	private String clientSecret;
 	public static final String OAUTH_TOKEN = "oauth_token";
 	public static final String OAUTH_VERIFIER = "oauth_verifier";
-
+	public static String timerStatus="off";
 	private FitbitAPIEntityCache entityCache = new FitbitApiEntityCacheMapImpl();
 	private FitbitApiCredentialsCache credentialsCache = new FitbitApiCredentialsCacheMapImpl();
 	private FitbitApiSubscriptionStorage subscriptionStore = new FitbitApiSubscriptionStorageInMemoryImpl();
@@ -154,6 +154,7 @@ public class FitbitTimer extends HttpServlet {
 		Ext_API_Info_DAO extDao = new Ext_API_Info_DAO();
 
 		public void run() {
+			timerStatus="on";
 			List<ExternalApiInfo> apiinfoList = extDao
 					.getExt_API_INFO_List(AllConstants.ExternalAPIConsts.fitbit_device);
 
@@ -365,7 +366,7 @@ public class FitbitTimer extends HttpServlet {
 		PrintWriter out = response.getWriter();
 
 		if (command == null) {
-			out.write("no command");
+			out.write("Timer Status:"+timerStatus);
 			return;
 		}
 		if (command.equalsIgnoreCase("on")) {
@@ -374,13 +375,15 @@ public class FitbitTimer extends HttpServlet {
 				timer.schedule(new RemindTask(), 0, // initial delay
 						5 * 60 * 1000); // subsequent rate
 			}
-			out.write("Timer is on");
+					out.write("Timer is on");
+			
 			return;
 		} else if (command.equalsIgnoreCase("off")) {
 			if (timer != null) {
 				timer.cancel();
 				timer = null;
 			}
+			timerStatus="off";
 			out.write("Timer is off");
 			return;
 		} else {

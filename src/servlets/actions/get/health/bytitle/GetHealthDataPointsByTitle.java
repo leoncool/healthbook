@@ -7,10 +7,12 @@ package servlets.actions.get.health.bytitle;
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
+import health.database.DAO.SleepDataDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
+import health.database.models.SleepDataSummary;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 import javax.persistence.NonUniqueResultException;
@@ -173,10 +176,11 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-//				ReturnParser.outputErrorException(response,
-//				AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
-//				null);
-//		return;
+				// ReturnParser.outputErrorException(response,
+				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
+				// null,
+				// null);
+				// return;
 				try {
 					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
@@ -200,8 +204,8 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
-						streamTitle, true, false);
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, false);
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -260,18 +264,90 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				System.out.println("datastreamID:" + datastream.getStreamId());
 				HBaseDataImport hbaseexport = null;
 				try {
-					if (request
-							.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
-						DateUtil dateUtil = new DateUtil();
-						hbaseexport = diDao.exportDatapoints(
-								datastream.getStreamId(), start, end, blockid,
-								mapUnits, dateUtil.millisecFormat);
-					} else {
-						hbaseexport = diDao.exportDatapoints(
-								datastream.getStreamId(), start, end, blockid,
-								mapUnits, null);
-					}
 
+					if (streamTitle
+							.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_sleep)) {
+						// sleep record
+						if (request
+								.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) == null) {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Invalid_date_format,
+											null, null);
+							return;
+						}
+						DateUtil dateUtil = new DateUtil();
+						String yearMonthDateString = request
+								.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
+						Date date = dateUtil.convert(yearMonthDateString,
+								dateUtil.YearMonthDay_DateFormat);
+
+						SleepDataDAO sleepdataDao = new SleepDataDAO();
+						List<SleepDataSummary> sleepSummaryList = sleepdataDao
+								.getSleepDataSummaries(
+										datastream.getStreamId(), null, date);
+						if (sleepSummaryList.size() < 1) {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.NO_SLEEP_RECORD,
+											null, datastream.getStreamId());
+							return;
+						}
+						start = sleepSummaryList.get(0).getStartTime()
+								.getTime();
+						end = sleepSummaryList.get(0).getEndtime()
+								.getTime();
+						for (SleepDataSummary summary : sleepSummaryList) {
+							if(start>summary.getStartTime().getTime())
+							{
+								start=summary.getStartTime().getTime();
+							}
+							if(end<summary.getEndtime().getTime())
+							{
+								end=summary.getEndtime().getTime();
+							}
+						}
+						if (datastream.getDatastreamUnitsList().size() == 0) {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Unknown_StreamID,
+											null, datastream.getStreamId());
+							return;
+						}
+						if (datastream.getDatastreamUnitsList().size() > 1) {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.MORE_THAN_ONE_DATASTREAM_UNIT,
+											null, datastream.getStreamId());
+							return;
+						}
+						mapUnits = new HashMap<String, String>();
+						mapUnits.put(datastream.getDatastreamUnitsList().get(0)
+								.getUnitID(), datastream
+								.getDatastreamUnitsList().get(0).getUnitID());
+						hbaseexport = diDao.exportDatapointsForSingleUnit(
+								datastream.getStreamId(), start, end, blockid,
+								datastream.getDatastreamUnitsList().get(0)
+										.getUnitID(), null);
+
+					} else {
+
+						if (request
+								.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
+							DateUtil dateUtil = new DateUtil();
+							hbaseexport = diDao.exportDatapoints(
+									datastream.getStreamId(), start, end,
+									blockid, mapUnits, dateUtil.millisecFormat);
+						} else {
+							hbaseexport = diDao.exportDatapoints(
+									datastream.getStreamId(), start, end,
+									blockid, mapUnits, null);
+						}
+					}
 				} catch (ErrorCodeException ex) {
 					ex.printStackTrace();
 					ReturnParser.outputErrorException(response,
