@@ -144,7 +144,7 @@ public class PostUserProfilePicture extends HttpServlet {
 						// + ext);
 						fileItem.write(uploadedFile);	
 						avatar.setUrl(accessUser.getLoginID() + "."
-								+ "jpg");
+								+ ext);
 						Session session = HibernateUtil.beginTransaction();
 						session.update(accessUser);
 						session.saveOrUpdate(accessUser.getUserAvatar());
