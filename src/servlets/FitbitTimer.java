@@ -273,13 +273,11 @@ public class FitbitTimer extends HttpServlet {
 //							apiinfo.setLateDataUpdate(now);
 
 							fitbitlog.setFetchTime(now);
-							if (fitbitDate.isEqual(lastSyncTime.toLocalDate())) {
-								fitbitlog.setFinished(false);
-							} else if (fitbitDate.isAfter(lastSyncTime
-									.toLocalDate())) {
-								fitbitlog.setFinished(false);
-							} else {
+							
+							if (fitbitDate.isAfter(lastSyncTime.toLocalDate().plusDays(1))) {								
 								fitbitlog.setFinished(true);
+							}else{
+								fitbitlog.setFinished(false);
 							}
 							fitbitlog
 									.setFetchData("steps;floors;calories;sleep;");
@@ -299,9 +297,10 @@ public class FitbitTimer extends HttpServlet {
 							tempDate = tempDate.plusDays(1);
 
 							for (int i = 0; i < 5; i++) {
-								if (apiCounter < apiRateLimit
-										&& tempDate.isBefore(lastSyncTime
-												.toLocalDate())) {
+								
+								if ((apiCounter < apiRateLimit)
+										&& 
+							(!tempDate.isAfter(lastSyncTime.toLocalDate())))  {
 									LocalDate fitbitDate = tempDate;
 									importStepsData(apiinfo, fitbitDate,
 											apiClientService);
@@ -322,6 +321,7 @@ public class FitbitTimer extends HttpServlet {
 									log.setLoginID(apiinfo.getLoginID());
 									log.setFetchTime(now);
 									log.setDate(fitbitDate.toDate());
+									
 									if (fitbitDate.isEqual(lastSyncTime
 											.toLocalDate())) {
 										log.setFinished(false);
@@ -700,6 +700,15 @@ public class FitbitTimer extends HttpServlet {
 							.getIntradayDataset().getDataset();
 					int counter = 0;
 					int end = intraDataList.size() - 1;
+					
+					double baseCalories = 5000;
+					for (IntradayData data : intraDataList) {
+						if (data.getValue() < baseCalories) {
+							baseCalories = data.getValue();
+						}
+					}
+					System.out.println(apiinfo.getLoginID()+":baseCalories:"+baseCalories);
+					
 					double summaryValue = 0;
 					for (IntradayData data : intraDataList) {
 						Calendar cal = Calendar.getInstance(DateUtil.UTC);
@@ -720,7 +729,7 @@ public class FitbitTimer extends HttpServlet {
 						JsonDataValues jvalue = new JsonDataValues();
 						jvalue.setUnit_id(ds.getDatastreamUnitsList().get(0)
 								.getUnitID());
-						jvalue.setVal(Double.toString(data.getValue()));
+						jvalue.setVal(Double.toString(data.getValue()-baseCalories));
 						List<JsonDataValues> jsonvalueList = new ArrayList<JsonDataValues>();
 						jsonvalueList.add(jvalue);
 						if (counter == 0) {
@@ -782,7 +791,7 @@ public class FitbitTimer extends HttpServlet {
 							.getIntradayDataset().getDataset();
 					List<IntradayData> intraDataList2 = stepSummary2
 							.getIntradayDataset().getDataset();
-					double baseCalories = 100;
+					double baseCalories = 5000;
 					for (IntradayData data : intraDataList1) {
 						if (data.getValue() < baseCalories) {
 							baseCalories = data.getValue();
@@ -793,6 +802,7 @@ public class FitbitTimer extends HttpServlet {
 							baseCalories = data.getValue();
 						}
 					}
+					System.out.println(apiinfo.getLoginID()+":baseCalories:"+baseCalories);
 					int counter = 0;
 					double summaryValue = 0;
 					for (IntradayData data : intraDataList1) {
