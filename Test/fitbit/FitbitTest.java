@@ -17,6 +17,7 @@ import com.fitbit.api.client.FitbitApiSubscriptionStorage;
 import com.fitbit.api.client.FitbitApiSubscriptionStorageInMemoryImpl;
 import com.fitbit.api.client.LocalUserDetail;
 import com.fitbit.api.client.service.FitbitAPIClientService;
+import com.fitbit.api.common.model.devices.Device;
 import com.fitbit.api.model.APICollectionType;
 import com.fitbit.api.model.ApiSubscription;
 import com.fitbit.api.model.FitbitUser;
@@ -70,7 +71,11 @@ public class FitbitTest {
 		test.init();
 		System.out.println(apiClientService.getClient().getDevices(userDetail).get(0).getLastSyncTime());
 		System.out.println(apiClientService.getClient().getDevices(userDetail).get(0).getId());
-
+		List<Device> deviceList = apiClientService.getClient()
+				.getDevices(
+						new LocalUserDetail(apiinfo.getLoginID(),
+								apiinfo.getExtId()));
+		System.out.println(deviceList.size());
 	//	test.apiClientService.getClient().subscribe("1", userDetail, fitbitUser, APICollectionType.user,"dongdong");
 //		List<ApiSubscription> subList=test.apiClientService.getClient().getSubscriptions(userDetail);
 //		for(ApiSubscription sub:subList)

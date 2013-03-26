@@ -18,5 +18,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/oauth/scribe-1.3.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

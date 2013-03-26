@@ -186,6 +186,7 @@ public class FitbitTimer extends HttpServlet {
 							.getDevices(
 									new LocalUserDetail(apiinfo.getLoginID(),
 											apiinfo.getExtId()));
+					System.out.println("API WORKS--"+new Date());
 					if (deviceList.size() != 1) {
 						System.out.println("----------------ERROR----------"
 								+ apiinfo.getLoginID());

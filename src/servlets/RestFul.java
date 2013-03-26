@@ -36,6 +36,7 @@ import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
+import servlets.actions.get.lifestyle.location.GetLocations;
 
 import servlets.actions.get.throughdefaultsubjects.GetDataPointsSingleStreamUnit;
 import servlets.actions.get.throughdefaultsubjects.GetDefaultDatastreamByID;
@@ -221,6 +222,11 @@ public class RestFul extends HttpServlet {
 		 else if (isGetMyAccountData(ServletPath(req))) {
 				System.out.println("isGetMyAccountData");
 				GetMyAccountData proceReq = new GetMyAccountData();
+				proceReq.processRequest(req, resp);
+			} 
+		 else if (isGetLocationLogs(ServletPath(req))) {
+				System.out.println("isGetLocationLogs");
+				GetLocations proceReq = new GetLocations();
 				proceReq.processRequest(req, resp);
 			} 
 		else {

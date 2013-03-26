@@ -432,6 +432,14 @@ public class ServerUtil {
             return false;
         }
     }
+    public static boolean isGetLocationLogs(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_lifestyle
+             +"/"+ AllConstants.api_entryPoints.api_location  + "[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public static boolean isDeleteASubjectRequest(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "/[0-9]+"+"[/]*$")) {
             return true;
