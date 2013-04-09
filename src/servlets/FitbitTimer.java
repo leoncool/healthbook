@@ -274,8 +274,9 @@ public class FitbitTimer extends HttpServlet {
 //							apiinfo.setLateDataUpdate(now);
 
 							fitbitlog.setFetchTime(now);
-							
-							if (fitbitDate.isAfter(lastSyncTime.toLocalDate().plusDays(1))) {								
+							System.out.println("last Sync:"+lastSyncTime.toLocalDate().plusDays(1));
+							System.out.println("fitbitDate:"+fitbitDate);
+							if (fitbitDate.isBefore(lastSyncTime.toLocalDate().plusDays(1))) {								
 								fitbitlog.setFinished(true);
 							}else{
 								fitbitlog.setFinished(false);
@@ -461,7 +462,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-			// System.out.println(" " + cal.getTime() + " " + data.getValue());
+		//	System.out.println("Steps: " + cal.getTime() + " " + data.getValue());
 			JsonDataPoints jdatapoint = new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue = new JsonDataValues();
@@ -523,7 +524,7 @@ public class FitbitTimer extends HttpServlet {
 			cal.set(Calendar.HOUR_OF_DAY, tempLocalTime.getHourOfDay());
 			cal.set(Calendar.MINUTE, tempLocalTime.getMinuteOfHour());
 			cal.set(Calendar.SECOND, tempLocalTime.getSecondOfMinute());
-			// System.out.println(" "+cal.getTime()+" "+data.getValue());
+		//	 System.out.println("floors: "+cal.getTime()+" "+data.getValue());
 			JsonDataPoints jdatapoint = new JsonDataPoints();
 			jdatapoint.setAt(Long.toString(cal.getTime().getTime()));
 			JsonDataValues jvalue = new JsonDataValues();
