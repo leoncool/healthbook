@@ -245,9 +245,9 @@ public class FitbitTimer extends HttpServlet {
 									fitbitlog.setFinished(false);
 								} else if (fitbitDate.isAfter(lastSyncTime
 										.toLocalDate())) {
-									fitbitlog.setFinished(false);
-								} else {
 									fitbitlog.setFinished(true);
+								} else {
+									fitbitlog.setFinished(false);
 								}
 								fitbitlog
 										.setFetchData("steps;floors;calories;sleep;");
@@ -276,7 +276,7 @@ public class FitbitTimer extends HttpServlet {
 							fitbitlog.setFetchTime(now);
 							System.out.println("last Sync:"+lastSyncTime.toLocalDate().plusDays(1));
 							System.out.println("fitbitDate:"+fitbitDate);
-							if (fitbitDate.isBefore(lastSyncTime.toLocalDate().plusDays(1))) {								
+							if (fitbitDate.isAfter(lastSyncTime.toLocalDate().plusDays(1))) {								
 								fitbitlog.setFinished(true);
 							}else{
 								fitbitlog.setFinished(false);
@@ -329,9 +329,9 @@ public class FitbitTimer extends HttpServlet {
 										log.setFinished(false);
 									} else if (fitbitDate.isAfter(lastSyncTime
 											.toLocalDate())) {
-										log.setFinished(false);
-									} else {
 										log.setFinished(true);
+									} else {
+										log.setFinished(false);
 									}
 									log.setFetchData("steps;floors;calories;sleep;");
 									extDao.create_FitbitLog(log);
