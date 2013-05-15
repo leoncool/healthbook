@@ -155,7 +155,9 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			try {
 				if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_blockid) != null) {
-					if (blockid.length() > 5) {
+					
+					if (request
+							.getParameter(AllConstants.api_entryPoints.request_api_blockid).length() > 5) {
 						blockid = request
 								.getParameter(AllConstants.api_entryPoints.request_api_blockid);
 					}
