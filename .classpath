@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/healthlib"/>
 	<classpathentry kind="lib" path="lib/fitbit/joda-time-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/fitbit/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
@@ -19,5 +18,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/oauth/scribe-1.3.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/healthlib"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
