@@ -29,7 +29,6 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 
-import com.amazonaws.services.s3.model.Permission;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

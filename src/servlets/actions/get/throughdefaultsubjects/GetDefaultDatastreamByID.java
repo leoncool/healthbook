@@ -6,11 +6,9 @@ package servlets.actions.get.throughdefaultsubjects;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
-import health.database.models.LoginToken;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.input.util.DBtoJsonUtil;
@@ -29,7 +27,6 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 
-import com.amazonaws.services.s3.model.Permission;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
