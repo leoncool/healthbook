@@ -217,11 +217,11 @@ public class GetHealthDataPoints extends HttpServlet {
 					{
 						DateUtil dateUtil=new DateUtil();
 						hbaseexport = diDao.exportDatapoints(streamID, start, end,
-								blockid, mapUnits,dateUtil.millisecFormat);
+								blockid, mapUnits,dateUtil.millisecFormat,null);
 					}
 					else{
 						hbaseexport = diDao.exportDatapoints(streamID, start, end,
-								blockid, mapUnits,null);
+								blockid, mapUnits,null,null);
 					}
 					
 				} catch (ErrorCodeException ex) {

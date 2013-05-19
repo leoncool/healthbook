@@ -71,7 +71,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 	 */
 	public void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("application/json");
+
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 		System.out.println("before checkAndGetLoginFromToken");
@@ -155,9 +155,10 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			try {
 				if (request
 						.getParameter(AllConstants.api_entryPoints.request_api_blockid) != null) {
-					
-					if (request
-							.getParameter(AllConstants.api_entryPoints.request_api_blockid).length() > 5) {
+
+					if (request.getParameter(
+							AllConstants.api_entryPoints.request_api_blockid)
+							.length() > 5) {
 						blockid = request
 								.getParameter(AllConstants.api_entryPoints.request_api_blockid);
 					}
@@ -299,16 +300,13 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						}
 						start = sleepSummaryList.get(0).getStartTime()
 								.getTime();
-						end = sleepSummaryList.get(0).getEndtime()
-								.getTime();
+						end = sleepSummaryList.get(0).getEndtime().getTime();
 						for (SleepDataSummary summary : sleepSummaryList) {
-							if(start>summary.getStartTime().getTime())
-							{
-								start=summary.getStartTime().getTime();
+							if (start > summary.getStartTime().getTime()) {
+								start = summary.getStartTime().getTime();
 							}
-							if(end<summary.getEndtime().getTime())
-							{
-								end=summary.getEndtime().getTime();
+							if (end < summary.getEndtime().getTime()) {
+								end = summary.getEndtime().getTime();
 							}
 						}
 						if (datastream.getDatastreamUnitsList().size() == 0) {
@@ -343,11 +341,27 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 							DateUtil dateUtil = new DateUtil();
 							hbaseexport = diDao.exportDatapoints(
 									datastream.getStreamId(), start, end,
-									blockid, mapUnits, dateUtil.millisecFormat);
+									blockid, mapUnits, dateUtil.millisecFormat,null);
 						} else {
+							HashMap<String, Object> settings=new HashMap<String, Object>();
+							if(request.getParameter(AllConstants.api_entryPoints.request_max)!=null)
+							{
+								try{
+								int max=Integer.parseInt(request.getParameter(AllConstants.api_entryPoints.request_max));
+								settings.put(AllConstants.ProgramConts.exportSetting_MAX, max);
+								}catch(Exception ex)
+								{
+									ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Invalid_ValueType,
+											null, AllConstants.api_entryPoints.request_max);
+							return;
+								}
+							}
 							hbaseexport = diDao.exportDatapoints(
 									datastream.getStreamId(), start, end,
-									blockid, mapUnits, null);
+									blockid, mapUnits, null,settings);
 						}
 					}
 				} catch (ErrorCodeException ex) {
@@ -378,23 +392,44 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				}
 				outStream = null;
 				boolean iftoZip = true;
+				GZIPOutputStream gzipStream = null;
+				if (request.getParameter("nocompress") != null) {
+					iftoZip = false;
+				}
 				String encodings = request.getHeader("Accept-Encoding");
-				if (encodings != null && encodings.indexOf("gzip") != -1
+				if (encodings != null && encodings.indexOf("gzip") >= 0
 						&& iftoZip == true) {
 					// Go with GZIP
+					System.out
+							.println("---------------responding with GZIP data--------------");
 					response.setHeader("Content-Encoding", "gzip");
-					outStream = new GZIPOutputStream(response.getOutputStream());
+					gzipStream = new GZIPOutputStream(
+							response.getOutputStream());
+					// outStream = new
+					// GZIPOutputStream(response.getOutputStream());
 				} else {
+					response.setContentType("application/json");
 					outStream = response.getOutputStream();
 				}
-				response.setHeader("Vary", "Accept-Encoding");
+				// response.setHeader("Vary", "Accept-Encoding");
 				Date timerStart = new Date();
 				JsonElement je = gson.toJsonTree(hbaseexport);
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,
 						AllConstants.ProgramConts.succeed);
+				jo.addProperty(AllConstants.ProgramConts.total_points,
+						hbaseexport.getData_points().size());
+				// jo.addProperty(AllConstants.ProgramConts.total_records,
+				// hbaseexport.getData_points().size()*hbaseexport.getDatastream().getTotal_units());
+				//
+				//
 				jo.add("datapoints_list", je);
-				OutputStreamWriter osWriter = new OutputStreamWriter(outStream);
+				OutputStreamWriter osWriter = null;
+				if (gzipStream != null) {
+					osWriter = new OutputStreamWriter(gzipStream);
+				} else {
+					osWriter = new OutputStreamWriter(outStream);
+				}
 				JsonWriter jwriter = new JsonWriter(osWriter);
 				String callbackStr = null;
 				if (request
@@ -413,10 +448,18 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						+ (timerEnd.getTime() - timerStart.getTime())
 						/ (1000.00) + "seconds");
 				osWriter.close();
-				outStream.close();
+				if (gzipStream != null) {
+					gzipStream.close();
+				} else {
+					outStream.close();
+				}
+				
 			} else {
 				String encodings = request.getHeader("Accept-Encoding");
 				boolean iftoZip = true;
+				if (request.getParameter("nocompress") != null) {
+					iftoZip = false;
+				}
 				if (encodings != null && encodings.indexOf("gzip") != -1
 						&& iftoZip == true) {
 					// Go with GZIP
@@ -425,7 +468,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				} else {
 					outStream = response.getOutputStream();
 				}
-				response.setHeader("Vary", "Accept-Encoding");
+				// response.setHeader("Vary", "Accept-Encoding");
 				File inputFile = new File(
 						"E:/IC_Dropbox/Dropbox/java/healthbook/sample_data/download.txt");
 				// File inputFile = new
