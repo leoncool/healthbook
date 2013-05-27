@@ -10,6 +10,7 @@ import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SleepDataDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.DAO.nosql.DataPointsSimulators;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.SleepDataSummary;
@@ -256,6 +257,8 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						}
 					}
 				}
+			}else{
+				mapUnits=dbtoJUtil.ToDatastreamUnitsMap(datastream);
 			}
 			System.out.println("mapUnits.size():" + mapUnits.size() + ", "
 					+ mapUnits);
@@ -263,11 +266,10 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			int debug = 1;
 			if (debug == 1) {
 				System.out.println("debuging.....going to hbase");
-				HBaseDatapointDAO diDao = new HBaseDatapointDAO();
+				HBaseDatapointDAO diDao =null;
 				System.out.println("datastreamID:" + datastream.getStreamId());
 				HBaseDataImport hbaseexport = null;
 				try {
-
 					if (streamTitle
 							.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_sleep)) {
 						// sleep record
@@ -329,6 +331,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						mapUnits.put(datastream.getDatastreamUnitsList().get(0)
 								.getUnitID(), datastream
 								.getDatastreamUnitsList().get(0).getUnitID());
+						diDao=new HBaseDatapointDAO();
 						hbaseexport = diDao.exportDatapointsForSingleUnit(
 								datastream.getStreamId(), start, end, blockid,
 								datastream.getDatastreamUnitsList().get(0)
@@ -339,6 +342,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						if (request
 								.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
 							DateUtil dateUtil = new DateUtil();
+							diDao=new HBaseDatapointDAO();
 							hbaseexport = diDao.exportDatapoints(
 									datastream.getStreamId(), start, end,
 									blockid, mapUnits, dateUtil.millisecFormat,null);
@@ -359,9 +363,17 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 							return;
 								}
 							}
-							hbaseexport = diDao.exportDatapoints(
-									datastream.getStreamId(), start, end,
-									blockid, mapUnits, null,settings);
+							if(streamTitle
+									.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)){
+								DataPointsSimulators simulator=new DataPointsSimulators();
+								hbaseexport=simulator.exportHeartRateDatapoints(datastream.getStreamId(), start, end,blockid, mapUnits, null,settings);
+							}else{
+								diDao=new HBaseDatapointDAO();
+								hbaseexport = diDao.exportDatapoints(
+										datastream.getStreamId(), start, end,
+										blockid, mapUnits, null,settings);
+							}
+							
 						}
 					}
 				} catch (ErrorCodeException ex) {
@@ -417,17 +429,24 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,
 						AllConstants.ProgramConts.succeed);
+				int totalData_pointsSize=0;
+				if(hbaseexport.getData_points()!=null){
+					totalData_pointsSize=hbaseexport.getData_points().size();
+				}
+				else if(hbaseexport.getData_points_single_list()!=null){
+					totalData_pointsSize=hbaseexport.getData_points_single_list().size();
+				}
 				jo.addProperty(AllConstants.ProgramConts.total_points,
-						hbaseexport.getData_points().size());
-				// jo.addProperty(AllConstants.ProgramConts.total_records,
-				// hbaseexport.getData_points().size()*hbaseexport.getDatastream().getTotal_units());
-				//
-				//
+						totalData_pointsSize);
 				jo.add("datapoints_list", je);
 				OutputStreamWriter osWriter = null;
 				if (gzipStream != null) {
 					osWriter = new OutputStreamWriter(gzipStream);
 				} else {
+					if(outStream==null)
+					{
+						outStream=response.getOutputStream();
+					}
 					osWriter = new OutputStreamWriter(outStream);
 				}
 				JsonWriter jwriter = new JsonWriter(osWriter);
