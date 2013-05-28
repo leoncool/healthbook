@@ -24,7 +24,7 @@ import util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lifestyle.DAO.LocationsDAO;
+import com.lifestyle.DAO.LocationLogDAO;
 import com.lifestyle.models.Locationlogs;
 import com.lifestyle.output.models.JsonLocationLog;
 
@@ -62,7 +62,7 @@ public class GetLocations extends HttpServlet {
 		try {		
 		
 			  DateUtil dateUtil = new DateUtil();
-	            LocationsDAO locDao = new LocationsDAO();
+	            LocationLogDAO locDao = new LocationLogDAO();
 	            List<Locationlogs> loclogList = locDao.getLocatioonLogs("leoncool", null, null);
 	            List<JsonLocationLog> jsonLogList = new ArrayList<JsonLocationLog>();
 	            for (Locationlogs log : loclogList) {
