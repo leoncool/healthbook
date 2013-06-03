@@ -177,6 +177,14 @@ public class ServerUtil {
             return false;
         }
     }
+    public static boolean isGetAPI_Document_Json(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url+ "api"+"")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public static boolean isGetSubjectsListReq(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_subject + "[/]*$")) {
             return true;

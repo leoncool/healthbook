@@ -22,6 +22,7 @@ import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.get.GetDataPoints;
+import servlets.actions.get.GetAPI_DocumentJson;
 //import servlets.actions.get.GetDataPointsLocalDebug;
 import servlets.actions.get.GetDatastreamBlocks;
 import servlets.actions.get.GetDatastreamsList;
@@ -107,6 +108,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("severlet Path is /");
 		} else if (isGetSubjectsListReq(ServletPath(req))) {
 			GetSubjectList proceReq = new GetSubjectList();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetAPI_Document_Json(ServletPath(req))) {
+			System.out.println("getting API document");
+			GetAPI_DocumentJson proceReq = new GetAPI_DocumentJson();
 			proceReq.processRequest(req, resp);
 		} else if (isGetDatastreamList(ServletPath(req))) {
 			System.out.println("Action: GetDatastreamsList");
