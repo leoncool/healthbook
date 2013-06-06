@@ -222,6 +222,13 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
+			if(!datastream.getOwner().equalsIgnoreCase(loginID))
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						streamTitle);
+				return;
+			}
 			if (blockid != null
 					&& dstreamDao.getDatastreamBlock(blockid) == null) {
 				ReturnParser.outputErrorException(response,
@@ -246,6 +253,11 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				for (String id : unitids) {
 					if (id.length() < 3) {
 						// error
+						ReturnParser
+						.outputErrorException(
+								response,
+								AllConstants.ErrorDictionary.Invalid_Unit_ID,
+								null, null);
 						return;
 					} else {
 						if (allUnits.get(id) == null) {
@@ -259,6 +271,15 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				}
 			}else{
 				mapUnits=dbtoJUtil.ToDatastreamUnitsMap(datastream);
+			}
+			if(mapUnits.size()==0)
+			{
+				ReturnParser
+				.outputErrorException(
+						response,
+						AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist,
+						null, null);
+				return;
 			}
 			System.out.println("mapUnits.size():" + mapUnits.size() + ", "
 					+ mapUnits);

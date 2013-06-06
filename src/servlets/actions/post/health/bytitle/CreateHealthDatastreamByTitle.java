@@ -2,17 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions.get.health.bytitle;
+package servlets.actions.post.health.bytitle;
 
-import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
-import health.database.models.LoginToken;
 import health.database.models.Subject;
 import health.database.models.Users;
+import health.input.jsonmodels.JsonDatastream;
+import health.input.jsonmodels.JsonDatastreamUnits;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
@@ -26,18 +26,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
-import servlets.util.ServerUtil;
 import util.AllConstants;
+import util.JsonUtil;
+import util.UnitValueTypes;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * 
  * @author Leon
  */
-public class GetaHealthDatastreamByTitle extends HttpServlet {
+public class CreateHealthDatastreamByTitle extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -82,26 +84,9 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 
 		try {
 
-			// if (request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid)
-			// != null) {
-			// loginID = request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			// }
-			// if (!userDao.existLogin(loginID)) {
-			// ReturnParser.outputErrorException(response,
-			// AllConstants.ErrorDictionary.Unauthorized_Access, null,
-			// null);
-			// return;
-			// }
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				// ReturnParser.outputErrorException(response,
-				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
-				// null,
-				// null);
-				// return;
 				try {
 					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
@@ -114,46 +99,93 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Internal_Fault, null,
 							null);
-					e.printStackTrace();
 				}
 			}
-			String streamTitle = ServerUtil
-					.getHealthStreamTitle(ServletPath(request));
-
+			JsonUtil jutil = new JsonUtil();
+			Gson gson = new Gson();
+			JsonDatastream jDatasteram = null;
+			
+			String input = jutil.readJsonStrFromHttpRequest(request);
+			System.out.println(input);
+			jDatasteram = gson.fromJson(input, JsonDatastream.class);
+			if (jDatasteram == null) {
+				ReturnParser
+						.outputErrorException(
+								response,
+								AllConstants.ErrorDictionary.Input_Json_Format_Error,
+								null, null);
+				return;
+			}
+			if (jDatasteram.getTitle() == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA, null,
+						null);
+				return;
+			}
+			
 			DatastreamDAO dstreamDao = new DatastreamDAO();
+			
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-			Datastream datastream = null;
+
+
+			Datastream datastream=null;
 			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
-						streamTitle, true, false);
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), jDatasteram.getTitle(), true, false);
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
-						streamTitle);
+						jDatasteram.getTitle());
 				return;
 			}
-			if (datastream == null) {
+			if (datastream != null) {
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
-						streamTitle);
+						AllConstants.ErrorDictionary.Such_Stream_title_EXIST,
+						null, jDatasteram.getTitle());
 				return;
 			}
-			if(!datastream.getOwner().equalsIgnoreCase(loginID))
+			if (jDatasteram.getUnits_list()==null||jDatasteram.getUnits_list().isEmpty()) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA,
+						"units_list", null);
+				return;
+			}else{
+				for (JsonDatastreamUnits unit : jDatasteram.getUnits_list()) {
+				if (unit.getValue_type()!=null&&!UnitValueTypes.existValueType(unit.getValue_type())) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_ValueType,
+							AllConstants.ErrorDictionary.Invalid_ValueType,
+							unit.getValue_type());
+					return;
+				}else{
+					unit.setValue_type(UnitValueTypes.DOUBLE_TYPE);
+				}
+				}
+			}
+			datastream=dbtoJUtil.convert_a_JdataStream(jDatasteram);
+			datastream.setSubId(subject.getId());
+			datastream.setOwner(loginID);
+			datastream.setPurpose(AllConstants.HealthConts.defaultDatastreamPurpose);
+			try{
+			datastream = dstreamDao.createDatastream(datastream,
+					datastream.getDatastreamUnitsList());
+			}catch(Exception ex)
 			{
+				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-						streamTitle);
-				return;
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						null);
 			}
-			Gson gson = new Gson();
-			JsonElement je = gson.toJsonTree(dbtoJUtil.convertDatastream(
-					datastream, null));
+			JsonDatastream jobject = dbtoJUtil.convertDatastream(datastream,
+					null);
+			JsonElement je = gson.toJsonTree(jobject);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			jo.add("datastream", je);
-			System.out.println(jo.toString());
-			out.println(gson.toJson(jo));
+			JsonWriter jwriter = new JsonWriter(out);
+			gson.toJson(jo, jwriter);
+			System.out.println(gson.toJson(jobject));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {

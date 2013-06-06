@@ -39,6 +39,11 @@ public class ServerUtil {
         String streamTitle = values[0];
         return streamTitle;
     }
+    public static String getHealthDS_UnitID(String ServletPath) {
+        String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health + "/"+AllConstants.api_entryPoints.api_title+"/", "").split("/");
+        String unitid = values[1];
+        return unitid;
+    }
     public static String getDeviceID(String ServletPath) {
         String values[] = ServletPath.replaceFirst(AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_device + "/", "").split("/");
         String DeviceID = values[0];
@@ -150,6 +155,22 @@ public class ServerUtil {
     public static boolean isPostDefaultSuject_Datastream_DatapointsReq(String ServletPath) {
         if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_defaultsubject + "/" + AllConstants.api_entryPoints.api_datastream +
         		"/"+"[-a-zA-Z0-9]+/"+api_entryPoints.api_datapoints+"[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isPostCreateDatastream_ByTitleReq(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health + "/" + AllConstants.api_entryPoints.api_title +
+        	"[/]*$")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static boolean isPostCreateSingleDS_UnitReq(String ServletPath) {
+        if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url + AllConstants.api_entryPoints.api_health + "/" + AllConstants.api_entryPoints.api_title +
+        	"[/]*$")) {
             return true;
         } else {
             return false;

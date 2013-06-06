@@ -200,6 +200,13 @@ public class GetHealthDataSummariesByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
+			if(!datastream.getOwner().equalsIgnoreCase(loginID))
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						streamTitle);
+				return;
+			}
 			String unitID = null;
 			if (request
 					.getParameter(AllConstants.api_entryPoints.request_api_unit_id) != null

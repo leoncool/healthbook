@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions.get.health.bytitle;
+package servlets.actions.delete.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
@@ -10,13 +10,14 @@ import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
-import health.database.models.LoginToken;
+import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
@@ -30,14 +31,14 @@ import servlets.util.ServerUtil;
 import util.AllConstants;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.sun.org.apache.xpath.internal.FoundIndex;
 
 /**
  * 
  * @author Leon
  */
-public class GetaHealthDatastreamByTitle extends HttpServlet {
+public class DeleteSingleHealthDSUnitByID extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -57,7 +58,6 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
-
 		Users accessUser = null;
 		PermissionFilter filter = new PermissionFilter();
 		String loginID = filter.checkAndGetLoginFromToken(request, response);
@@ -82,30 +82,12 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 
 		try {
 
-			// if (request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid)
-			// != null) {
-			// loginID = request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			// }
-			// if (!userDao.existLogin(loginID)) {
-			// ReturnParser.outputErrorException(response,
-			// AllConstants.ErrorDictionary.Unauthorized_Access, null,
-			// null);
-			// return;
-			// }
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				// ReturnParser.outputErrorException(response,
-				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
-				// null,
-				// null);
-				// return;
 				try {
 					subject = subjDao.createDefaultHealthSubject(loginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
-
 					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
 							subject.getId());
 				} catch (Exception e) {
@@ -119,7 +101,8 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 			}
 			String streamTitle = ServerUtil
 					.getHealthStreamTitle(ServletPath(request));
-
+			String unitID=ServerUtil
+					.getHealthDS_UnitID(ServletPath(request));
 			DatastreamDAO dstreamDao = new DatastreamDAO();
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
@@ -145,15 +128,46 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
-			Gson gson = new Gson();
-			JsonElement je = gson.toJsonTree(dbtoJUtil.convertDatastream(
-					datastream, null));
-			JsonObject jo = new JsonObject();
-			jo.addProperty(AllConstants.ProgramConts.result,
-					AllConstants.ProgramConts.succeed);
-			jo.add("datastream", je);
-			System.out.println(jo.toString());
-			out.println(gson.toJson(jo));
+			if(unitID==null||unitID.length()<2)
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist, null,
+						streamTitle);
+				return;
+			}
+			boolean found=false;
+			boolean deleted=false;
+			try{
+			List<DatastreamUnits> dsUnitList=datastream.getDatastreamUnitsList();
+
+			for(DatastreamUnits unit:dsUnitList)
+			{
+				if(unit.getShortUnitID()==unitID||unit.getUnitID()==unitID)
+				{found=true;
+					dstreamDao.DeleteSingleDatastream_Unit(unit);
+					deleted=true;
+				}
+			}			
+			}catch (Exception ex) {
+				ex.printStackTrace();
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						null);
+				return;
+			}
+			if(found&&deleted){
+				Gson gson = new Gson();
+				JsonObject jo = new JsonObject();
+				jo.addProperty(AllConstants.ProgramConts.result,
+						AllConstants.ProgramConts.succeed);
+				out.println(gson.toJson(jo));
+			}else{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						null);
+				return;
+			}
+		
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {

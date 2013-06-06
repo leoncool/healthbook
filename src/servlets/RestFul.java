@@ -21,6 +21,7 @@ import servlets.actions.delete.DeleteADatastream;
 import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
+import servlets.actions.delete.health.bytitle.DeleteAHealthDatastreamByTitle;
 import servlets.actions.get.GetDataPoints;
 import servlets.actions.get.GetAPI_DocumentJson;
 //import servlets.actions.get.GetDataPointsLocalDebug;
@@ -56,6 +57,7 @@ import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
 import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
+import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
 import servlets.device.actions.GetADeviceBinding;
@@ -270,6 +272,10 @@ public class RestFul extends HttpServlet {
 			System.out.println("isDeleteADataBlock");
 			DeleteADatastreamBlock proceReq = new DeleteADatastreamBlock();
 			proceReq.processRequest(req, resp);
+		} 	else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+			System.out.println("is delete health data stream:");
+			DeleteAHealthDatastreamByTitle proceReq = new DeleteAHealthDatastreamByTitle();
+			proceReq.processRequest(req, resp);
 		} else if (isDeleteFollower(ServletPath(req))) {
 			System.out.println("isDeleteFollower");
 			DeleteFollower proceReq = new DeleteFollower();
@@ -369,6 +375,14 @@ public class RestFul extends HttpServlet {
 		else if (isPostDefaultSuject_Datastream_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostDefaultSuject_Datastream_DatapointsReq");
 			PostDatapointsThoughDefaultSubject proceReq = new PostDatapointsThoughDefaultSubject();
+			proceReq.processRequest(req, resp);
+		} else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
+			System.out.println("isPostCreateDatastream_ByTitleReq");
+			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
+			proceReq.processRequest(req, resp);
+		}  else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
+			System.out.println("isPostCreateSingleDatastreamUnitReq");
+			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
 		} 
 		else if (isGetUserToken(ServletPath(req))) {
