@@ -96,7 +96,6 @@ public class DeleteAHealthDatastreamByTitle extends HttpServlet {
 			}
 			String streamTitle = ServerUtil
 					.getHealthStreamTitle(ServletPath(request));
-
 			DatastreamDAO dstreamDao = new DatastreamDAO();
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;

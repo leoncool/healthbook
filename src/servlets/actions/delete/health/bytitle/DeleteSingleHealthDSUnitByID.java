@@ -96,20 +96,21 @@ public class DeleteSingleHealthDSUnitByID extends HttpServlet {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Internal_Fault, null,
 							null);
-					e.printStackTrace();
 				}
 			}
 			String streamTitle = ServerUtil
 					.getHealthStreamTitle(ServletPath(request));
-			String unitID=ServerUtil
-					.getHealthDS_UnitID(ServletPath(request));
+			System.out.println("streamTitle:" + streamTitle);
+			String unitID = ServerUtil.getHealthDS_UnitID(ServletPath(request));
+			System.out.println("unitID:" + unitID);
 			DatastreamDAO dstreamDao = new DatastreamDAO();
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
-						streamTitle, true, false);
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, false);
 			} catch (NonUniqueResultException ex) {
+				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
 						streamTitle);
@@ -121,53 +122,58 @@ public class DeleteSingleHealthDSUnitByID extends HttpServlet {
 						streamTitle);
 				return;
 			}
-			if(!datastream.getOwner().equalsIgnoreCase(loginID))
-			{
+			if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Unauthorized_Access, null,
 						streamTitle);
 				return;
 			}
-			if(unitID==null||unitID.length()<2)
-			{
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist, null,
-						streamTitle);
+			if (unitID == null || unitID.length() < 2) {
+				ReturnParser
+						.outputErrorException(
+								response,
+								AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist,
+								null, streamTitle);
 				return;
 			}
-			boolean found=false;
-			boolean deleted=false;
-			try{
-			List<DatastreamUnits> dsUnitList=datastream.getDatastreamUnitsList();
+			boolean found = false;
+			boolean deleted = false;
+			try {
+				List<DatastreamUnits> dsUnitList = datastream
+						.getDatastreamUnitsList();
 
-			for(DatastreamUnits unit:dsUnitList)
-			{
-				if(unit.getShortUnitID()==unitID||unit.getUnitID()==unitID)
-				{found=true;
-					dstreamDao.DeleteSingleDatastream_Unit(unit);
-					deleted=true;
+				for (DatastreamUnits unit : dsUnitList) {
+					if (unit.getShortUnitID().equalsIgnoreCase(unitID)
+							|| unit.getUnitID().equalsIgnoreCase(unitID)) {
+						found = true;
+						System.out.println("found going to delete...");
+						dstreamDao.DeleteSingleDatastream_Unit(unit);
+						deleted = true;
+					}
 				}
-			}			
-			}catch (Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
 				return;
 			}
-			if(found&&deleted){
+			if (found && deleted) {
 				Gson gson = new Gson();
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,
 						AllConstants.ProgramConts.succeed);
 				out.println(gson.toJson(jo));
-			}else{
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
+			} else {
+				System.out.println("not found or deleted");
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
 				return;
 			}
-		
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {

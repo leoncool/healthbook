@@ -22,6 +22,7 @@ import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.delete.health.bytitle.DeleteAHealthDatastreamByTitle;
+import servlets.actions.delete.health.bytitle.DeleteSingleHealthDSUnitByID;
 import servlets.actions.get.GetDataPoints;
 import servlets.actions.get.GetAPI_DocumentJson;
 //import servlets.actions.get.GetDataPointsLocalDebug;
@@ -57,6 +58,7 @@ import servlets.actions.post.PostNewUserReg;
 import servlets.actions.post.PostSubject;
 import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
+import servlets.actions.post.health.bytitle.AddSingleHealthDSUnit;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
@@ -290,7 +292,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("isDeleteADataPointsRequest");
 			DeleteADataPoint proceReq = new DeleteADataPoint();
 			proceReq.processRequest(req, resp);
-		}
+		} else if (isDeleteSingleDS_UnitReq(ServletPath(req))) {
+			System.out.println("DeleteSingleHealthDSUnitByID");
+			DeleteSingleHealthDSUnitByID proceReq = new DeleteSingleHealthDSUnitByID();
+			proceReq.processRequest(req, resp);
+		} 
 		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
@@ -380,11 +386,13 @@ public class RestFul extends HttpServlet {
 			System.out.println("isPostCreateDatastream_ByTitleReq");
 			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
-		}  else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
-			System.out.println("isPostCreateSingleDatastreamUnitReq");
-			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
+		}  else if (isPostCreateSingleDS_UnitReq(ServletPath(req))) {
+			System.out.println("AddSingleHealthDSUnit");
+			AddSingleHealthDSUnit proceReq = new AddSingleHealthDSUnit();
 			proceReq.processRequest(req, resp);
 		} 
+		
+		
 		else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("Post Ruqeest isGetUserToken:");
 			GetAUserToken proceReq = new GetAUserToken();
