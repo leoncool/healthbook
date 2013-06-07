@@ -219,7 +219,17 @@ public class ServerUtil {
 			return false;
 		}
 	}
-
+	public static boolean isPostHealthTitle_Datastream_DatapointsReq(
+			String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9]+/" + api_entryPoints.api_datapoints + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isPostCreateDatastream_ByTitleReq(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"

@@ -60,6 +60,7 @@ import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
 import servlets.actions.post.health.bytitle.AddSingleHealthDSUnit;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
+import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
 import servlets.device.actions.GetADeviceBinding;
@@ -382,7 +383,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("isPostDefaultSuject_Datastream_DatapointsReq");
 			PostDatapointsThoughDefaultSubject proceReq = new PostDatapointsThoughDefaultSubject();
 			proceReq.processRequest(req, resp);
-		} else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
+		}else if (isPostHealthTitle_Datastream_DatapointsReq(ServletPath(req))) {
+			System.out.println("isPostHealthTitle_Datastream_DatapointsReq");
+			PostDatapointsThroughHealthTitle proceReq = new PostDatapointsThroughHealthTitle();
+			proceReq.processRequest(req, resp);
+		}  else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
 			System.out.println("isPostCreateDatastream_ByTitleReq");
 			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
