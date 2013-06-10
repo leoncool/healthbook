@@ -11,6 +11,7 @@ import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamBlocks;
 import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
 import health.database.models.Users;
@@ -70,80 +71,84 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 		System.out.println("before checkAndGetLoginFromToken");
-		PrintWriter out=response.getWriter();
-		try{
-		
-		Users accessUser = null;
-		PermissionFilter filter = new PermissionFilter();
-		String loginID = filter.checkAndGetLoginFromToken(request, response);
+		PrintWriter out = response.getWriter();
+		try {
 
-		UserDAO userDao = new UserDAO();
-		if (loginID == null) {
-			if (filter.getCheckResult().equalsIgnoreCase(
-					filter.INVALID_LOGIN_TOKEN_ID)) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Invalid_login_token_id,
-						null, null);
-				return;
-			} else if (filter.getCheckResult().equalsIgnoreCase(
-					AllConstants.ErrorDictionary.login_token_expired)) {
-				return;
+			Users accessUser = null;
+			PermissionFilter filter = new PermissionFilter();
+			String loginID = filter
+					.checkAndGetLoginFromToken(request, response);
+
+			UserDAO userDao = new UserDAO();
+			if (loginID == null) {
+				if (filter.getCheckResult().equalsIgnoreCase(
+						filter.INVALID_LOGIN_TOKEN_ID)) {
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Invalid_login_token_id,
+									null, null);
+					return;
+				} else if (filter.getCheckResult().equalsIgnoreCase(
+						AllConstants.ErrorDictionary.login_token_expired)) {
+					return;
+				} else {
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Invalid_login_token_id,
+									null, null);
+					return;
+				}
 			} else {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Invalid_login_token_id,
-						null, null);
-				return;
+				accessUser = userDao.getLogin(loginID);
 			}
-		} else {
-			accessUser = userDao.getLogin(loginID);
-		}
-		SubjectDAO subjDao = new SubjectDAO();
-		Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
-		if (subject == null) {
-			try {
-				subject = subjDao.createDefaultHealthSubject(loginID);
-				HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
+			SubjectDAO subjDao = new SubjectDAO();
+			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
+			if (subject == null) {
+				try {
+					subject = subjDao.createDefaultHealthSubject(loginID);
+					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
-				hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
-						subject.getId());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
+							subject.getId());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+				}
+			}
+
+			String streamTitle = ServerUtil
+					.getHealthStreamTitle(ServletPath(request));
+
+			DatastreamDAO dstreamDao = new DatastreamDAO();
+			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+			Datastream datastream = null;
+			try {
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, false);
+			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
+						streamTitle);
+				return;
 			}
-		}
+			if (datastream == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
+						streamTitle);
+				return;
+			}
+			if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						streamTitle);
+				return;
+			}
 
-		String streamTitle = ServerUtil
-				.getHealthStreamTitle(ServletPath(request));
-
-		DatastreamDAO dstreamDao = new DatastreamDAO();
-		DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-		Datastream datastream = null;
-		try {
-			datastream = dstreamDao.getHealthDatastreamByTitle(
-					subject.getId(), streamTitle, true, false);
-		} catch (NonUniqueResultException ex) {
-			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.Internal_Fault, null,
-					streamTitle);
-			return;
-		}
-		if (datastream == null) {
-			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
-					streamTitle);
-			return;
-		}
-		if(!datastream.getOwner().equalsIgnoreCase(loginID))
-		{
-			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.Unauthorized_Access, null,
-					streamTitle);
-			return;
-		}
-		
 			JsonUtil jutil = new JsonUtil();
 			Gson gson = new Gson();
 			JsonDataImport jdataImport = null;
@@ -165,7 +170,7 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 						null, null);
 				return;
 			}
-			
+
 			List<DatastreamUnits> unitList = datastream
 					.getDatastreamUnitsList();
 			HashMap<String, String> unitIDList = new HashMap<String, String>();
@@ -183,12 +188,25 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 				return;
 			}
 			if (jdataImport.getBlock_id() != null) {
-				if (dstreamDao.getDatastreamBlock(jdataImport.getBlock_id()) == null) {
+				DatastreamBlocks block = dstreamDao
+						.getDatastreamBlock(jdataImport.getBlock_id());
+				if (block == null) {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Invalid_Datablock_ID,
-							AllConstants.ErrorDictionary.Invalid_Datablock_ID,
+							jdataImport.getBlock_id(),
 							jdataImport.getBlock_id());
 					return;
+				} else {
+					if (!block.getStreamID().getStreamId()
+							.equalsIgnoreCase(datastream.getStreamId())) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_Datablock_ID_for_such_stream,
+										jdataImport.getBlock_id(),
+										jdataImport.getBlock_id());
+						return;
+					}
 				}
 			}
 
@@ -236,13 +254,15 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 				importData.setDatastream_id(datastream.getStreamId());
 				importData.setBlock_id(jdataImport.getBlock_id());
 			} else {
-				if (jdataImport.getData_points()==null||jdataImport.getData_points().size() < 1) {
+				if (jdataImport.getData_points() == null
+						|| jdataImport.getData_points().size() < 1) {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.No_Input_Datapoints,
 							null, datastream.getStreamId());
 					return;
 				}
-				importData.setDatastream(dbtoJUtil.convertDatastream(datastream, null));
+				importData.setDatastream(dbtoJUtil.convertDatastream(
+						datastream, null));
 				importData.setData_points(jdataImport.getData_points());
 				importData.setDatastream_id(datastream.getStreamId());
 				importData.setBlock_id(jdataImport.getBlock_id());
@@ -250,19 +270,20 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 
 			JsonDataPointsPostResult jsonResult = new JsonDataPointsPostResult();
 			try {
-				jsonResult.setTotal_stored_byte(importDao
-						.importDatapointsDatapoints(importData));
-			
+				int totalStoredByte = importDao
+						.importDatapointsDatapoints(importData); //submit data
+				jsonResult.setTotal_stored_byte(totalStoredByte);
+
 			} catch (ErrorCodeException ex) {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response, ex.getErrorCode(),
 						null, null);
-				return; 
+				return;
 			} catch (NumberFormatException ex) {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR, null,
-						null);
+						AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR,
+						null, null);
 				return;
 			}
 			jsonResult.setTotal_points(jdataImport.getData_points().size());
@@ -274,19 +295,16 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 			jo.add("data_import_stat", je);
 			JsonWriter jwriter = new JsonWriter(out);
 			gson.toJson(jo, jwriter);
-		}catch(Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.Internal_Fault, null,
-					null);
+					AllConstants.ErrorDictionary.Internal_Fault, null, null);
 			return;
-			
-		}finally{
+
+		} finally {
 			out.close();
 		}
-	} 
-	
+	}
 
 	// <editor-fold defaultstate="collapsed"
 	// desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

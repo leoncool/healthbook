@@ -165,8 +165,7 @@ public class PostDatapointsThoughDefaultSubject extends HttpServlet {
 							jdataImport.getBlock_id());
 					return;
 				}
-			}
-
+			}			
 			HBaseDatapointDAO importDao = null;
 			try {
 				importDao = new HBaseDatapointDAO();

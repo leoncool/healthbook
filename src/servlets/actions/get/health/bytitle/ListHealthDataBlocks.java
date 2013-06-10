@@ -2,37 +2,45 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions.delete;
+package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
+import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
-import health.database.DAO.nosql.HBaseDatapointDAO;
+import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamBlocks;
 import health.database.models.Subject;
+import health.database.models.Users;
+import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
-import util.AllConstants.api_entryPoints;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
  * 
  * @author Leon
  */
-public class DeleteADataPoint extends HttpServlet {
+public class ListHealthDataBlocks extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -53,89 +61,91 @@ public class DeleteADataPoint extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 
+		Users accessUser = null;
+		PermissionFilter filter = new PermissionFilter();
+		String loginID = filter.checkAndGetLoginFromToken(request, response);
+
+		UserDAO userDao = new UserDAO();
+		if (loginID == null) {
+			if (filter.getCheckResult().equalsIgnoreCase(
+					filter.INVALID_LOGIN_TOKEN_ID)) {
+				return;
+			} else if (filter.getCheckResult().equalsIgnoreCase(
+					AllConstants.ErrorDictionary.login_token_expired)) {
+				return;
+			} else {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_login_token_id,
+						null, null);
+			}
+		} else {
+			accessUser = userDao.getLogin(loginID);
+		}
 		PrintWriter out = response.getWriter();
+
 		try {
-			int subID = ServerUtil.getSubjectID(ServletPath(request));
+
 			SubjectDAO subjDao = new SubjectDAO();
-			String streamID = ServerUtil.getStreamID(ServletPath(request));
-			Subject subject = (Subject) subjDao.getObjectByID(Subject.class,
-					subID); // Retreive Subject from DB
+			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
 			if (subject == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_SubjectID, null,
-						Integer.toString(subID));
-				return;
-			}
-			DatastreamDAO dstreamDao = new DatastreamDAO();
-			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-			Datastream datastream = dstreamDao.getDatastream(streamID, false,
-					true);
-			if (datastream == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_StreamID, null,
-						streamID);
-				return;
-			}
-			String atString=request.getParameter(api_entryPoints.request_api_at);
-			if(atString!=null)
-			{
-				long at=0;
-				try{
-					at=Long.parseLong(atString);
-				}
-				catch(Exception ex)
-				{
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_date_format, null,
-							null);
-					return;
-				}
+
 				try {
-					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
-					dpDap.delete_A_Datapoint(streamID, at,null); //has not finished yet
-				} catch (Exception ex) {
-					ex.printStackTrace();
+					subject = subjDao.createDefaultHealthSubject(loginID);
+					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
+
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
+							subject.getId());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Internal_Fault, null,
 							null);
-					return;
-				}	
-			}else if(request.getParameter(api_entryPoints.request_api_start)!=null||request.getParameter(api_entryPoints.request_api_end)!=null){
-				long start=0;
-				long end=0;
-				String startStr=request.getParameter(api_entryPoints.request_api_start);
-				String endStr=request.getParameter(api_entryPoints.request_api_end);
-				try{
-					if(startStr!=null)
-					{
-						start=Long.parseLong(startStr);
-					}
-					if(endStr!=null)
-					{
-						end=Long.parseLong(endStr);
-					}
-					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
-					dpDap.delete_range_Datapoint(streamID, start, end); //has not finished yet
-				}
-				catch(Exception ex)
-				{
-					ex.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_date_format, null,
-							null);
-					return;
+					e.printStackTrace();
 				}
 			}
-			else{
+			String streamTitle = ServerUtil
+					.getHealthStreamTitle(ServletPath(request));
+
+			DatastreamDAO dstreamDao = new DatastreamDAO();
+			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+			Datastream datastream = null;
+			try {
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, true);
+			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						null);
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						streamTitle);
 				return;
 			}
+			if (datastream == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
+						streamTitle);
+				return;
+			}
+			if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						streamTitle);
+				return;
+			}
+
+			DBtoJsonUtil dbjUtil = new DBtoJsonUtil();
+			List<DatastreamBlocks> blocks=datastream.getDatastreamBlocksList();
+			List<JsonDatastreamBlock> jblocks=new ArrayList<JsonDatastreamBlock>();
+			for(DatastreamBlocks block:blocks)
+			{
+				JsonDatastreamBlock jblock = dbjUtil.convert_a_Datablock(block);
+				jblocks.add(jblock);
+			}
 			Gson gson = new Gson();
+			JsonElement je = gson.toJsonTree(jblocks);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
+			jo.add("datastream_blocks", je);
 			out.println(gson.toJson(jo));
 		} catch (Exception ex) {
 			ex.printStackTrace();

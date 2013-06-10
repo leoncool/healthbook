@@ -94,7 +94,12 @@ public class PostDatastreamBlocks extends HttpServlet {
                 return;
             }
             try {
-                DatastreamBlocks block = dsDao.CreateDatastreamBlock(stream, jblock.getBlockname(), jblock.getBlockdesc());
+            	DatastreamBlocks block=new DatastreamBlocks();
+            	block.setDisplayName(jblock.getBlockname());
+            	block.setBlockDesc(jblock.getBlockdesc());
+            	block.setStreamID(stream);
+               	block.setTags(jblock.getTags());
+                block=dsDao.CreateDatastreamBlock(block); //here maybe need some change
                 DBtoJsonUtil dbjUtil = new DBtoJsonUtil();
                 jblock = dbjUtil.convert_a_Datablock(block);
                 JsonElement je = gson.toJsonTree(jblock);

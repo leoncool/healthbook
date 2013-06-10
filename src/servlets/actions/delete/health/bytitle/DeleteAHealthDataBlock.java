@@ -2,37 +2,46 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servlets.actions.delete;
+package servlets.actions.delete.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
+import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
-import health.database.DAO.nosql.HBaseDatapointDAO;
+import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamBlocks;
+import health.database.models.LoginToken;
 import health.database.models.Subject;
+import health.database.models.Users;
+import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
+import servlets.util.HealthDatastreamFilter;
+import servlets.util.HealthSubjectFilter;
+import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
-import util.AllConstants.api_entryPoints;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
  * 
  * @author Leon
  */
-public class DeleteADataPoint extends HttpServlet {
+public class DeleteAHealthDataBlock extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -53,83 +62,72 @@ public class DeleteADataPoint extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		request.setCharacterEncoding("UTF-8");
 
+		Users accessUser = null;
+		PermissionFilter filter = new PermissionFilter();
+		String loginID = filter.checkAndGetLoginFromToken(request, response);
+
+		UserDAO userDao = new UserDAO();
+		if (loginID == null) {
+			if (filter.getCheckResult().equalsIgnoreCase(
+					filter.INVALID_LOGIN_TOKEN_ID)) {
+				return;
+			} else if (filter.getCheckResult().equalsIgnoreCase(
+					AllConstants.ErrorDictionary.login_token_expired)) {
+				return;
+			} else {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_login_token_id,
+						null, null);
+			}
+		} else {
+			accessUser = userDao.getLogin(loginID);
+		}
 		PrintWriter out = response.getWriter();
+
 		try {
-			int subID = ServerUtil.getSubjectID(ServletPath(request));
-			SubjectDAO subjDao = new SubjectDAO();
-			String streamID = ServerUtil.getStreamID(ServletPath(request));
-			Subject subject = (Subject) subjDao.getObjectByID(Subject.class,
-					subID); // Retreive Subject from DB
+			HealthSubjectFilter subFilter = new HealthSubjectFilter();
+			Subject subject = subFilter.subjectFilter(loginID, request,
+					response);
 			if (subject == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_SubjectID, null,
-						Integer.toString(subID));
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
 				return;
 			}
-			DatastreamDAO dstreamDao = new DatastreamDAO();
-			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-			Datastream datastream = dstreamDao.getDatastream(streamID, false,
-					true);
-			if (datastream == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_StreamID, null,
-						streamID);
-				return;
-			}
-			String atString=request.getParameter(api_entryPoints.request_api_at);
-			if(atString!=null)
+
+			HealthDatastreamFilter datastreamfilter = new HealthDatastreamFilter();
+			Datastream datastream = datastreamfilter.datastreamFilter(loginID,
+					subject, request, response);
+			
+			String blockID = ServerUtil.getHealthBlockID(ServletPath(request));
+			if(blockID==null||blockID.length()<2)
 			{
-				long at=0;
-				try{
-					at=Long.parseLong(atString);
-				}
-				catch(Exception ex)
-				{
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_date_format, null,
-							null);
-					return;
-				}
-				try {
-					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
-					dpDap.delete_A_Datapoint(streamID, at,null); //has not finished yet
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Internal_Fault, null,
-							null);
-					return;
-				}	
-			}else if(request.getParameter(api_entryPoints.request_api_start)!=null||request.getParameter(api_entryPoints.request_api_end)!=null){
-				long start=0;
-				long end=0;
-				String startStr=request.getParameter(api_entryPoints.request_api_start);
-				String endStr=request.getParameter(api_entryPoints.request_api_end);
-				try{
-					if(startStr!=null)
-					{
-						start=Long.parseLong(startStr);
-					}
-					if(endStr!=null)
-					{
-						end=Long.parseLong(endStr);
-					}
-					HBaseDatapointDAO dpDap=new HBaseDatapointDAO();
-					dpDap.delete_range_Datapoint(streamID, start, end); //has not finished yet
-				}
-				catch(Exception ex)
-				{
-					ex.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_date_format, null,
-							null);
-					return;
-				}
-			}
-			else{
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						null);
+						AllConstants.ErrorDictionary.Invalid_Datablock_ID, blockID,
+						datastream.getTitle());
+				return;
+			}
+			DatastreamDAO dstreamDao=new DatastreamDAO();
+			DatastreamBlocks block=dstreamDao.getDatastreamBlock(blockID);
+			if(block==null||!block.getStreamID().getStreamId().equalsIgnoreCase(datastream.getStreamId()))
+			{
+				if(block!=null){
+				System.out.println("block.getStreamID().getStreamId():"+block.getStreamID().getStreamId()+","
+						+"datastream.getStreamId():"+datastream.getStreamId());
+				}
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_Datablock_ID_for_such_stream, null,
+						datastream.getTitle());
+				return;
+			}
+			try{
+			dstreamDao.DeleteDataBlock(block);
+			}catch(Exception ex)
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						datastream.getTitle());
 				return;
 			}
 			Gson gson = new Gson();
@@ -137,8 +135,12 @@ public class DeleteADataPoint extends HttpServlet {
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			out.println(gson.toJson(jo));
+		
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, "",
+					"");
+			return;
 		} finally {
 			out.close();
 		}

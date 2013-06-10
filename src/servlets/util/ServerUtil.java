@@ -71,6 +71,16 @@ public class ServerUtil {
 		return unitid;
 	}
 
+	public static String getHealthBlockID(String ServletPath) {
+		String values[] = ServletPath.replaceFirst(
+				AllConstants.api_entryPoints.api_url
+						+ AllConstants.api_entryPoints.api_health + "/"
+						+ AllConstants.api_entryPoints.api_title + "/", "")
+				.split("/");
+		String unitid = values[2];
+		return unitid;
+	}
+
 	public static String getDeviceID(String ServletPath) {
 		String values[] = ServletPath.replaceFirst(
 				AllConstants.api_entryPoints.api_url
@@ -121,7 +131,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -133,7 +143,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
 			return true;
 		} else {
@@ -170,7 +180,7 @@ public class ServerUtil {
 
 	public static boolean isPostDeviceDatapoints(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
-				+ AllConstants.api_entryPoints.api_device + "/[-a-zA-Z0-9]+/"
+				+ AllConstants.api_entryPoints.api_device + "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -213,23 +223,25 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_defaultsubject + "/"
 				+ AllConstants.api_entryPoints.api_datastream + "/"
-				+ "[-a-zA-Z0-9]+/" + api_entryPoints.api_datapoints + "[/]*$")) {
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+
 	public static boolean isPostHealthTitle_Datastream_DatapointsReq(
 			String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_title + "/"
-				+ "[-a-zA-Z0-9]+/" + api_entryPoints.api_datapoints + "[/]*$")) {
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+
 	public static boolean isPostCreateDatastream_ByTitleReq(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
@@ -240,28 +252,90 @@ public class ServerUtil {
 		}
 	}
 
+	public static boolean isPostCreateDatastreamBlock_ByTitleReq(
+			String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isListDatastreamBlock_ByTitleReq(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isGetDatastreamBlock_ByTitleReq(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datablocks
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public static boolean isPostCreateSingleDS_UnitReq(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_title + "/"
-				+ "[-a-zA-Z0-9]+/" + AllConstants.api_entryPoints.api_unit
+				+ "[-a-zA-Z0-9_]+/" + AllConstants.api_entryPoints.api_unit
 				+ "[/]*$")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+
 	public static boolean isDeleteSingleDS_UnitReq(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_title + "/"
-				+ "[-a-zA-Z0-9]+/" + AllConstants.api_entryPoints.api_unit+ "/[-a-zA-Z0-9]+" 
-				+ "[/]*$")) {
+				+ "[-a-zA-Z0-9_]+/" + AllConstants.api_entryPoints.api_unit
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
+
+	public static boolean isDeleteHealthDataBlock(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datablocks
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static boolean isDeleteHealthDatapoints(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public static boolean isGetUserAvatar(String ServletPath) {
 		if (ServletPath.startsWith(AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_user + "/"
@@ -331,7 +405,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_defaultsubject + "/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+" + "[/]*$")) {
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
@@ -343,7 +417,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_defaultsubject + "/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -364,7 +438,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+" + "[/]*$")) {
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
@@ -386,7 +460,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
 			return true;
 		} else {
@@ -398,7 +472,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
 			return true;
 		} else {
@@ -410,7 +484,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+" + "[/]*$")) {
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
@@ -421,7 +495,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -433,7 +507,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -467,7 +541,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "/jackson$")) {
 			return true;
 		} else {
@@ -479,7 +553,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "/debug")) {
 			return true;
 		} else {
@@ -516,7 +590,7 @@ public class ServerUtil {
 
 	public static boolean isGetDeviceDataPointsAllUnits(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
-				+ AllConstants.api_entryPoints.api_device + "/[-a-zA-Z0-9]+/"
+				+ AllConstants.api_entryPoints.api_device + "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {
@@ -536,7 +610,7 @@ public class ServerUtil {
 	public static boolean isGetaDeviceBinding(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_devicebinding
-				+ "/[-a-zA-Z0-9]+" + "[/]*$")) {
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
@@ -605,7 +679,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+" + "[/]*$")) {
+				+ "/[-a-zA-Z0-9_]+" + "[/]*$")) {
 			return true;
 		} else {
 			return false;
@@ -616,7 +690,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
 			return true;
 		} else {
@@ -637,7 +711,7 @@ public class ServerUtil {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_subject + "/[0-9]+/"
 				+ AllConstants.api_entryPoints.api_datastream
-				+ "/[-a-zA-Z0-9]+/"
+				+ "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
 			return true;
 		} else {

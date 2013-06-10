@@ -7,6 +7,7 @@ package servlets;
 import static servlets.util.ServerUtil.*;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -21,11 +22,12 @@ import servlets.actions.delete.DeleteADatastream;
 import servlets.actions.delete.DeleteADatastreamBlock;
 import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
+import servlets.actions.delete.health.bytitle.DeleteAHealthDataBlock;
 import servlets.actions.delete.health.bytitle.DeleteAHealthDatastreamByTitle;
+import servlets.actions.delete.health.bytitle.DeleteHealthDatapoints;
 import servlets.actions.delete.health.bytitle.DeleteSingleHealthDSUnitByID;
-import servlets.actions.get.GetDataPoints;
 import servlets.actions.get.GetAPI_DocumentJson;
-//import servlets.actions.get.GetDataPointsLocalDebug;
+import servlets.actions.get.GetDataPoints;
 import servlets.actions.get.GetDatastreamBlocks;
 import servlets.actions.get.GetDatastreamsList;
 import servlets.actions.get.GetFollowers;
@@ -38,9 +40,10 @@ import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
+import servlets.actions.get.health.bytitle.GetaHealthDataBlock;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
+import servlets.actions.get.health.bytitle.ListHealthDataBlocks;
 import servlets.actions.get.lifestyle.location.GetLocations;
-
 import servlets.actions.get.throughdefaultsubjects.GetDataPointsSingleStreamUnit;
 import servlets.actions.get.throughdefaultsubjects.GetDefaultDatastreamByID;
 import servlets.actions.get.throughdefaultsubjects.GetDefaultDatastreamsList;
@@ -59,6 +62,7 @@ import servlets.actions.post.PostSubject;
 import servlets.actions.post.PostUserProfilePicture;
 import servlets.actions.post.Upload;
 import servlets.actions.post.health.bytitle.AddSingleHealthDSUnit;
+import servlets.actions.post.health.bytitle.CreateHealthDataBlock;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
@@ -71,6 +75,7 @@ import servlets.device.actions.PostBindingDeviceSerial;
 import servlets.device.actions.PostDevice;
 import servlets.device.actions.PostDeviceDatapoints;
 import util.AllConstants.api_entryPoints;
+//import servlets.actions.get.GetDataPointsLocalDebug;
 
 /**
  * 
@@ -114,8 +119,7 @@ public class RestFul extends HttpServlet {
 		} else if (isGetSubjectsListReq(ServletPath(req))) {
 			GetSubjectList proceReq = new GetSubjectList();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetAPI_Document_Json(ServletPath(req))) {
+		} else if (isGetAPI_Document_Json(ServletPath(req))) {
 			System.out.println("getting API document");
 			GetAPI_DocumentJson proceReq = new GetAPI_DocumentJson();
 			proceReq.processRequest(req, resp);
@@ -135,11 +139,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("Action: Get A Datastream");
 			GetaDatastream proceReq = new GetaDatastream();
 			proceReq.processRequest(req, resp);
-		} 
-//		else if (isGetDataPointsAllUnitsDebug(ServletPath(req))) {
-//			GetDataPointsLocalDebug proceReq = new GetDataPointsLocalDebug();
-//			proceReq.processRequest(req, resp);
-//		}
+		}
+		// else if (isGetDataPointsAllUnitsDebug(ServletPath(req))) {
+		// GetDataPointsLocalDebug proceReq = new GetDataPointsLocalDebug();
+		// proceReq.processRequest(req, resp);
+		// }
 		else if (isGetFollowers(ServletPath(req))) {
 			System.out.println("getfollower:");
 			GetFollowers proceReq = new GetFollowers();
@@ -182,46 +186,47 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetHealthDatapoints:");
 			GetHealthDataPoints proceReq = new GetHealthDataPoints();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetHealthDatapointsByTitle(ServletPath(req))) {
+		} else if (isGetHealthDatapointsByTitle(ServletPath(req))) {
 			System.out.println("isGetHealthDatapointsByTitle:");
 			GetHealthDataPointsByTitle proceReq = new GetHealthDataPointsByTitle();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+		} else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetaHealthDatastreamByTitle proceReq = new GetaHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetHealthDataSummariesByTitle(ServletPath(req))) {
+		} else if (isGetHealthDataSummariesByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetHealthDataSummariesByTitle proceReq = new GetHealthDataSummariesByTitle();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetDefault_Subject_DatastreamList(ServletPath(req))) {
+		} else if (isGetDefault_Subject_DatastreamList(ServletPath(req))) {
 			System.out.println("isGetDefault_Subject_DatastreamList:");
 			GetDefaultDatastreamsList proceReq = new GetDefaultDatastreamsList();
 			proceReq.processRequest(req, resp);
-			
-		} 
-		else if (isGetDefault_Subject_Datastream(ServletPath(req))) {
+
+		} else if (isGetDefault_Subject_Datastream(ServletPath(req))) {
 			System.out.println("isGetDefault_Subject_Datastream:");
 			GetDefaultDatastreamByID proceReq = new GetDefaultDatastreamByID();
-			proceReq.processRequest(req, resp);			
-		} 
-		else if (isGetDefault_Subject_Datastream_Datapoints(ServletPath(req))) {
+			proceReq.processRequest(req, resp);
+		} else if (isGetDefault_Subject_Datastream_Datapoints(ServletPath(req))) {
 			System.out.println("isGetDefault_Subject_Datastream_Datapoints:");
 			GetDataPointsSingleStreamUnit proceReq = new GetDataPointsSingleStreamUnit();
-			proceReq.processRequest(req, resp);			
-		} 
-		else if (isGetUserToken(ServletPath(req))) {
+			proceReq.processRequest(req, resp);
+		} else if (isGetDatastreamBlock_ByTitleReq(ServletPath(req))) {
+			System.out.println("isGetDatastreamBlock_ByTitleReq");
+			GetaHealthDataBlock proceReq = new GetaHealthDataBlock();
+			proceReq.processRequest(req, resp);
+		} else if (isListDatastreamBlock_ByTitleReq(ServletPath(req))) {
+			System.out.println("isListDatastreamBlock_ByTitleReq");
+			ListHealthDataBlocks proceReq = new ListHealthDataBlocks();
+			proceReq.processRequest(req, resp);
+		} else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("isGetUserToken:");
 			GetAUserToken proceReq = new GetAUserToken();
 			proceReq.processRequest(req, resp);
-		}else if (isListUsers(ServletPath(req))) {
+		} else if (isListUsers(ServletPath(req))) {
 			ListUsers proceReq = new ListUsers();
 			proceReq.processRequest(req, resp);
-		}else if (isPostUserRegister(ServletPath(req))) {
+		} else if (isPostUserRegister(ServletPath(req))) {
 			System.out.println("Post isPostUserRegister");
 			PostNewUserReg proceReq = new PostNewUserReg();
 			proceReq.processRequest(req, resp);
@@ -229,18 +234,15 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetUserAvatar");
 			GetUserAvatar proceReq = new GetUserAvatar();
 			proceReq.processRequest(req, resp);
-		} 
-		 else if (isGetMyAccountData(ServletPath(req))) {
-				System.out.println("isGetMyAccountData");
-				GetMyAccountData proceReq = new GetMyAccountData();
-				proceReq.processRequest(req, resp);
-			} 
-		 else if (isGetLocationLogs(ServletPath(req))) {
-				System.out.println("isGetLocationLogs");
-				GetLocations proceReq = new GetLocations();
-				proceReq.processRequest(req, resp);
-			} 
-		else {
+		} else if (isGetMyAccountData(ServletPath(req))) {
+			System.out.println("isGetMyAccountData");
+			GetMyAccountData proceReq = new GetMyAccountData();
+			proceReq.processRequest(req, resp);
+		} else if (isGetLocationLogs(ServletPath(req))) {
+			System.out.println("isGetLocationLogs");
+			GetLocations proceReq = new GetLocations();
+			proceReq.processRequest(req, resp);
+		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
@@ -275,7 +277,7 @@ public class RestFul extends HttpServlet {
 			System.out.println("isDeleteADataBlock");
 			DeleteADatastreamBlock proceReq = new DeleteADatastreamBlock();
 			proceReq.processRequest(req, resp);
-		} 	else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+		} else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
 			System.out.println("is delete health data stream:");
 			DeleteAHealthDatastreamByTitle proceReq = new DeleteAHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
@@ -288,8 +290,7 @@ public class RestFul extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		else if (isDeleteDataPointsReq(ServletPath(req))) {
+		} else if (isDeleteDataPointsReq(ServletPath(req))) {
 			System.out.println("isDeleteADataPointsRequest");
 			DeleteADataPoint proceReq = new DeleteADataPoint();
 			proceReq.processRequest(req, resp);
@@ -297,8 +298,15 @@ public class RestFul extends HttpServlet {
 			System.out.println("DeleteSingleHealthDSUnitByID");
 			DeleteSingleHealthDSUnitByID proceReq = new DeleteSingleHealthDSUnitByID();
 			proceReq.processRequest(req, resp);
-		} 
-		else {
+		}  else if (isDeleteHealthDataBlock(ServletPath(req))) {
+			System.out.println("DeleteSingleHealthDSUnitByID");
+			DeleteAHealthDataBlock proceReq = new DeleteAHealthDataBlock();
+			proceReq.processRequest(req, resp);
+		}  else if (isDeleteHealthDatapoints(ServletPath(req))) {
+			System.out.println("isDeleteHealthDatapoints");
+			DeleteHealthDatapoints proceReq = new DeleteHealthDatapoints();
+			proceReq.processRequest(req, resp);
+		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
@@ -368,42 +376,41 @@ public class RestFul extends HttpServlet {
 			System.out.println("Post Ruqeest isPostUpload");
 			Upload proceReq = new Upload();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isPostUserAvatar(ServletPath(req))) {
+		} else if (isPostUserAvatar(ServletPath(req))) {
 			System.out.println("PostUserProfilePicture");
 			PostUserProfilePicture proceReq = new PostUserProfilePicture();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isPostDefaultSuject_DatastreamReq(ServletPath(req))) {
+		} else if (isPostDefaultSuject_DatastreamReq(ServletPath(req))) {
 			System.out.println("isPostDefaultSuject_DatastreamReq");
 			PostDatastreamThroughDefaultSubject proceReq = new PostDatastreamThroughDefaultSubject();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isPostDefaultSuject_Datastream_DatapointsReq(ServletPath(req))) {
+		} else if (isPostDefaultSuject_Datastream_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostDefaultSuject_Datastream_DatapointsReq");
 			PostDatapointsThoughDefaultSubject proceReq = new PostDatapointsThoughDefaultSubject();
 			proceReq.processRequest(req, resp);
-		}else if (isPostHealthTitle_Datastream_DatapointsReq(ServletPath(req))) {
+		} else if (isPostHealthTitle_Datastream_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostHealthTitle_Datastream_DatapointsReq");
 			PostDatapointsThroughHealthTitle proceReq = new PostDatapointsThroughHealthTitle();
 			proceReq.processRequest(req, resp);
-		}  else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
+		} else if (isPostCreateDatastream_ByTitleReq(ServletPath(req))) {
 			System.out.println("isPostCreateDatastream_ByTitleReq");
 			CreateHealthDatastreamByTitle proceReq = new CreateHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
-		}  else if (isPostCreateSingleDS_UnitReq(ServletPath(req))) {
+		} else if (isPostCreateDatastreamBlock_ByTitleReq(ServletPath(req))) {
+			System.out.println("isPostCreateDatastreamBlock_ByTitleReq");
+			CreateHealthDataBlock proceReq = new CreateHealthDataBlock();
+			proceReq.processRequest(req, resp);
+		} else if (isPostCreateSingleDS_UnitReq(ServletPath(req))) {
 			System.out.println("AddSingleHealthDSUnit");
 			AddSingleHealthDSUnit proceReq = new AddSingleHealthDSUnit();
 			proceReq.processRequest(req, resp);
-		} 
-		
-		
+		}
+
 		else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("Post Ruqeest isGetUserToken:");
 			GetAUserToken proceReq = new GetAUserToken();
 			proceReq.processRequest(req, resp);
-		}
-		else {
+		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}

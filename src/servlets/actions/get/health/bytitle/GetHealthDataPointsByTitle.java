@@ -417,8 +417,8 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 					hbaseexport = new HBaseDataImport();
 					hbaseexport.setBlock_id(blockid);
 					hbaseexport.setData_points(new ArrayList<JsonDataPoints>());
-
-					hbaseexport.setDatastream_id(datastream.getStreamId());
+					hbaseexport.setStream_title(datastream.getTitle());
+//					hbaseexport.setDatastream_id(datastream.getStreamId());
 					hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
 							datastream, mapUnits).getUnits_list());
 					// hbaseexport.setDeviceid(streamID);
@@ -446,6 +446,9 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				}
 				// response.setHeader("Vary", "Accept-Encoding");
 				Date timerStart = new Date();
+				hbaseexport.setStream_title(datastream.getTitle());
+				hbaseexport.setDatastream_id(null);
+				hbaseexport.setDevice_id(null);
 				JsonElement je = gson.toJsonTree(hbaseexport);
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,
@@ -457,6 +460,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				else if(hbaseexport.getData_points_single_list()!=null){
 					totalData_pointsSize=hbaseexport.getData_points_single_list().size();
 				}
+			
 				jo.addProperty(AllConstants.ProgramConts.total_points,
 						totalData_pointsSize);
 				jo.add("datapoints_list", je);
