@@ -1,10 +1,10 @@
 package servlets.util;
 
-import java.io.IOException;
-
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.models.Subject;
+
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

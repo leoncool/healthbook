@@ -4,24 +4,18 @@
  */
 package servlets.actions.get.users;
 
-import health.database.DAO.DatastreamDAO;
 import health.database.DAO.FollowingDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Follower;
 import health.database.models.LoginToken;
-import health.database.models.Subject;
 import health.database.models.Users;
 import health.database.models.merge.UserInfo;
-import health.input.jsonmodels.JsonDatastream;
-import health.input.jsonmodels.JsonSubject;
 import health.input.jsonmodels.JsonUserInfo;
 import health.input.jsonmodels.JsonUserToken;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

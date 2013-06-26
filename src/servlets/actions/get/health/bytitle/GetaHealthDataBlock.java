@@ -11,7 +11,6 @@ import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamBlocks;
-import health.database.models.LoginToken;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.input.jsonmodels.JsonDatastreamBlock;

@@ -4,7 +4,6 @@
  */
 package servlets.actions.post.throughdefaultsubject;
 
-import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.DeviceTemplateDAO;
 import health.database.DAO.SubjectDAO;

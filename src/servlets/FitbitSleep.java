@@ -32,7 +32,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import server.exception.ErrorCodeException;
-import util.AllConstants;
 import util.DateUtil;
 
 import com.fitbit.api.FitbitAPIException;

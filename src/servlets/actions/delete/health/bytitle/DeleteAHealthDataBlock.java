@@ -6,21 +6,15 @@ package servlets.actions.delete.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamBlocks;
-import health.database.models.LoginToken;
 import health.database.models.Subject;
 import health.database.models.Users;
-import health.input.jsonmodels.JsonDatastreamBlock;
-import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +28,6 @@ import servlets.util.ServerUtil;
 import util.AllConstants;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**

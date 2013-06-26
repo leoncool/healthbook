@@ -4,53 +4,31 @@
  */
 package servlets.actions.delete.health.bytitle;
 
-import static util.JsonUtil.ServletPath;
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
-import health.database.models.DatastreamBlocks;
-import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
 import health.database.models.Users;
-import health.hbase.models.HBaseDataImport;
-import health.input.jsonmodels.JsonDataImport;
-import health.input.jsonmodels.JsonDataPointsPostResult;
-import health.input.jsonmodels.JsonDataValues;
-import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
-import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import servlets.util.HealthDatastreamFilter;
 import servlets.util.HealthSubjectFilter;
 import servlets.util.PermissionFilter;
-import servlets.util.ServerUtil;
 import util.AllConstants;
-import util.DateUtil;
-import util.JsonUtil;
-import util.AllConstants.ErrorDictionary;
 import util.AllConstants.api_entryPoints;
+import util.DateUtil;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonWriter;
 
 /**
  * 

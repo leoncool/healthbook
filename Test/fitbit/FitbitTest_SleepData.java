@@ -1,22 +1,16 @@
 package fitbit;
 
 import health.database.DAO.Ext_API_Info_DAO;
-import health.database.models.Datastream;
 import health.database.models.ExternalApiInfo;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
-import health.input.jsonmodels.JsonDataValues;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-
-import util.DateUtil;
 
 import com.fitbit.api.FitbitAPIException;
 import com.fitbit.api.client.FitbitAPIEntityCache;
@@ -34,8 +28,6 @@ import com.fitbit.api.common.model.sleep.SleepSummary;
 import com.fitbit.api.common.model.timeseries.IntradayData;
 import com.fitbit.api.common.model.timeseries.IntradaySummary;
 import com.fitbit.api.common.model.timeseries.TimeSeriesResourceType;
-import com.fitbit.api.model.APICollectionType;
-import com.fitbit.api.model.ApiSubscription;
 import com.fitbit.api.model.FitbitUser;
 
 public class FitbitTest_SleepData {

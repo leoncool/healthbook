@@ -1,7 +1,5 @@
 package servlets;
 
-import health.input.jsonmodels.JsonDataImport;
-
 import java.io.IOException;
 import java.util.Date;
 

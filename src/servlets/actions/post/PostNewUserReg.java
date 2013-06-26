@@ -15,7 +15,6 @@ import health.database.models.UserAvatar;
 import health.database.models.UserDetails;
 import health.database.models.Users;
 import health.database.models.merge.UserInfo;
-import health.input.jsonmodels.JsonDatastream;
 import health.input.jsonmodels.JsonUser;
 import health.input.jsonmodels.JsonUserInfo;
 import health.input.jsonmodels.JsonUserToken;
@@ -100,10 +99,20 @@ public class PostNewUserReg extends HttpServlet {
 						null, null);
 				return;
 			}
-			if (juser.getLoginid() == null || juser.getPassword() == null
-					|| juser.getEmail() == null) {
+			if (juser.getLoginid() == null) {
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null, null);
+						AllConstants.ErrorDictionary.MISSING_DATA, null, "loginid");
+				return;
+			}
+			if (juser.getPassword() == null
+					) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA, null, "password");
+				return;
+			}
+			if (juser.getEmail() == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA, null, "email");
 				return;
 			}
 			UserDAO userdao = new UserDAO();

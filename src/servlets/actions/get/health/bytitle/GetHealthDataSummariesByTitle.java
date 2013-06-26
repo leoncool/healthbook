@@ -39,7 +39,6 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.DateUtil;
-import util.AllConstants.HealthConts;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

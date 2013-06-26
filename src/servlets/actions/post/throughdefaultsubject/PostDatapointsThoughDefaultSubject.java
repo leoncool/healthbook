@@ -7,21 +7,17 @@ package servlets.actions.post.throughdefaultsubject;
 import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
-import health.database.DAO.UserDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
-import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataImport;
 import health.input.jsonmodels.JsonDataPointsPostResult;
-import health.input.jsonmodels.JsonDataValues;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +32,6 @@ import server.exception.ReturnParser;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.JsonUtil;
-import util.AllConstants.ErrorDictionary;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

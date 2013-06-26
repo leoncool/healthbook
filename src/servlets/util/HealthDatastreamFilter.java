@@ -1,15 +1,12 @@
 package servlets.util;
 
 import static util.JsonUtil.ServletPath;
-
-import java.io.IOException;
-
 import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.input.util.DBtoJsonUtil;
+
+import java.io.IOException;
 
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;

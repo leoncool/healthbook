@@ -18,8 +18,6 @@ import com.fitbit.api.client.FitbitApiSubscriptionStorageInMemoryImpl;
 import com.fitbit.api.client.LocalUserDetail;
 import com.fitbit.api.client.service.FitbitAPIClientService;
 import com.fitbit.api.common.model.devices.Device;
-import com.fitbit.api.model.APICollectionType;
-import com.fitbit.api.model.ApiSubscription;
 import com.fitbit.api.model.FitbitUser;
 
 public class FitbitTest {

@@ -5,8 +5,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.gson.JsonArray;
-
 public class IntradaySummary {
 
     private Data summary;

@@ -4,12 +4,6 @@
  */
 package servlets.actions.get;
 
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.SubjectDAO;
-import health.database.models.Subject;
-import health.input.jsonmodels.JsonSubject;
-import health.input.util.DBtoJsonUtil;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -25,7 +19,6 @@ import util.AllConstants;
 import com.apidocument.objects.API_apis;
 import com.apidocument.objects.API_main;
 import com.apidocument.objects.API_operations;
-import com.apidocument.objects.API_parameters;
 import com.google.gson.Gson;
 
 /**

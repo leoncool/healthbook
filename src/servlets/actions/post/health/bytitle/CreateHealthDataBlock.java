@@ -4,10 +4,7 @@
  */
 package servlets.actions.post.health.bytitle;
 
-import static util.JsonUtil.ServletPath;
 import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
 import health.database.models.DatastreamBlocks;
@@ -19,7 +16,6 @@ import health.input.util.DBtoJsonUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +25,6 @@ import server.exception.ReturnParser;
 import servlets.util.HealthDatastreamFilter;
 import servlets.util.HealthSubjectFilter;
 import servlets.util.PermissionFilter;
-import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.JsonUtil;
 

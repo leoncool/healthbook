@@ -12,7 +12,6 @@ import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.hbase.models.HBaseDataImport;
-import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.singleunitstream.JsonSingleDataPoints;
 import health.input.util.DBtoJsonUtil;
 
