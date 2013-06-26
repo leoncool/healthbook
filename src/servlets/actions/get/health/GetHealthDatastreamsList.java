@@ -9,6 +9,7 @@ import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
+import health.database.models.Users;
 import health.input.jsonmodels.JsonDatastream;
 import health.input.util.DBtoJsonUtil;
 
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
 import util.AllConstants;
 
 import com.google.gson.Gson;
@@ -56,19 +58,28 @@ public class GetHealthDatastreamsList extends HttpServlet {
 
 		PrintWriter out = response.getWriter();
 		try {
-			String loginID = "leoncool";
-			if (request
-					.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
-				loginID = request
-						.getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			}
+
+			Users accessUser = null;
+			PermissionFilter filter = new PermissionFilter();
+			String loginID = filter.checkAndGetLoginFromToken(request, response);
+
 			UserDAO userDao = new UserDAO();
-			if (!userDao.existLogin(loginID)) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-						null);
-				return;
+			if (loginID == null) {
+				if (filter.getCheckResult().equalsIgnoreCase(
+						filter.INVALID_LOGIN_TOKEN_ID)) {
+					return;
+				} else if (filter.getCheckResult().equalsIgnoreCase(
+						AllConstants.ErrorDictionary.login_token_expired)) {
+					return;
+				} else {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_login_token_id,
+							null, null);
+				}
+			} else {
+				accessUser = userDao.getLogin(loginID);
 			}
+			
 			SubjectDAO subjDao = new SubjectDAO();
 
 			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
