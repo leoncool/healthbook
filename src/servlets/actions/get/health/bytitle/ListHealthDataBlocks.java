@@ -5,10 +5,12 @@
 package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
+import health.database.DAO.DataPermissionDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.DataPermission;
 import health.database.models.Datastream;
 import health.database.models.DatastreamBlocks;
 import health.database.models.Subject;
@@ -81,6 +83,21 @@ public class ListHealthDataBlocks extends HttpServlet {
 		} else {
 			accessUser = userDao.getLogin(loginID);
 		}
+		String targetLoginID = filter.getTargetUserID(request, response);
+		if (targetLoginID != null) {
+			Users targetUser = userDao.getLogin(targetLoginID);
+			if (targetUser == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_Target_LoginID,
+						null, null);
+				return;
+			}
+		}
+		if(targetLoginID==null)
+		{
+			targetLoginID=loginID;
+		}
+		
 		PrintWriter out = response.getWriter();
 
 		try {
@@ -113,6 +130,7 @@ public class ListHealthDataBlocks extends HttpServlet {
 			try {
 				datastream = dstreamDao.getHealthDatastreamByTitle(
 						subject.getId(), streamTitle, true, true);
+			
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -131,7 +149,34 @@ public class ListHealthDataBlocks extends HttpServlet {
 						streamTitle);
 				return;
 			}
+			// check permissions
+			if (loginID!=null&&targetLoginID != null&&!loginID.equals(targetLoginID)) {
+				DataPermissionDAO permissionDao = new DataPermissionDAO();
+				List<DataPermission> permissionList = permissionDao
+						.getDataPermission(
+								targetLoginID,
+								loginID,
+								AllConstants.ProgramConts.data_permission_type_datastream,
+								datastream.getStreamId(),
+								AllConstants.ProgramConts.VALID);
+				if (permissionList.size() > 0) {
 
+				} else {
+					DataPermission permission = new DataPermission();
+					permission.setGivenLoginid(loginID);
+					permission
+							.setTargetDataType(AllConstants.ProgramConts.data_permission_type_datastream);
+					permission.setTargetDataId(datastream.getStreamId());
+					permission.setOwner(targetLoginID);
+					permission.setStatus("pending");
+					permission.setPermission("");
+					permissionDao.createDataPermission(permission);
+					// ReturnParser.outputErrorException(response,
+					// AllConstants.ErrorDictionary.PERMISSION_DENIED,
+					// null, streamTitle);
+					// return;
+				}
+			}
 			DBtoJsonUtil dbjUtil = new DBtoJsonUtil();
 			List<DatastreamBlocks> blocks=datastream.getDatastreamBlocksList();
 			List<JsonDatastreamBlock> jblocks=new ArrayList<JsonDatastreamBlock>();
@@ -145,6 +190,8 @@ public class ListHealthDataBlocks extends HttpServlet {
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
+			jo.addProperty(AllConstants.api_entryPoints.request_api_targetid,
+					targetLoginID);
 			jo.add("datastream_blocks", je);
 			out.println(gson.toJson(jo));
 		} catch (Exception ex) {

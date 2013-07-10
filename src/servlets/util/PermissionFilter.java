@@ -2,6 +2,7 @@ package servlets.util;
 
 import health.database.DAO.UserDAO;
 import health.database.models.LoginToken;
+import health.database.models.Users;
 
 import java.io.IOException;
 import java.util.Date;
@@ -17,6 +18,15 @@ protected String checkResult="";
 public static final String VALID="valid";
 public static final String EMPTY_TOKENID="empty_tokenid";
 public static final String INVALID_LOGIN_TOKEN_ID=AllConstants.ErrorDictionary.Invalid_login_token_id;
+public String getTargetUserID(HttpServletRequest request, HttpServletResponse response)
+{
+	String targetUserID=request.getParameter(AllConstants.api_entryPoints.request_api_targetid);
+	if(targetUserID!=null&&targetUserID.length()<2)
+	{
+		return null;
+	}
+	return targetUserID;
+}
 	public String checkAndGetLoginFromToken(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		  String tokenID=null;

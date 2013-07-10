@@ -4,11 +4,14 @@
  */
 package servlets.actions.get.health;
 
+import health.database.DAO.DataPermissionDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.DataPermission;
 import health.database.models.Datastream;
 import health.database.models.Subject;
+import health.database.models.Users;
 import health.input.jsonmodels.JsonDatastream;
 import health.input.util.DBtoJsonUtil;
 
@@ -23,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
 import util.AllConstants;
 
 import com.google.gson.Gson;
@@ -56,27 +60,78 @@ public class GetHealthDatastreamsList extends HttpServlet {
 
 		PrintWriter out = response.getWriter();
 		try {
-			String loginID = "leoncool";
-			if (request
-					.getParameter(AllConstants.api_entryPoints.request_api_loginid) != null) {
-				loginID = request
-						.getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			}
+	
+			Users accessUser = null;
+			PermissionFilter filter = new PermissionFilter();
+			String loginID = filter.checkAndGetLoginFromToken(request, response);
+
 			UserDAO userDao = new UserDAO();
-			if (!userDao.existLogin(loginID)) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-						null);
-				return;
+			if (loginID == null) {
+				if (filter.getCheckResult().equalsIgnoreCase(
+						filter.INVALID_LOGIN_TOKEN_ID)) {
+					return;
+				} else if (filter.getCheckResult().equalsIgnoreCase(
+						AllConstants.ErrorDictionary.login_token_expired)) {
+					return;
+				} else {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_login_token_id,
+							null, null);
+				}
+			} else {
+				accessUser = userDao.getLogin(loginID);
 			}
+			String targetLoginID = filter.getTargetUserID(request, response);
+			if (targetLoginID != null) {
+				Users targetUser = userDao.getLogin(targetLoginID);
+				if (targetUser == null) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_Target_LoginID,
+							null, null);
+					return;
+				}
+			}
+			if(targetLoginID==null)
+			{
+				targetLoginID=loginID;
+			}
+			
+			
 			SubjectDAO subjDao = new SubjectDAO();
 
-			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
+			Subject subject = (Subject) subjDao.findHealthSubject(targetLoginID); // Retreive
 			if (subject == null) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT, null,
 						null);
 				return;
+			}
+			if (loginID!=null&&targetLoginID != null&&!loginID.equals(targetLoginID)) {
+				DataPermissionDAO permissionDao = new DataPermissionDAO();
+				List<DataPermission> permissionList = permissionDao
+						.getDataPermission(
+								targetLoginID,
+								loginID,
+								AllConstants.ProgramConts.data_permission_type_subject,
+								Integer.toString(subject.getId()),
+								AllConstants.ProgramConts.VALID);
+				if (permissionList.size() > 0) {
+
+				} else {
+					DataPermission permission = new DataPermission();
+					permission.setGivenLoginid(loginID);
+					permission
+							.setTargetDataType(AllConstants.ProgramConts.data_permission_type_subject);
+					permission.setTargetDataId(Integer.toString(subject.getId()));
+					permission.setOwner(targetLoginID);
+					permission.setStatus("pending");
+					permission.setPermission("");
+					permissionDao.createDataPermission(permission);
+					// ReturnParser.outputErrorException(response,
+					// AllConstants.ErrorDictionary.PERMISSION_DENIED,
+					// null, streamTitle);
+					// return;
+				}
 			}
 			DatastreamDAO dstreamDao = new DatastreamDAO();
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
@@ -93,6 +148,8 @@ public class GetHealthDatastreamsList extends HttpServlet {
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
+			jo.addProperty(AllConstants.api_entryPoints.request_api_targetid,
+					targetLoginID);
 			jo.addProperty(AllConstants.api_entryPoints.request_api_loginid,
 					subject.getLoginID());
 			jo.add("datastream_list", je);

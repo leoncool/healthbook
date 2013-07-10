@@ -5,10 +5,12 @@
 package servlets.actions.get.health.bytitle;
 
 import static util.JsonUtil.ServletPath;
+import health.database.DAO.DataPermissionDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.models.DataPermission;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.database.models.Users;
@@ -16,6 +18,7 @@ import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
@@ -77,36 +80,32 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 		} else {
 			accessUser = userDao.getLogin(loginID);
 		}
+		String targetLoginID = filter.getTargetUserID(request, response);
+		if (targetLoginID != null) {
+			Users targetUser = userDao.getLogin(targetLoginID);
+			if (targetUser == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_Target_LoginID,
+						null, null);
+				return;
+			}
+		}
+		if(targetLoginID==null)
+		{
+			targetLoginID=loginID;
+		}
 		PrintWriter out = response.getWriter();
 
 		try {
-
-			// if (request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid)
-			// != null) {
-			// loginID = request
-			// .getParameter(AllConstants.api_entryPoints.request_api_loginid);
-			// }
-			// if (!userDao.existLogin(loginID)) {
-			// ReturnParser.outputErrorException(response,
-			// AllConstants.ErrorDictionary.Unauthorized_Access, null,
-			// null);
-			// return;
-			// }
 			SubjectDAO subjDao = new SubjectDAO();
-			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
+			Subject subject = (Subject) subjDao
+					.findHealthSubject(targetLoginID); // Retreive
 			if (subject == null) {
-				// ReturnParser.outputErrorException(response,
-				// AllConstants.ErrorDictionary.SYSTEM_ERROR_NO_DEFAULT_HEALTH_SUBJECT,
-				// null,
-				// null);
-				// return;
 				try {
-					subject = subjDao.createDefaultHealthSubject(loginID);
+					subject = subjDao.createDefaultHealthSubject(targetLoginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
-
-					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
-							subject.getId());
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(
+							targetLoginID, subject.getId());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -123,8 +122,11 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			Datastream datastream = null;
 			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(subject.getId(),
-						streamTitle, true, false);
+				datastream = dstreamDao.getHealthDatastreamByTitle(
+						subject.getId(), streamTitle, true, false);
+
+				// check permissions
+			
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -137,12 +139,38 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
-			if(!datastream.getOwner().equalsIgnoreCase(loginID))
-			{
+			if (!datastream.getOwner().equalsIgnoreCase(targetLoginID)) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Unauthorized_Access, null,
 						streamTitle);
 				return;
+			}
+			if (loginID!=null&&targetLoginID != null&&!loginID.equals(targetLoginID)) {
+				DataPermissionDAO permissionDao = new DataPermissionDAO();
+				List<DataPermission> permissionList = permissionDao
+						.getDataPermission(
+								targetLoginID,
+								loginID,
+								AllConstants.ProgramConts.data_permission_type_datastream,
+								datastream.getStreamId(),
+								AllConstants.ProgramConts.VALID);
+				if (permissionList.size() > 0) {
+
+				} else {
+					DataPermission permission = new DataPermission();
+					permission.setGivenLoginid(loginID);
+					permission
+							.setTargetDataType(AllConstants.ProgramConts.data_permission_type_datastream);
+					permission.setTargetDataId(datastream.getStreamId());
+					permission.setOwner(targetLoginID);
+					permission.setStatus("pending");
+					permission.setPermission("");
+					permissionDao.createDataPermission(permission);
+					// ReturnParser.outputErrorException(response,
+					// AllConstants.ErrorDictionary.PERMISSION_DENIED,
+					// null, streamTitle);
+					// return;
+				}
 			}
 			Gson gson = new Gson();
 			JsonElement je = gson.toJsonTree(dbtoJUtil.convertDatastream(
@@ -150,6 +178,8 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
+			jo.addProperty(AllConstants.api_entryPoints.request_api_targetid,
+					targetLoginID);
 			jo.add("datastream", je);
 			System.out.println(jo.toString());
 			out.println(gson.toJson(jo));
