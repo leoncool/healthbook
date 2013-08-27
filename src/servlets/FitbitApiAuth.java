@@ -59,7 +59,9 @@ public class FitbitApiAuth extends HttpServlet {
 			exampleBaseUrl = properties.getProperty("exampleBaseUrl").replace(
 					"/app", "");
 			clientConsumerKey = properties.getProperty("clientConsumerKey");
+			
 			clientSecret = properties.getProperty("clientSecret");
+			System.out.println("clientConsumerKey"+clientConsumerKey+", \n clientSecret:"+clientSecret);
 			FitbitAPIClientService<FitbitApiClientAgent> apiClientService = new FitbitAPIClientService<FitbitApiClientAgent>(
 					new FitbitApiClientAgent(apiBaseUrl, fitbitSiteBaseUrl,
 							credentialsCache), clientConsumerKey, clientSecret,
