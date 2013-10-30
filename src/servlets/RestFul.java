@@ -54,6 +54,7 @@ import static servlets.util.ServerUtil.isPostDevice;
 import static servlets.util.ServerUtil.isPostDeviceDatapoints;
 import static servlets.util.ServerUtil.isPostDeviceSerialBinding;
 import static servlets.util.ServerUtil.isPostFollower;
+import static servlets.util.ServerUtil.isPostHealthDataPointThroughUnitIDfromURL;
 import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_DatapointsReq;
 import static servlets.util.ServerUtil.isPostSubjectReq;
 import static servlets.util.ServerUtil.isPostUpload;
@@ -120,6 +121,7 @@ import servlets.actions.post.health.bytitle.AddSingleHealthDSUnit;
 import servlets.actions.post.health.bytitle.CreateHealthDataBlock;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
+import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
 import servlets.device.actions.GetADeviceBinding;
@@ -297,6 +299,10 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetLocationLogs");
 			GetLocations proceReq = new GetLocations();
 			proceReq.processRequest(req, resp);
+		} else if (isPostHealthDataPointThroughUnitIDfromURL(ServletPath(req))) {
+			System.out.println("isPostHealthDataPointThroughUnitIDfromURL");
+			PostSingleUnstructuredDatapointThroughHealthTitle proceReq = new PostSingleUnstructuredDatapointThroughHealthTitle();
+			proceReq.processRequest(req, resp);
 		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
@@ -454,6 +460,10 @@ public class RestFul extends HttpServlet {
 		} else if (isPostCreateDatastreamBlock_ByTitleReq(ServletPath(req))) {
 			System.out.println("isPostCreateDatastreamBlock_ByTitleReq");
 			CreateHealthDataBlock proceReq = new CreateHealthDataBlock();
+			proceReq.processRequest(req, resp);
+		} else if (isPostHealthDataPointThroughUnitIDfromURL(ServletPath(req))) {
+			System.out.println("isPostHealthDataPointThroughUnitIDfromURL");
+			PostSingleUnstructuredDatapointThroughHealthTitle proceReq = new PostSingleUnstructuredDatapointThroughHealthTitle();
 			proceReq.processRequest(req, resp);
 		} else if (isPostCreateSingleDS_UnitReq(ServletPath(req))) {
 			System.out.println("AddSingleHealthDSUnit");
