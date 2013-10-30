@@ -4,6 +4,9 @@
  */
 package servlets.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import util.AllConstants;
 import util.AllConstants.api_entryPoints;
 
@@ -59,6 +62,24 @@ public class ServerUtil {
 				.split("/");
 		String streamTitle = values[0];
 		return streamTitle;
+	}
+	
+	public static String getHealthDataUnitIDfromURL(String ServletPath) {
+		String value=null;
+		String pattern="^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_datapoints + "/"+api_entryPoints.api_unit+"/"+"([-a-zA-Z0-9_]+)"+"[/]*$";
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(ServletPath);
+		if (m.find()) {
+			if(m.group(1)!=null&&m.group().length()>1)
+			{
+				value=m.group(1);
+			}
+		   
+		}
+		return value;
 	}
 
 	public static String getHealthDS_UnitID(String ServletPath) {
@@ -241,7 +262,17 @@ public class ServerUtil {
 			return false;
 		}
 	}
-
+	public static boolean isPostHealthTitle_Datastream_DatapointsByUnitIDReq(
+			String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_datapoints + "/"+api_entryPoints.api_unit+"/"+"[-a-zA-Z0-9_]+"+"[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isPostCreateDatastream_ByTitleReq(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
@@ -258,6 +289,16 @@ public class ServerUtil {
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datablocks + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public static boolean isPostHealthDataPointThroughUnitIDfromURL(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_datapoints + "/"+api_entryPoints.api_unit+"/"+"[-a-zA-Z0-9_]+"+"[/]*$")) {
 			return true;
 		} else {
 			return false;

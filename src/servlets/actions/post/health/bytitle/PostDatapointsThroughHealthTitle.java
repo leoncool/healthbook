@@ -172,8 +172,14 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 					.getDatastreamUnitsList();
 			HashMap<String, String> unitIDList = new HashMap<String, String>();
 			for (DatastreamUnits unit : unitList) {
+				if(unit.getShortUnitID() != null
+						&& unit.getShortUnitID().length() > 1)
+				{
+					unitIDList.put(unit.getShortUnitID(), unit.getShortUnitID()); 
+				}
+				else{
 				unitIDList.put(unit.getUnitID(), unit.getUnitID()); // retrieve
-																	// all
+				}												// all
 																	// existing
 																	// units
 			}
