@@ -118,10 +118,15 @@ public class GetAUserToken extends HttpServlet {
 			if(jsonUserToken.getExpire_in_seconds()!=null&&jsonUserToken.getExpire_in_seconds().length()>1)
 			{
 				try{
-				Date now=new Date();
-				long expireLong=now.getTime()+1000L*Long.parseLong(jsonUserToken.getExpire_in_seconds());
-				expireTime=new Date();
-				expireTime.setTime(expireLong);
+				long expireInSeconds=Long.parseLong(jsonUserToken.getExpire_in_seconds());
+				if(expireInSeconds>1)
+				{
+					Date now=new Date();
+					long expireLong=now.getTime()+1000L*expireInSeconds;
+					expireTime=new Date();
+					expireTime.setTime(expireLong);
+				}
+			
 				}
 				catch(Exception ex)
 				{

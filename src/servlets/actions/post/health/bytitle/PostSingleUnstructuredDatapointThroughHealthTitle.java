@@ -75,8 +75,8 @@ public class PostSingleUnstructuredDatapointThroughHealthTitle extends
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
-	private String unstrcturedDataFolderString="/var/www/html/wikihealth/unstructured/";
-	private File unstructuredDataFolder=new File(unstrcturedDataFolderString); 
+	private String unstrcturedDataFolderString = "/var/www/html/wikihealth/unstructured/";
+	private File unstructuredDataFolder = new File(unstrcturedDataFolderString);
 
 	public void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
@@ -172,61 +172,90 @@ public class PostSingleUnstructuredDatapointThroughHealthTitle extends
 						AllConstants.api_entryPoints.request_api_at);
 				return;
 			}
-			try{
-				long at_long_test=Long.parseLong(at);
-				Date atDateTest=new Date();
+			try {
+				long at_long_test = Long.parseLong(at);
+				Date atDateTest = new Date();
 				atDateTest.setTime(at_long_test);
-			}catch(Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Invalid_date_format, null,
 						AllConstants.api_entryPoints.request_api_at);
 				return;
 			}
-//			String unstrcturedDataFolderString="/var/www/html/wikihealth/unstructured";
-//			File unstructuredDataFolder=new File(unstrcturedDataFolderString);
-//			if(!unstructuredDataFolder.exists())
-//			{
-//				ReturnParser.outputErrorException(response,
-//						AllConstants.ErrorDictionary.Internal_Fault, null,
-//						"unstrctured data folder not exist");
-//				return;
-//			}
-	        DiskFileItemFactory fileFactory = new DiskFileItemFactory();
-//	        File filesDir = (File) getServletContext().getAttribute("FILES_DIR_FILE");
-	        fileFactory.setRepository(unstructuredDataFolder);
-	        ServletFileUpload uploader = new ServletFileUpload(fileFactory);
-	        String fileURL=null;
+			// String
+			// unstrcturedDataFolderString="/var/www/html/wikihealth/unstructured";
+			// File unstructuredDataFolder=new
+			// File(unstrcturedDataFolderString);
+			// if(!unstructuredDataFolder.exists())
+			// {
+			// ReturnParser.outputErrorException(response,
+			// AllConstants.ErrorDictionary.Internal_Fault, null,
+			// "unstrctured data folder not exist");
+			// return;
+			// }
+			DiskFileItemFactory fileFactory = new DiskFileItemFactory();
+			// File filesDir = (File)
+			// getServletContext().getAttribute("FILES_DIR_FILE");
+			fileFactory.setRepository(unstructuredDataFolder);
+			ServletFileUpload uploader = new ServletFileUpload(fileFactory);
+			String fileURL = null;
+			int totalFileItems = 0;
 			try {
-	            List<FileItem> fileItemsList = uploader.parseRequest(request);
-	            Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
-	            while(fileItemsIterator.hasNext()){
-	                FileItem fileItem = fileItemsIterator.next();
-	                System.out.println("FieldName="+fileItem.getFieldName());
-	                System.out.println("FileName="+fileItem.getName());
-	                System.out.println("ContentType="+fileItem.getContentType());
-	                System.out.println("Size in bytes="+fileItem.getSize());
-	                String fileExtension = "";
-	                int i = fileItem.getName().lastIndexOf('.');
-	                if (i > 0) {
-	                	fileExtension = fileItem.getName().substring(i+1);
-	                }
-	                UUID file_uuid=UUID.randomUUID();
-	                String newFileName=file_uuid+"."+fileExtension;
-	                File file = new File(unstrcturedDataFolderString+newFileName);
-	                System.out.println("Absolute Path at server="+file.getAbsolutePath());
-	                fileItem.write(file);
-	                fileURL="/"+newFileName;
-	            }
-	      
-	        } catch (Exception e) {
-	        	e.printStackTrace();
-	        	ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
+				List<FileItem> fileItemsList = uploader.parseRequest(request);
+				Iterator<FileItem> fileItemsIterator = fileItemsList.iterator();
+				while (fileItemsIterator.hasNext()) {
+					FileItem fileItem = fileItemsIterator.next();
+					System.out.println("FieldName=" + fileItem.getFieldName());
+					System.out.println("FileName=" + fileItem.getName());
+					System.out.println("ContentType="
+							+ fileItem.getContentType());
+					System.out.println("Size in bytes=" + fileItem.getSize());
+					totalFileItems = totalFileItems + 1;
+					String fileExtension = "";
+					String newFileName = null;
+					UUID file_uuid = UUID.randomUUID();
+					if (fileItem.getName() != null
+							&& fileItem.getName().length() > 1) {
+						int i = fileItem.getName().lastIndexOf('.');
+						if (i > 0) {
+							fileExtension = fileItem.getName().substring(i + 1);
+						}
+
+						if (fileExtension != null && fileExtension.length() > 1) {
+							newFileName = file_uuid.toString() + "."
+									+ fileExtension;
+						} else {
+							newFileName = file_uuid.toString();
+						}
+					} else {
+						newFileName = file_uuid.toString();
+					}
+
+					File file = new File(unstrcturedDataFolderString
+							+ newFileName);
+					System.out.println("Absolute Path at server="
+							+ file.getAbsolutePath());
+					fileItem.write(file);
+					fileURL = "/" + newFileName;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
 				return;
-	        }
+			}
+			if (totalFileItems < 1) {
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.MISSING_DATA,
+								"file", null);
+				return;
+
+			}
 			String timetag = null;
 			timetag = request
 					.getParameter(AllConstants.api_entryPoints.request_api_timetag);// not
@@ -263,7 +292,7 @@ public class PostSingleUnstructuredDatapointThroughHealthTitle extends
 			List<JsonDataValues> value_list = new ArrayList<JsonDataValues>();
 			JsonDataValues singleJsonDataValue = new JsonDataValues();
 			singleJsonDataValue.setUnit_id(unitid);
-			fileURL="http://wikihealth.bigdatapro.org/unstructured"+fileURL;
+			fileURL = "http://wikihealth.bigdatapro.org/unstructured" + fileURL;
 			singleJsonDataValue.setVal(fileURL);
 			JsonDataPoints singleJsonDatapoint = new JsonDataPoints();
 			singleJsonDatapoint.setAt(at);
@@ -385,6 +414,9 @@ public class PostSingleUnstructuredDatapointThroughHealthTitle extends
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			jo.add("data_import_stat", je);
+			JsonElement datapointJson=gson.toJsonTree(importData.getData_points());
+			
+			jo.add("data_points", datapointJson);
 			JsonWriter jwriter = new JsonWriter(out);
 			gson.toJson(jo, jwriter);
 		} catch (Exception ex) {

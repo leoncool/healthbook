@@ -1,0 +1,1 @@
+curl.exe --upload-file C:\Users\Leon\Desktop\healthbook.war "http://tomcat:leoncool@wikihealth.bigdatapro.org:55555/manager/html/deploy?path=/healthbook&update=true"

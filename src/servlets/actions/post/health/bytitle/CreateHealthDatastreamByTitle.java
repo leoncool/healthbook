@@ -158,7 +158,7 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 							unit.getValue_type());
 					return;
 				}else{
-					unit.setValue_type(UnitValueTypes.DOUBLE_TYPE);
+					unit.setValue_type(unit.getValue_type());
 				}
 				}
 			}
