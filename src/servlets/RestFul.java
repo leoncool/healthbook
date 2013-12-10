@@ -131,7 +131,10 @@ import servlets.device.actions.GetDeviceList;
 import servlets.device.actions.PostBindingDeviceSerial;
 import servlets.device.actions.PostDevice;
 import servlets.device.actions.PostDeviceDatapoints;
+import servlets.humanmodels.get.GetTemperatureSimulation;
+import servlets.util.HMServerUtil;
 import util.AllConstants.api_entryPoints;
+
 //import servlets.actions.get.GetDataPointsLocalDebug;
 
 /**
@@ -303,6 +306,10 @@ public class RestFul extends HttpServlet {
 			System.out.println("isPostHealthDataPointThroughUnitIDfromURL");
 			PostSingleUnstructuredDatapointThroughHealthTitle proceReq = new PostSingleUnstructuredDatapointThroughHealthTitle();
 			proceReq.processRequest(req, resp);
+		} else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
+			System.out.println("isBodyTemperatureSimulation");
+			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
+			proceReq.processRequest(req, resp);
 		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
@@ -359,11 +366,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("DeleteSingleHealthDSUnitByID");
 			DeleteSingleHealthDSUnitByID proceReq = new DeleteSingleHealthDSUnitByID();
 			proceReq.processRequest(req, resp);
-		}  else if (isDeleteHealthDataBlock(ServletPath(req))) {
+		} else if (isDeleteHealthDataBlock(ServletPath(req))) {
 			System.out.println("DeleteSingleHealthDSUnitByID");
 			DeleteAHealthDataBlock proceReq = new DeleteAHealthDataBlock();
 			proceReq.processRequest(req, resp);
-		}  else if (isDeleteHealthDatapoints(ServletPath(req))) {
+		} else if (isDeleteHealthDatapoints(ServletPath(req))) {
 			System.out.println("isDeleteHealthDatapoints");
 			DeleteHealthDatapoints proceReq = new DeleteHealthDatapoints();
 			proceReq.processRequest(req, resp);
