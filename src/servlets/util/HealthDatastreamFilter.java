@@ -8,7 +8,6 @@ import health.input.util.DBtoJsonUtil;
 
 import java.io.IOException;
 
-import javax.persistence.NonUniqueResultException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,7 +27,7 @@ public class HealthDatastreamFilter {
 		try {
 			datastream = dstreamDao.getHealthDatastreamByTitle(
 					subject.getId(), streamTitle, true, false);
-		} catch (NonUniqueResultException ex) {
+		} catch (Exception ex) {
 			ReturnParser.outputErrorException(response,
 					AllConstants.ErrorDictionary.Internal_Fault, null,
 					streamTitle);

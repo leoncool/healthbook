@@ -477,7 +477,11 @@ public class RestFul extends HttpServlet {
 			AddSingleHealthDSUnit proceReq = new AddSingleHealthDSUnit();
 			proceReq.processRequest(req, resp);
 		}
-
+		else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
+			System.out.println("isPostBodyTemperatureSimulation");
+			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
+			proceReq.processRequest(req, resp);
+		} 
 		else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("Post Ruqeest isGetUserToken:");
 			GetAUserToken proceReq = new GetAUserToken();

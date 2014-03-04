@@ -8,6 +8,7 @@ import health.database.DAO.FollowingDAO;
 import health.database.DAO.UserDAO;
 import health.database.models.Follower;
 import health.database.models.merge.UserInfo;
+import health.input.jsonmodels.JsonDatastreamBlock;
 import health.input.jsonmodels.JsonUserInfo;
 import health.input.util.DBtoJsonUtil;
 
@@ -32,7 +33,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
-import com.humanmodel.HumanTemperature;
+import com.physiology.calculator.HumanTemperature;
+import com.physiology.input.jsonmodels.JsonTemperature;
 
 /**
  * 
@@ -62,15 +64,90 @@ public class GetTemperatureSimulation extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		JsonUtil jutil = new JsonUtil();
 		Gson gson = new Gson();
+
+		String input = jutil.readJsonStrFromHttpRequest(request);
+		JsonTemperature jobject = null;
+		HashMap<String, Object> inputs = new HashMap<String, Object>();
+		double weight = 0;
+		double WORK = 74;
+		double RH = 0.3;
+		double TAIR = 25;
+		double VAIR = 0.1;
+		int elapsed_seconds = 60;
 		try {
-			System.out.println("start....");
-			HumanTemperature ht = new HumanTemperature();
-			HashMap<String, Object> results = ht.CalculateTemperature(null);
-			double[] Tnew = (double[]) results.get("T");
-			for (int i = 1; i <= 25; i++) {
-				out.println(Tnew[i]);
+			jobject = gson.fromJson(input, JsonTemperature.class);
+			if (jobject.getWeight() > 0) {
+				weight = jobject.getWeight();
 			}
+			if (jobject.getWork() > 0) {
+				WORK = jobject.getWork();
+			}
+			if (jobject.getRh() > 0) {
+				RH = jobject.getRh();
+			}
+			if (jobject.getTair() > 0) {
+				TAIR = jobject.getTair();
+			}
+			if (jobject.getVair() > 0) {
+				VAIR = jobject.getVair();
+			}
+			if (jobject.getElapsed_seconds() > 0) {
+				elapsed_seconds = jobject.getElapsed_seconds();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Input_Json_Format_Error, null,
+					null);
+			return;
+		}
+		try {
+			HumanTemperature ht = new HumanTemperature();
+			System.out.println("start....");
+
+			try {
+				double[] T = HumanTemperature
+						.convertStringToDoubleArray(jobject.getT_list());
+				inputs.put("T", T);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Input_Json_Format_Error,
+						"temperature syntax error", "temperature syntax error");
+				return;
+			}
+			inputs.put("weight", weight);
+			inputs.put("RH", RH);
+			inputs.put("WORK", WORK);
+			inputs.put("TAIR", TAIR);
+			inputs.put("VAIR", VAIR);
+			inputs.put("elapsed_seconds", elapsed_seconds);
+			HashMap<String, Object> results = HumanTemperature
+					.CalculateTemperature(inputs);
+			if (results == null) {
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
+				return;
+			}
+			double[] Tnew = (double[]) results.get("T");
 			System.out.println("finish....");
+			jobject.setT_average((Double) results.get("t_average"));
+			jobject.setT_list(HumanTemperature.convertDoubleArrayToString(Tnew));
+			JsonElement je = gson.toJsonTree(jobject);
+			jobject.setElapsed_seconds(elapsed_seconds);
+			jobject.setWork(WORK);
+			jobject.setRh(RH);
+			jobject.setWeight(weight);
+			jobject.setTair(TAIR);
+			jobject.setVair(VAIR);
+			JsonObject jo = new JsonObject();
+			jo.addProperty(AllConstants.ProgramConts.result,
+					AllConstants.ProgramConts.succeed);
+			jo.add("temperature", je);
+			JsonWriter jwriter = new JsonWriter(response.getWriter());
+			gson.toJson(jo, jwriter);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {

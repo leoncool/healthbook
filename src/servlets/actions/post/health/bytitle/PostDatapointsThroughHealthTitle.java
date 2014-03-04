@@ -289,7 +289,14 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 						null, null);
 				return;
 			}
-			jsonResult.setTotal_points(jdataImport.getData_points().size());
+			int totalInputSize=0;
+			if(jdataImport.getData_points()!=null)
+			{
+				totalInputSize=jdataImport.getData_points().size();
+			}else if (jdataImport.getData_points_single_list()!=null){
+				totalInputSize=jdataImport.getData_points_single_list().size();
+			}
+			jsonResult.setTotal_points(totalInputSize);
 			jsonResult.setTotal_input_byte(jsonInputTotalByte);
 			JsonElement je = gson.toJsonTree(jsonResult);
 			JsonObject jo = new JsonObject();
