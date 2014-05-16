@@ -157,8 +157,10 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 							AllConstants.ErrorDictionary.Invalid_ValueType,
 							unit.getValue_type());
 					return;
-				}else{
-					unit.setValue_type(unit.getValue_type());
+				}
+				else
+				{
+					unit.setValue_type(UnitValueTypes.DOUBLE_TYPE); //Setting Default to double
 				}
 				}
 			}

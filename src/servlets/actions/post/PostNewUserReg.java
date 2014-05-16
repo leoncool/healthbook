@@ -234,7 +234,7 @@ public class PostNewUserReg extends HttpServlet {
 				session.save(user);
 				session.save(userDetail);
 				session.save(avatar);
-				HibernateUtil.commitTransaction();
+				session.getTransaction().commit();
 				SubjectDAO subjDao = new SubjectDAO();
 				Subject default_sub = subjDao.createDefaultHealthSubject(user
 						.getLoginID());
@@ -289,9 +289,9 @@ public class PostNewUserReg extends HttpServlet {
 	           gson.toJson(jo, jwriter);
 				String emailSubject = "";
 				// if (language.equalsIgnoreCase("cn")) {
-				// emailSubject = "Via Cloud 通知-注册确认信！";
+				// emailSubject = "Via Cloud é€šçŸ¥-æ³¨å†Œç¡®è®¤ä¿¡ï¼�";
 				// } else if (language.equalsIgnoreCase("en")) {
-				// emailSubject = "Notification-Registration Completed！";
+				// emailSubject = "Notification-Registration Completedï¼�";
 				// }
 				String MD5username = null;
 				md5 = MessageDigest.getInstance("MD5");

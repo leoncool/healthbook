@@ -148,7 +148,7 @@ public class PostUserProfilePicture extends HttpServlet {
 						Session session = HibernateUtil.beginTransaction();
 						session.update(accessUser);
 						session.saveOrUpdate(accessUser.getUserAvatar());
-						HibernateUtil.commitTransaction();
+						session.getTransaction().commit();
 						DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 						UserInfo userinfo = userDao.getUserInfo(accessUser
 								.getLoginID());
