@@ -229,13 +229,14 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 
 			if (jdataImport.getData_points_single_list() != null
 					&& jdataImport.getData_points_single_list().size() > 0) {
-				if (datastream.getDatastreamUnitsList().size() == 0) {
+				System.out.println("--------------dealing with single data point list--------");
+				if (unitIDList.size() == 0) {
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Unknown_StreamID,
 							null, datastream.getStreamId());
 					return;
 				}
-				if (datastream.getDatastreamUnitsList().size() > 1) {
+				if (unitIDList.size() > 1) {
 					ReturnParser
 							.outputErrorException(
 									response,
@@ -251,12 +252,17 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 									null, datastream.getStreamId());
 					return;
 				}
-				importData.setSingle_Unit_ID(unitList.get(0).getUnitID());
+				String singleUnitID=datastream.getDatastreamUnitsList().get(0).getShortUnitID();
+				if(singleUnitID==null||singleUnitID.length()<3){
+					singleUnitID=datastream.getDatastreamUnitsList().get(0).getUnitID();
+				}
+				importData.setSingle_Unit_ID(singleUnitID);
 				importData.setData_points_single_list(jdataImport
 						.getData_points_single_list());
 				importData.setDatastream_id(datastream.getStreamId());
 				importData.setBlock_id(jdataImport.getBlock_id());
 			} else {
+				System.out.println("--------------dealing with normal data point list--------");
 				if (jdataImport.getData_points() == null
 						|| jdataImport.getData_points().size() < 1) {
 					ReturnParser.outputErrorException(response,

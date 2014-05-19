@@ -398,9 +398,37 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 								.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
 							DateUtil dateUtil = new DateUtil();
 							diDao=new HBaseDatapointDAO();
-							hbaseexport = diDao.exportDatapoints(
-									datastream.getStreamId(), start, end,
-									blockid, mapUnits, dateUtil.millisecFormat,null);
+							boolean useSingleUnitExport=false;
+							if(request
+									.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null&&request
+											.getParameter(AllConstants.api_entryPoints.request_api_single_unit).length()>0)
+							{
+							
+								useSingleUnitExport=true;
+							}
+							
+							if(useSingleUnitExport)
+							{
+								String shortUnitID=datastream.getDatastreamUnitsList().get(0)
+										.getShortUnitID();
+								if(shortUnitID==null)
+								{
+									shortUnitID=datastream.getDatastreamUnitsList().get(0)
+									.getUnitID();
+								}
+								System.out.println("--------using single unit export with request_api_dataformat-----:"+shortUnitID);
+								hbaseexport = diDao.exportDatapointsForSingleUnit(
+										datastream.getStreamId(), start, end, blockid,
+										shortUnitID, null);
+							}
+							else{		
+								System.out.println("--------normal data export with request_api_dataformat-----");
+								hbaseexport = diDao.exportDatapoints(
+										datastream.getStreamId(), start, end,
+										blockid, mapUnits, dateUtil.millisecFormat,null);
+							}
+							
+						
 						} else {
 							HashMap<String, Object> settings=new HashMap<String, Object>();
 							if(request.getParameter(AllConstants.api_entryPoints.request_max)!=null)
@@ -423,10 +451,37 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 								DataPointsSimulators simulator=new DataPointsSimulators();
 								hbaseexport=simulator.exportHeartRateDatapoints(datastream.getStreamId(), start, end,blockid, mapUnits, null,settings);
 							}else{
+								//normal data retrieval comes from here
 								diDao=new HBaseDatapointDAO();
+								boolean useSingleUnitExport=false;
+								if(request
+										.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null&&request
+												.getParameter(AllConstants.api_entryPoints.request_api_single_unit).length()>0)
+								{
+								
+									useSingleUnitExport=true;
+								}
+								
+								if(useSingleUnitExport)
+								{
+									String shortUnitID=datastream.getDatastreamUnitsList().get(0)
+											.getShortUnitID();
+									if(shortUnitID==null)
+									{
+										shortUnitID=datastream.getDatastreamUnitsList().get(0)
+										.getUnitID();
+									}
+									System.out.println("--------using single unit export-----:"+shortUnitID);
+									hbaseexport = diDao.exportDatapointsForSingleUnit(
+											datastream.getStreamId(), start, end, blockid,
+											shortUnitID, null);
+								}
+								else{		
+									System.out.println("--------normal data export-----");
 								hbaseexport = diDao.exportDatapoints(
 										datastream.getStreamId(), start, end,
 										blockid, mapUnits, null,settings);
+								}
 							}
 							
 						}
@@ -481,7 +536,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				// response.setHeader("Vary", "Accept-Encoding");
 				Date timerStart = new Date();
 				hbaseexport.setStream_title(datastream.getTitle());
-				hbaseexport.setDatastream_id(null);
+				hbaseexport.setDatastream_id(datastream.getStreamId());
 				hbaseexport.setDevice_id(null);
 				JsonElement je = gson.toJsonTree(hbaseexport);
 				JsonObject jo = new JsonObject();
