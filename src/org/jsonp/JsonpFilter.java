@@ -68,7 +68,13 @@ public class JsonpFilter implements Filter {
 
 	public void doFilter(final ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
-        
+		String path = ((HttpServletRequest) req).getServletPath();
+		System.out.println("doFiltering:"+path);
+//		if (path.startsWith("/index.jsp")) {
+//			System.out.println("Getting Index JSP:"+path);
+//		    chain.doFilter(req, resp); // Just continue chain.
+//		    return;
+//		} 
 
 		if (resp instanceof HttpServletResponse && isJsonp(req)) {
 

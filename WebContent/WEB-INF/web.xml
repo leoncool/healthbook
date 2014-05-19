@@ -37,7 +37,7 @@
   </filter>
   <filter-mapping>
     <filter-name>jsonp</filter-name>
-    <url-pattern>*</url-pattern>
+    <url-pattern>/v1/*</url-pattern>
   </filter-mapping>
   <mime-mapping>
     <extension>json</extension>
