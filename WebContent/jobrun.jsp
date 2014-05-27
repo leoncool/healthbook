@@ -25,7 +25,6 @@
 			OctaveEngine octave = octaveFactory.getScriptEngine();
 			octave.setWriter(stdout);
 		
-			
 			octave.eval("main");
 			octave.close();
 			String outPut=stdout.toString();
