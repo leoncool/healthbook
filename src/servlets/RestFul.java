@@ -124,6 +124,7 @@ import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
+import servlets.analysis.service.getImage;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceBindingList;
 import servlets.device.actions.GetDeviceDataPoints;
@@ -134,6 +135,8 @@ import servlets.device.actions.PostDeviceDatapoints;
 import servlets.humanmodels.get.GetTemperatureSimulation;
 import servlets.util.HMServerUtil;
 import util.AllConstants.api_entryPoints;
+
+import com.analysis.service.AnalysisWrapperUtil;
 
 //import servlets.actions.get.GetDataPointsLocalDebug;
 
@@ -310,7 +313,13 @@ public class RestFul extends HttpServlet {
 			System.out.println("isBodyTemperatureSimulation");
 			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
 			proceReq.processRequest(req, resp);
-		} else {
+		} else if (AnalysisWrapperUtil.isGetImage(ServletPath(req))) {
+			System.out.println("isGetImage");
+			getImage proceReq = new getImage();
+			proceReq.processRequest(req, resp);
+		}
+
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
@@ -476,13 +485,11 @@ public class RestFul extends HttpServlet {
 			System.out.println("AddSingleHealthDSUnit");
 			AddSingleHealthDSUnit proceReq = new AddSingleHealthDSUnit();
 			proceReq.processRequest(req, resp);
-		}
-		else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
+		} else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
 			System.out.println("isPostBodyTemperatureSimulation");
 			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isGetUserToken(ServletPath(req))) {
+		} else if (isGetUserToken(ServletPath(req))) {
 			System.out.println("Post Ruqeest isGetUserToken:");
 			GetAUserToken proceReq = new GetAUserToken();
 			proceReq.processRequest(req, resp);
