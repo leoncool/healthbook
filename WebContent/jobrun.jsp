@@ -1,3 +1,4 @@
+<%@page import="javax.activation.MimetypesFileTypeMap"%>
 <%@page import="com.google.gson.Gson"%>
 <%@page import="health.input.jsonmodels.JsonDataPoints"%>
 <%@page import="com.analysis.service.*"%>
@@ -22,17 +23,13 @@
 		jobID = request.getParameter("jobid") != null ? request
 				.getParameter("jobid") : "";
 	%>
-	<h1>
-		Analysis Model Logs:
-		<%
-		out.println(jobID);
-	%>
-	</h1>
+
 	<%
 		String outputLog = "";
-		File folder = new File("F:/octave/");
+		String tmpfolderPath = "F:/octave/";
+		File folder = new File(tmpfolderPath);
+		String outputFolderURLPath = "http://localhost:8080/healthbook/as/getFile?path=";
 		if (folder.exists()) {
-
 			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 			StringWriter stdout = new StringWriter();
 			OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
@@ -46,20 +43,36 @@
 			ArrayList<ASOutput> outputList = new ArrayList<ASOutput>();
 			ASInput input1 = new ASInput();
 			input1.setName("input1");
-			input1.setType("string");
+			input1.setType(AScontants.StringType);
 			input1.setValue("input1.txt");
 			// ASInput input2 = new ASInput();
 			// input2.setName("input2");
 			ASOutput output1 = new ASOutput();
 			output1.setName("output1");
-			output1.setType("sensordata");
+			output1.setType(AScontants.sensordataType);
+			ASOutput output2 = new ASOutput();
+			output2.setName("output2");
+			output2.setType(AScontants.fileType);
+			ASOutput output3 = new ASOutput();
+			output3.setName("output3");
+			output3.setType(AScontants.fileType);
 			inputList.add(input1);
 			// inputList.add(input2);
 			outputList.add(output1);
+			outputList.add(output2);
+			outputList.add(output3);
 			String mainFunctionString = awU.createMainFunction("main3",
 					inputList, outputList);
+	%>
 
-			for (ASInput input : inputList) {
+	<h1>Analysis Input and Function:</h1>
+	<p>
+		<%
+			out.println(mainFunctionString);
+		%>
+	</p>
+	<%
+		for (ASInput input : inputList) {
 				if (input.getType().equals("string")) {
 					OctaveString octaveInput = new OctaveString(
 							(String) input.getValue());
@@ -68,41 +81,149 @@
 
 			}
 
+			boolean OctaveExecutionSuccessful = false;
 			try {
 				octave.eval(mainFunctionString);
+				OctaveExecutionSuccessful=true;
 			} catch (Exception ex) {
-				ex.printStackTrace();
+		//		ex.printStackTrace();
 				System.out.println(ex.getMessage());
+				outputLog=outputLog+ex.getMessage();
+				OctaveExecutionSuccessful = false;
 			}
-			for (ASOutput output : outputList) {
-				if (output.getType() == AScontants.sensordataType) {
-					OctaveCell result = (OctaveCell) octave.get(output
-							.getName());
-					List<JsonDataPoints> datapointsList = awU
-							.unwrapOctaveSensorData(result);
-					if (datapointsList == null) {
+			if (OctaveExecutionSuccessful) {
+	%>
+	<h1>Analysis Process: <span style="color: green;">Successful</span></h1>
+	<h1>
+		Analysis Outputs:
+		<%
+		out.println(jobID);
+	%>
+	</h1>
 
-					} else {
-						Gson gson = new Gson();
-						out.println(gson.toJson(datapointsList));
+	<%
+		for (ASOutput output : outputList) {
+					if (output.getType() == AScontants.sensordataType) {
+						OctaveCell result = (OctaveCell) octave.get(output
+								.getName());
+						List<JsonDataPoints> datapointsList = awU
+								.unwrapOctaveSensorData(result);
+						if (datapointsList == null) {
+
+						} else {
+							Gson gson = new Gson();
+							out.println(gson.toJson(datapointsList));
+							
+							
+						}
+					} else if (output.getType() == AScontants.fileType) {
+						OctaveString fileOutput = (OctaveString) octave
+								.get(output.getName());
+
+						File outputFile = new File(tmpfolderPath
+								+ fileOutput.getString());
+						if (fileOutput.getString().length() < 1
+								|| !outputFile.exists()) {
+							System.out
+									.println("ERROR Found No Output File Exist or empty string:"
+											+ fileOutput.getString()
+											+ ",Exist"
+											+ outputFile.exists()
+											+ ","
+											+ outputFile.getAbsolutePath());
+							continue;
+						}
+						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
+						imageMimeTypes
+								.addMimeTypes("image png tif jpg jpeg bmp");
+
+						String mimetype = imageMimeTypes
+								.getContentType(fileOutput.getString());
+						String fileDownloadPath = outputFolderURLPath
+								+ fileOutput.getString();
+						//	String type = mimetype.split("/")[0];
+	%>
+
+	<br>
+	<table style="width: 300px">
+		<tr style="font-weight: bold;">
+			<td>Name</td>
+			<td>Type</td>
+			<td>Filename</td>
+			<td>File Link</td>
+		</tr>
+		<tr>
+			<td>
+				<%
+					out.println("Name:" + output.getName());
+				%>
+			</td>
+			<td>
+				<%
+					out.println(output.getType());
+				%>
+			</td>
+			<td>
+				<%
+					out.println(fileOutput.getString());
+				%>
+			</td>
+			<td><a target="_blank"
+				href="
+				<%out.println(fileDownloadPath);%>
+				"> <%
+ 	out.println(fileOutput.getString());
+ %>
+			</a></td>
+		</tr>
+	</table>
+	<%
+		if (fileOutput.toString().length() > 1
+								&& mimetype.startsWith("image")) {
+	%>
+	<div id="image-wrapper" style="width: 100%; text-align: center">
+		<img style="max-width: 800px" src="<%out.println(fileDownloadPath);%>" />
+	</div>
+	<br>
+	<%
+		System.out.println("Image File:"
+									+ outputFolderURLPath
+									+ fileOutput.getString());
+
+						} else if (fileOutput.toString().length() > 1
+								&& outputFile.exists()) {
+							System.out.println("Generic File:"
+									+ outputFolderURLPath
+									+ fileOutput.getString());
+						} else {
+							System.out.println("Somethign Wrong:" + "Type:"
+									+ mimetype + "," + outputFolderURLPath
+									+ fileOutput.getString());
+						}
+					} else if (output.getType() == AScontants.StringType) {
+
+					} else if (output.getType() == AScontants.integerType) {
+
+					} else if (output.getType() == AScontants.doubleType) {
+
 					}
-				} else if (output.getType() == AScontants.fileType) {
-					OctaveString fileOutput= (OctaveString)octave.get(output.getName());	
-					
-				} else if (output.getType() == AScontants.StringType) {
-
-				} else if (output.getType() == AScontants.integerType) {
-
-				} else if (output.getType() == AScontants.doubleType) {
 
 				}
 
+			}else{
+			%>
+			<h1>Analysis Process: <span style="color: red;">Failed</span></h1>
+			<%
 			}
-
+			try{
 			octave.close();
-			outputLog = stdout.toString();
+			outputLog = outputLog+stdout.toString();
 			outputLog = outputLog.replace("\n", "<br>");
-
+			}catch(Exception ex)
+			{
+				
+			}
+		
 		}
 	%>
 	<h1>
@@ -114,6 +235,7 @@
 
 	<%
 		out.println(outputLog);
+	System.out.println("outputLog:"+outputLog);
 	%>
 
 </body>

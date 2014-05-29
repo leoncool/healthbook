@@ -4,44 +4,22 @@
  */
 package servlets.analysis.service;
 
-import static util.JsonUtil.ServletPath;
-import health.database.DAO.DatastreamDAO;
-import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SubjectDAO;
-import health.database.DAO.UserDAO;
-import health.database.models.Datastream;
-import health.database.models.DatastreamUnits;
-import health.database.models.Subject;
-import health.database.models.Users;
-import health.input.jsonmodels.JsonDatastream;
-import health.input.jsonmodels.JsonDatastreamUnits;
-import health.input.util.DBtoJsonUtil;
-
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 
-import javax.persistence.NonUniqueResultException;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import server.exception.ReturnParser;
-import servlets.util.PermissionFilter;
-import servlets.util.ServerUtil;
-import util.AllConstants;
-import util.JsonUtil;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
-
 /**
  * 
  * @author Leon
  */
-public class getImage extends HttpServlet {
+public class GetFile extends HttpServlet {
 
 	/**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -58,6 +36,37 @@ public class getImage extends HttpServlet {
 	 */
 	public void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		String imagePath = request.getParameter("path");
+		if (imagePath == null) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+
+		String folderPath = "F:/octave/";
+		File imageFile = new File(folderPath + imagePath);
+
+		if (!imageFile.exists()) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		// Set content type
+//		response.setContentType(imageFile.);
+
+		// Set content size
+		response.setContentLength((int) imageFile.length());
+
+		// Open the file and output streams
+		FileInputStream in = new FileInputStream(imageFile);
+		OutputStream out = response.getOutputStream();
+
+		// Copy the contents of the file to the output stream
+		byte[] buf = new byte[1024];
+		int count = 0;
+		while ((count = in.read(buf)) >= 0) {
+			out.write(buf, 0, count);
+		}
+		in.close();
+		out.close();
 
 	}
 

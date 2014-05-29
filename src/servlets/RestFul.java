@@ -124,7 +124,7 @@ import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
-import servlets.analysis.service.getImage;
+import servlets.analysis.service.GetFile;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceBindingList;
 import servlets.device.actions.GetDeviceDataPoints;
@@ -313,9 +313,9 @@ public class RestFul extends HttpServlet {
 			System.out.println("isBodyTemperatureSimulation");
 			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
 			proceReq.processRequest(req, resp);
-		} else if (AnalysisWrapperUtil.isGetImage(ServletPath(req))) {
-			System.out.println("isGetImage");
-			getImage proceReq = new getImage();
+		} else if (AnalysisWrapperUtil.isGetFile(ServletPath(req))) {
+			System.out.println("isGetFile");
+			GetFile proceReq = new GetFile();
 			proceReq.processRequest(req, resp);
 		}
 

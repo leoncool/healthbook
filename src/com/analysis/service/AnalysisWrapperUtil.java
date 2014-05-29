@@ -28,10 +28,10 @@ public class AnalysisWrapperUtil {
 		return output.getName();
 	}
 
-	public static boolean isGetImage(String ServletPath) {
+	public static boolean isGetFile(String ServletPath) {
 		if (ServletPath.matches("^"
 				+ AllConstants.api_entryPoints.analysisservice
-				+ AllConstants.api_entryPoints.AS_getimage + "[/]*$")) {
+				+ AllConstants.api_entryPoints.AS_getfile + "[/]*$")) {
 			return true;
 		} else {
 			return false;
