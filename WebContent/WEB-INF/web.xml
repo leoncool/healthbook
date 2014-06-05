@@ -14,13 +14,13 @@
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>RestFul</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/v1/*</url-pattern>
   </servlet-mapping>
   <session-config>
     <session-timeout>30</session-timeout>
   </session-config>
   <welcome-file-list>
-    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
   <filter>
     <display-name>jsonp</display-name>

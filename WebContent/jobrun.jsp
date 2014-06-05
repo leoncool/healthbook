@@ -1,3 +1,12 @@
+<%@page import="util.AllConstants"%>
+<%@page import="server.exception.ErrorCodeException"%>
+<%@page import="health.input.util.DBtoJsonUtil"%>
+<%@page import="health.database.models.Datastream"%>
+<%@page import="health.hbase.models.HBaseDataImport"%>
+<%@page import="health.database.DAO.nosql.HBaseDatapointDAO"%>
+<%@page import="health.database.DAO.SubjectDAO"%>
+<%@page import="health.database.DAO.DatastreamDAO"%>
+<%@page import="health.input.jsonmodels.JsonDataImport"%>
 <%@page import="javax.activation.MimetypesFileTypeMap"%>
 <%@page import="com.google.gson.Gson"%>
 <%@page import="health.input.jsonmodels.JsonDataPoints"%>
@@ -26,6 +35,7 @@
 
 	<%
 		String outputLog = "";
+		String analysisDataMovementLog = "";
 		String tmpfolderPath = "F:/octave/";
 		File folder = new File(tmpfolderPath);
 		String outputFolderURLPath = "http://localhost:8080/healthbook/as/getFile?path=";
@@ -84,16 +94,18 @@
 			boolean OctaveExecutionSuccessful = false;
 			try {
 				octave.eval(mainFunctionString);
-				OctaveExecutionSuccessful=true;
+				OctaveExecutionSuccessful = true;
 			} catch (Exception ex) {
-		//		ex.printStackTrace();
+				//		ex.printStackTrace();
 				System.out.println(ex.getMessage());
-				outputLog=outputLog+ex.getMessage();
+				outputLog = outputLog + ex.getMessage();
 				OctaveExecutionSuccessful = false;
 			}
 			if (OctaveExecutionSuccessful) {
 	%>
-	<h1>Analysis Process: <span style="color: green;">Successful</span></h1>
+	<h1>
+		Analysis Process: <span style="color: green;">Successful</span>
+	</h1>
 	<h1>
 		Analysis Outputs:
 		<%
@@ -111,10 +123,48 @@
 						if (datapointsList == null) {
 
 						} else {
+
 							Gson gson = new Gson();
-							out.println(gson.toJson(datapointsList));
-							
-							
+							DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+							HBaseDataImport importData = new HBaseDataImport();
+							DatastreamDAO dsDao = new DatastreamDAO();
+							String datastreamID = "b4c45927-1c72-48b7-9bdd-1f6e920fdc87";
+							//		out.println(gson.toJson(datapointsList));
+
+							importData.setData_points(datapointsList);
+							HBaseDatapointDAO importDao = new HBaseDatapointDAO();
+							Datastream datastream = dsDao.getDatastream(
+									datastreamID, true, false);
+							if (datastream == null) {
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Cannot find datastream with id:"
+										+ datastreamID + "</p>";
+							}
+							importData.setDatastream_id(datastream
+									.getStreamId());
+							importData.setDatastream(dbtoJUtil
+									.convertDatastream(datastream, null));
+							try {
+								int totalStoredByte = importDao
+										.importDatapointsDatapoints(importData); //submit data
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Data Stored Successfully for datastream ID: "
+										+ datastreamID
+										+ ", total bytes:"
+										+ totalStoredByte + "</p>";
+								System.out.println(totalStoredByte);
+							} catch (ErrorCodeException ex) {
+								if (ex.getErrorCode()
+										.equals(AllConstants.ErrorDictionary.Input_data_contains_invalid_unit_id)) {
+									analysisDataMovementLog = analysisDataMovementLog
+											+ "<p>Contains Invalid UnitID"
+											+ "</p>";
+								}
+							} catch (Exception ex) {
+								ex.printStackTrace();
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Internal Error" + "</p>";
+							}
 						}
 					} else if (output.getType() == AScontants.fileType) {
 						OctaveString fileOutput = (OctaveString) octave
@@ -210,20 +260,21 @@
 
 				}
 
-			}else{
-			%>
-			<h1>Analysis Process: <span style="color: red;">Failed</span></h1>
-			<%
+			} else {
+	%>
+	<h1>
+		Analysis Process: <span style="color: red;">Failed</span>
+	</h1>
+	<%
+		}
+			try {
+				octave.close();
+				outputLog = outputLog + stdout.toString();
+				outputLog = outputLog.replace("\n", "<br>");
+			} catch (Exception ex) {
+
 			}
-			try{
-			octave.close();
-			outputLog = outputLog+stdout.toString();
-			outputLog = outputLog.replace("\n", "<br>");
-			}catch(Exception ex)
-			{
-				
-			}
-		
+
 		}
 	%>
 	<h1>
@@ -235,8 +286,22 @@
 
 	<%
 		out.println(outputLog);
-	System.out.println("outputLog:"+outputLog);
+		System.out.println("outputLog:" + outputLog);
 	%>
+	<h1>
+		Analysis Data Logs:
+		<%
+		out.println(jobID);
+	%>
+	</h1>
+
+	<%
+		out.println(analysisDataMovementLog);
+		System.out.println("analysisDataMovementLog:"
+				+ analysisDataMovementLog);
+	%>
+
+
 
 </body>
 </html>

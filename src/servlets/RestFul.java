@@ -177,9 +177,7 @@ public class RestFul extends HttpServlet {
 		resp.setCharacterEncoding("UTF-8");
 		System.out.println(req.getMethod() + " is coming..." + ",contextPath:"
 				+ contextPath(req) + "allow originls");
-		if (ServletPath(req).equals("/" + api_entryPoints.version1)) {
-			System.out.println("severlet Path is /");
-		} else if (isGetSubjectsListReq(ServletPath(req))) {
+		if (isGetSubjectsListReq(ServletPath(req))) {
 			GetSubjectList proceReq = new GetSubjectList();
 			proceReq.processRequest(req, resp);
 		} else if (isGetAPI_Document_Json(ServletPath(req))) {

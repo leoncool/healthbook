@@ -107,7 +107,7 @@ public class AnalysisWrapperUtil {
 		}
 		List<JsonDataPoints> data_points = new ArrayList<>();
 		// timestamp.getData().length
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < timestampList.length; i++) {
 			// matlab and java array difference is 1
 			JsonDataPoints point = new JsonDataPoints();
 
@@ -139,7 +139,7 @@ public class AnalysisWrapperUtil {
 				double sensorValue = sensorOctaveValue.getData()[i];
 				value.setVal(Double.toString(sensorValue));
 				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
-						&& valueTag.length() > 1 && !valueTag.equals(".")) {
+						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
 				}
 				value_list.add(value);
