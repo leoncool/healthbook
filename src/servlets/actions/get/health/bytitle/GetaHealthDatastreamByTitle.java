@@ -100,6 +100,13 @@ public class GetaHealthDatastreamByTitle extends HttpServlet {
 			SubjectDAO subjDao = new SubjectDAO();
 			Subject subject = (Subject) subjDao
 					.findHealthSubject(targetLoginID); // Retreive
+			if(targetLoginID==null||targetLoginID=="")
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Invalid_LoginID, null,
+						null);
+				return;
+			}
 			if (subject == null) {
 				try {
 					subject = subjDao.createDefaultHealthSubject(targetLoginID);

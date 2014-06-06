@@ -3,13 +3,12 @@ package com.analysis.service;
 import health.input.jsonmodels.JsonDataPoints;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
+import util.AScontants;
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
-import dk.ange.octave.type.OctaveDouble;
 import dk.ange.octave.type.OctaveString;
 
 public class TestECG_2 {

@@ -254,7 +254,7 @@ public class FitbitTimer extends HttpServlet {
 
 						}
 					} else {
-						if (!fitbitlog.isFinished) {
+						if (!fitbitlog.checkisFinished()) {
 							LocalDate fitbitDate = LocalDate
 									.fromDateFields(fitbitlog.getDate());
 							importStepsData(apiinfo, fitbitDate,

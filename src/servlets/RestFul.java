@@ -311,13 +311,7 @@ public class RestFul extends HttpServlet {
 			System.out.println("isBodyTemperatureSimulation");
 			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
 			proceReq.processRequest(req, resp);
-		} else if (AnalysisWrapperUtil.isGetFile(ServletPath(req))) {
-			System.out.println("isGetFile");
-			GetFile proceReq = new GetFile();
-			proceReq.processRequest(req, resp);
-		}
-
-		else {
+		} else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
