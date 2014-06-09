@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>Service Publisher</title>
+
+<!-- Bootstrap core CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="css/custom-styles.css" rel="stylesheet">
+
+<!-- Just for debugging purposes. Don't actually copy this line! -->
+<!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.form.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+
+</head>
+
+<body>
+
+
+<!--Header-->
+
+
+<div class="navbar navbar-inverse nav-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+      <a class="navbar-brand" href="#"> <img src="img/logo.png" alt="logo" class="img-responsive"> </a> </div>
+  
+  
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-left">
+        <li class="active"><a href="#">My Health</a></li>
+        <li><a href="#">News Feed</a></li>
+        <li><a href="#">Community</a></li>
+        <li><a href="#">Events</a></li>
+         <li><a href="#">Groups</a></li>
+      </ul>
+      <div class="navbar-form navbar-right">
+       <a class="pull-left" href="#"> <img class="img-circle img-responsive" src="img/user.png" alt="avatar" /> </a>
+          
+            <div class="btn-group top-user">
+              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"> LEON <span class="caret"></span> </button>
+              <ul class="dropdown-menu" role="menu">
+                <li class="active"><a href="#">Info</a></li>
+                
+                <li class="divider"></li>
+                <li><a href="#">Log Out</a></li>
+              </ul>
+            </div>
+          
+       
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--End Header -->
+
+
+
+<div class="clearfix"></div>
+
+<!-- Main Container -->
+
+<div class="container">
+<div class="row text-center">
+<h1 class="page-head"><img src="img/model.png" >  Model Publisher</h1>
+
+</div>
+
+
+  
+  
+  <div class="gap"></div>
+  <div class="row ">
+ 
+  
+  <!--Content Container-->
+    
+    <div class="col-sm-12 col-md-12 col-xs-12 col-lg-12 main white">
+      <div class="page-header page">
+      <div id="output"></div>
+
+       <h1 class="model-head"><img src="img/ecg.png" width="26" height="26" class="pull-left ico">Step 1. Please enter the basic Information for your model </h1>
+          
+        <div class="clearfix"></div>
+      </div>
+      
+     
+      
+       <!--Content-->
+       
+  <!--     <h3 class="pull-left product">Please enter the Information required for the model execution </h3>
+       
+      <div class="clearfix"></div>
+       <hr>
+       -->
+       
+       
+      <div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Basic Information</h3>
+  </div>
+          <div class="panel-body">
+    <br>
+
+    
+    <form id="model_form" enctype="multipart/form-data" method="post" class="form-horizontal" role="form" action="http://localhost:8080/healthbook/PostAnalysisService1">
+  
+  <div class="form-group">
+    <label for="model_name" class="col-sm-2 control-label">Model Name <span class="sub-tag">This Field is Required</span> </label>
+    
+    <div class="col-sm-6">
+      <input type="text" name="model_name" class="form-control" id="model_name" placeholder="Enter unique model name" onchange="">
+    </div>
+      <div id="model_name_result"></div>
+  </div>
+
+  
+  <div class="form-group">
+    <label for="model_thumbnail" class="col-sm-2 control-label">Model Thumbnail </label>
+    
+    <div class="col-sm-6">
+      <input type="file" class="form-control" name="model_thumbnail" id="model_thumbnail">
+    </div>
+  </div>
+  
+  
+  
+  <div class="form-group">
+    <label for="model_pricing_model" class="col-sm-2 control-label">Pricing Model</label>
+    
+    <div class="col-sm-6">
+      <select name="model_pricing_model" class="form-control" id="model_pricing_model">
+          <option value="">Free</option>
+          <option value="">One-time fee and unlimited use</option>
+          <option value="">Pay per use</option>
+          <option value="">Pay Monthly and unlimited use</option>
+        </select>
+    </div>
+  </div>
+        <div class="form-group">
+            <label for="model_price" class="col-sm-2 control-label">Price <span class="sub-tag">This Field is Required</span> </label>
+
+            <div class="col-sm-6">
+                <input type="number" name="model_price"  class="form-control" id="model_price" placeholder="Enter the price">
+            </div>
+        </div>
+
+        <div class="form-group">
+    <label for="model_description" class="col-sm-2 control-label">Description</label>
+    
+    <div class="col-sm-6">
+     <textarea class="form-control" name="model_description" id="model_description" rows="8" placeholder="Enter Description"></textarea>
+    </div>
+  </div>
+  
+  
+  <div class="form-group">
+    <label for="inputPassword3" class="col-sm-2 control-label">Required Permissions</label>
+    
+    <div class="col-sm-6">
+     <div class="checkbox">
+        <label>
+          <input type="checkbox"> ECG Sensor Datastream Read/Write Permissions
+        </label>
+        
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox"> Heigh Weight Age Information
+        </label>
+        
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword3" class="col-sm-2 control-label">Required Inputs and Formats</label>
+    
+    <div class="col-sm-6">
+      <select class="form-control">
+          <option value="">ECG Sensor Datastream</option>
+          <option value="">ECG Sensor Datastream</option>
+          <option value="">ECG Sensor Datastream</option>
+        </select>
+    </div>
+  </div>
+  
+  
+  <div class="form-group">
+    <label for="terms" class="col-sm-2 control-label">Terms & Conditions</label>
+    
+    <div class="col-sm-6">
+     <textarea class="form-control" name="terms" id="terms" rows="8" placeholder="Enter Terms"></textarea>
+    </div>
+  </div>
+
+
+            <div class="form-group">
+                <h1 class="service-head col-lg-12">Model Upload</h1>
+                        <label for="model_zip_file" class="col-sm-2 control-label">Upload a ZIp File Containg Functions
+                        </label>
+
+                        <div class="col-sm-6">
+
+                            <input type="file" id="model_zip_file" name="model_zip_file" class="form-control">
+
+                        </div>
+                    </div>
+              <!--      <div class="form-group">
+                        <label for="main_function_name" class="col-sm-2 control-label">Filename of Main Function </label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" name="main_function_name" id="main_function_name" placeholder="Enter your main function name">
+                        </div>
+                    </div>-->
+        <button class="btn btn-success btn-lg pull-right" type="submit" >Submit and Next</button>
+                </form>
+    
+    
+  </div>
+          <div class="clearfix"></div>
+
+
+          <br>
+          <br>
+          <br>
+</div>
+       
+
+    
+  </div>
+</div>
+
+      <!--End Content-->
+      
+      <div class="gap"></div>
+
+<br>
+<br>
+<br>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  <!--End Content Container-->
+    
+  </div>
+
+
+</div>
+<!--End Main Container -->
+<div class="gap"></div>
+<!--Footer -->
+
+<div class="footer">
+    <div class="container">
+        <div class="col-lg-4">
+            <h3 class="foot-head">Browse Site</h3>
+
+            <ul class="footlinks col-lg-6 col-xs-6">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Overview</a></li>
+                <li><a href="#">Login</a></li>
+            </ul>
+            <ul class="footlinks col-lg-6 col-xs-6">
+
+                <li><a href="#">Register</a></li>
+                <li><a href="#">Publish Service</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="col-lg-3">
+            <h3 class="foot-head">Keep In Touch</h3>
+            <p class="touch-txt">Connect to us.</p>
+            <a href="#"><img src="img/fb.png" width="32" height="32"></a>
+            <a href="#"><img src="img/twtr.png" width="32" height="32"></a>
+
+        </div>
+  
+  <div class="col-lg-3 pull-right visible-lg">
+
+      <input type="text" class="form-control"  placeholder="Search Site">
+     
+   
+  
+  </div>
+  
+  
+  </div>
+  
+  </div>
+
+<!--End Footer -->
+
+
+
+<!-- Bootstrap core JavaScript
+    ================================================== --> 
+<!-- Placed at the end of the document so the pages load faster -->
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
+<!--<script src="js/bootstrap.min.js"></script>-->
+
+<script type="text/javascript">
+    $('#model_name').change(function(){
+
+        // You can access the value of your select field using the .val() method
+        var model_name=$('#model_name').val();
+        if(model_name.length<5)
+        {
+        return;
+        }
+        var options = {
+            target:        '#output',   // target element(s) to be updated with server response
+            beforeSubmit: function(formData, jqForm, options) {
+
+            },
+            success:       function (responseText, statusText, xhr, $form) {
+
+                var result=responseText;
+
+                if(result.result=='error'&&result.errorCode=='unknown_analysis_model_name')
+                {
+                $('#model_name_result').html('<p style="color: green">Valid</p>');
+
+                }else{
+                $('#model_name_result').html('<p style="color: red">Already Exist</p>');
+                }
+            },
+
+
+            // other available options:
+            url:       "http://localhost:8080/healthbook/GetModelMetadata?model_name="+model_name ,        // override for form's 'action' attribute
+            type:      'get'  ,      // 'get' or 'post', override for form's 'method' attribute
+            dataType:  'json'        // 'xml', 'script', or 'json' (expected server response type)
+            //clearForm: true        // clear all form fields after successful submit
+            //resetForm: true        // reset the form after successful submit
+
+            // $.ajax options can be used here too, for example:
+            //timeout:   3000
+        };
+        $(this).ajaxSubmit(options);
+
+    });
+    // Attach a submit handler to the form
+    $(document).ready(function() {
+        var options = {
+            target:        '#output',   // target element(s) to be updated with server response
+            beforeSubmit:  showRequest,  // pre-submit callback
+            success:       showResponse,  // post-submit callback
+
+            // other available options:
+            url:       "http://localhost:8080/healthbook/PostAnalysisService1" ,        // override for form's 'action' attribute
+            type:      'post'  ,      // 'get' or 'post', override for form's 'method' attribute
+            dataType:  'json'        // 'xml', 'script', or 'json' (expected server response type)
+            //clearForm: true        // clear all form fields after successful submit
+            //resetForm: true        // reset the form after successful submit
+
+            // $.ajax options can be used here too, for example:
+            //timeout:   3000
+        };
+
+        // bind to the form's submit event
+        $('#model_form').submit(function() {
+            // inside event callbacks 'this' is the DOM element so we first
+            // wrap it in a jQuery object and then invoke ajaxSubmit
+
+            $(this).ajaxSubmit(options);
+          //  $body.removeClass("loading");
+            // !!! Important !!!
+            // always return false to prevent standard browser submit and page navigation
+            return false;
+        });
+    });
+
+    // pre-submit callback
+    function showRequest(formData, jqForm, options) {
+        $body = $("body");
+        $body.addClass("loading");
+
+        // formData is an array; here we use $.param to convert it to a string to display it
+        // but the form plugin does this for you automatically when it submits the data
+        var queryString = $.param(formData);
+
+        // jqForm is a jQuery object encapsulating the form element.  To access the
+        // DOM element for the form do this:
+         var formElement = jqForm[0];
+
+//        alert('About to submit: \n\n' + queryString);
+
+        // here we could return false to prevent the form from being submitted;
+        // returning anything other than false will allow the form submit to continue
+        return true;
+    }
+
+    // post-submit callback
+    function showResponse(responseText, statusText, xhr, $form)  {
+        $body = $("body");
+        $body.removeClass("loading");
+
+        // for normal html responses, the first argument to the success callback
+        // is the XMLHttpRequest object's responseText property
+
+        // if the ajaxSubmit method was passed an Options Object with the dataType
+        // property set to 'xml' then the first argument to the success callback
+        // is the XMLHttpRequest object's responseXML property
+
+        // if the ajaxSubmit method was passed an Options Object with the dataType
+        // property set to 'json' then the first argument to the success callback
+        // is the json data object returned by the server
+
+       /* alert('status: ' + statusText + '\n\nresponseText: \n' + responseText +
+                '\n\nThe output div should have already been updated with the responseText.');*/
+        var result=responseText;
+        $.removeCookie('model_id');
+        $.removeCookie('totalInputs');
+        $.removeCookie('totalOutputs');
+        if(result.result=='succeed')
+        {
+            var model_id=result.analysis_model.id;
+            var totalInputs=result.analysis_model.totalInputs;
+            var totalOutputs=result.analysis_model.totalOutputs;
+            $.cookie("model_id", model_id, { expires: 1 });
+            $.cookie("totalInputs", totalInputs, { expires: 1 });
+            $.cookie("totalOutputs", totalOutputs, { expires: 1 });
+            window.location = 'service-publish2.html';
+        }else{
+            alert(result.errorCode+",targetObject:"+result.targetObject);
+        }
+    }
+</script>
+<div class="modal"><!-- Place at bottom of page --></div>
+</body>
+</html>
