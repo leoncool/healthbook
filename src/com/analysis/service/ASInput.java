@@ -5,6 +5,8 @@ private String name;
 private String type;
 private String notes;
 private Object value;
+private String source;
+
 public String getName() {
 	return name;
 }
@@ -28,6 +30,12 @@ public Object getValue() {
 }
 public void setValue(Object value) {
 	this.value = value;
+}
+public String getSource() {
+	return source;
+}
+public void setSource(String source) {
+	this.source = source;
 }
 
 
