@@ -86,6 +86,7 @@ public class PostAnalysisService2 extends HttpServlet {
 		}
 		return true;
 	}
+
 	public static boolean validateOutputModelEntries(
 			List<AnalysisModelEntry> entryList) {
 		HashMap<String, String> allowedDataTypes = new HashMap<>();
@@ -111,17 +112,20 @@ public class PostAnalysisService2 extends HttpServlet {
 				System.out.println("missing output data action");
 				return false;
 			}
-			if(entry.getDataType()==AScontants.AlertType)
-			{
-				if(entry.getDataAction()!=AScontants.dataaction_alert&&entry.getDataAction()!=AScontants.dataaction_ignore)
-				{
+			if (entry.getEntry_name() == null) {
+				System.out.println("missing output data action");
+				return false;
+			}
+			if (entry.getDataType() == AScontants.AlertType) {
+				if (entry.getDataAction() != AScontants.dataaction_alert
+						&& entry.getDataAction() != AScontants.dataaction_ignore) {
 					System.out.println("error with data action for alert");
 					return false;
 				}
-			}else{
-				if(entry.getDataAction()==AScontants.dataaction_alert)
-				{
-					System.out.println("error with data action for other types than alert");
+			} else {
+				if (entry.getDataAction() == AScontants.dataaction_alert) {
+					System.out
+							.println("error with data action for other types than alert");
 					return false;
 				}
 			}
@@ -129,6 +133,7 @@ public class PostAnalysisService2 extends HttpServlet {
 		}
 		return true;
 	}
+
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
@@ -195,11 +200,15 @@ public class PostAnalysisService2 extends HttpServlet {
 						if (value.length() > 1) {
 							entry.setDataType(value);
 						}
+					} else if (param.contains("name")) {
+						if (value.length() > 1) {
+							entry.setEntry_name(value);
+						}
 					}
 					inputEntryList.set((order - 1), entry);
 				} else if (param.startsWith("output")) {
 					int order = parseEntryID(param);
-					System.out.println("output order:"+order);
+					System.out.println("output order:" + order);
 					if (outputEntryList.size() < (order)) {
 						break;
 					}
@@ -217,10 +226,13 @@ public class PostAnalysisService2 extends HttpServlet {
 						if (value.length() > 1) {
 							entry.setDataType(value);
 						}
-					}
-					else if (param.contains("dataaction")) {
+					} else if (param.contains("dataaction")) {
 						if (value.length() > 1) {
 							entry.setDataAction(value);
+						}
+					} else if (param.contains("name")) {
+						if (value.length() > 1) {
+							entry.setEntry_name(value);
 						}
 					}
 					outputEntryList.set((order - 1), entry);
@@ -230,17 +242,19 @@ public class PostAnalysisService2 extends HttpServlet {
 			if (validateInputModelEntries(inputEntryList) == false) {
 
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null, "Input Entries");
+						AllConstants.ErrorDictionary.MISSING_DATA, null,
+						"Input Entries");
 				return;
 			}
-			
+
 			if (validateOutputModelEntries(outputEntryList) == false) {
 
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null, "Output Entries");
+						AllConstants.ErrorDictionary.MISSING_DATA, null,
+						"Output Entries");
 				return;
 			}
-			List<AnalysisModelEntry> totalEntryList=new ArrayList<>();
+			List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			totalEntryList.addAll(inputEntryList);
 			totalEntryList.addAll(outputEntryList);
 			asDao.updateModelEntries(totalEntryList);
