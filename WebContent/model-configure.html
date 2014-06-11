@@ -207,6 +207,13 @@
 <!--End Footer -->
 
 <script type="text/javascript">
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
 //global parameters and variables
 var model_id = "";
 var totalInputs = 0;
@@ -219,17 +226,19 @@ var doneRetrivingDS = false;
 // Attach a submit handler to the form
 $(document).ready(function () {
 
-    if ($.cookie("model_id") == undefined || $.cookie("totalInputs") == undefined || $.cookie("totalOutputs") == undefined) {
-        alert("Error - Please ensure cookie is enabled!");
-        parent.history.back();
-        return false;
-    }
+
     service_id = $.cookie("service_id");
 
     if (service_id == "" || service_id == undefined) {
-        alert("There is some data missing, please go back to previous page and upload your model again!");
+        if(getParameterByName('service_id')==undefined||getParameterByName('service_id').length<1)
+        {
+        alert("Please ensure cookie is enabled in your browser! service id is missing");
         return;
-    }
+        }else{
+            service_id=getParameterByName('service_id');
+            $.cookie("service_id", service_id, { expires: 1 });
+        }
+        }
 
     var getServiceandModel = {
         target: '#output',   // target element(s) to be updated with server response

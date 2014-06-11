@@ -124,7 +124,6 @@
 						if (datapointsList == null) {
 
 						} else {
-
 							Gson gson = new Gson();
 							DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 							HBaseDataImport importData = new HBaseDataImport();
