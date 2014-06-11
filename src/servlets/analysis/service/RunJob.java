@@ -140,12 +140,10 @@ public class RunJob extends HttpServlet {
 			ASInput input = new ASInput();
 			input.setName("input" + Integer.toString(i + 1));
 			input.setType(inputEntryList.get(i).getDataType());
-
+			String source = request.getParameter("input"
+					+ Integer.toString(i + 1) + "_source");
 			try {
-				if (request.getParameter("input" + Integer.toString(i + 1)
-						+ "_source") != null) {
-					String source = request.getParameter("input"
-							+ Integer.toString(i + 1) + "_source");
+				if (source != null && source.length() > 1) {
 					input.setSource(source);
 				} else {
 					System.out
@@ -307,102 +305,106 @@ public class RunJob extends HttpServlet {
 					ex.printStackTrace();
 					System.out.println(ex.getMessage());
 					outputLog = outputLog + ex.getMessage();
+					analysisDataMovementLog=analysisDataMovementLog+ex.getMessage();
 					OctaveExecutionSuccessful = false;
 					WholeJobFinishedSuccessful = false;
 				}
 
 				// result.setJobLog((outputLog);
-
-				for (int i = 0; i < outputList.size(); i++) {
-					ASOutput output = outputList.get(i);
-					if (output.getType().equalsIgnoreCase(
-							AScontants.sensordataType)
-							&& !output.getDataAction().equalsIgnoreCase(
-									AScontants.dataaction_ignore)) {
-						OctaveCell octaveResult = (OctaveCell) octave
-								.get(output.getName());
-						List<JsonDataPoints> datapointsList = awU
-								.unwrapOctaveSensorData(octaveResult);
-						if (datapointsList == null) {
-							System.out
-									.println("some problem---:datapointsList == null");
-						} else {
-							DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-							HBaseDataImport importData = new HBaseDataImport();
-							DatastreamDAO dsDao = new DatastreamDAO();
-							String datastreamID = output.getSource();
-							importData.setData_points(datapointsList);
-							HBaseDatapointDAO importDao = new HBaseDatapointDAO();
-							Datastream datastream = dsDao.getDatastream(
-									datastreamID, true, false);
-							importData.setDatastream_id(datastream
-									.getStreamId());
-							try {
-								importData.setDatastream(dbtoJUtil
-										.convertDatastream(datastream, null));
-								int totalStoredByte = importDao
-										.importDatapointsDatapoints(importData); // submit
-																					// data
-								analysisDataMovementLog = analysisDataMovementLog
-										+ "<p>Data Stored Successfully for datastream ID: "
-										+ datastreamID
-										+ ", total bytes:"
-										+ totalStoredByte + "</p>";
-								output.setValue(datastream.getTitle());
-								outputList.set(i,output);
-								System.out.println(totalStoredByte);
-							} catch (ErrorCodeException ex) {
-								WholeJobFinishedSuccessful = false;
-								if (ex.getErrorCode()
-										.equals(AllConstants.ErrorDictionary.Input_data_contains_invalid_unit_id)) {
+				if (OctaveExecutionSuccessful) {
+					for (int i = 0; i < outputList.size(); i++) {
+						ASOutput output = outputList.get(i);
+						if (output.getType().equalsIgnoreCase(
+								AScontants.sensordataType)
+								&& !output.getDataAction().equalsIgnoreCase(
+										AScontants.dataaction_ignore)) {
+							OctaveCell octaveResult = (OctaveCell) octave
+									.get(output.getName());
+							List<JsonDataPoints> datapointsList = awU
+									.unwrapOctaveSensorData(octaveResult);
+							if (datapointsList == null) {
+								System.out
+										.println("some problem---:datapointsList == null");
+							} else {
+								DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+								HBaseDataImport importData = new HBaseDataImport();
+								DatastreamDAO dsDao = new DatastreamDAO();
+								String datastreamID = output.getSource();
+								importData.setData_points(datapointsList);
+								HBaseDatapointDAO importDao = new HBaseDatapointDAO();
+								Datastream datastream = dsDao.getDatastream(
+										datastreamID, true, false);
+								importData.setDatastream_id(datastream
+										.getStreamId());
+								try {
+									importData
+											.setDatastream(dbtoJUtil
+													.convertDatastream(
+															datastream, null));
+									int totalStoredByte = importDao
+											.importDatapointsDatapoints(importData); // submit
+																						// data
 									analysisDataMovementLog = analysisDataMovementLog
-											+ "<p>Contains Invalid UnitID"
-											+ "</p>";
-								} else {
+											+ "<p>Data Stored Successfully for datastream ID: "
+											+ datastreamID
+											+ ", total bytes:"
+											+ totalStoredByte + "</p>";
+									output.setValue(datastream.getTitle());
+									outputList.set(i, output);
+									System.out.println(totalStoredByte);
+								} catch (ErrorCodeException ex) {
+									WholeJobFinishedSuccessful = false;
+									if (ex.getErrorCode()
+											.equals(AllConstants.ErrorDictionary.Input_data_contains_invalid_unit_id)) {
+										analysisDataMovementLog = analysisDataMovementLog
+												+ "<p>Contains Invalid UnitID"
+												+ "</p>";
+									} else {
+										analysisDataMovementLog = analysisDataMovementLog
+												+ "<p>Internal Error unknown type"
+												+ "</p>";
+									}
+								} catch (Exception ex) {
+									WholeJobFinishedSuccessful = false;
+									ex.printStackTrace();
 									analysisDataMovementLog = analysisDataMovementLog
-											+ "<p>Internal Error unknown type"
-											+ "</p>";
+											+ "<p>Internal Error" + "</p>";
 								}
-							} catch (Exception ex) {
-								WholeJobFinishedSuccessful = false;
-								ex.printStackTrace();
-								analysisDataMovementLog = analysisDataMovementLog
-										+ "<p>Internal Error" + "</p>";
 							}
-						}
-					} else if (output.getType().equalsIgnoreCase(
-							AScontants.fileType)) {
-						OctaveString fileOutput = (OctaveString) octave
-								.get(output.getName());
+						} else if (output.getType().equalsIgnoreCase(
+								AScontants.fileType)) {
+							OctaveString fileOutput = (OctaveString) octave
+									.get(output.getName());
 
-						File outputFile = new File(tmpfolderPath
-								+ fileOutput.getString());
-						if (fileOutput.getString().length() < 1
-								|| !outputFile.exists()) {
-							analysisDataMovementLog = analysisDataMovementLog
-									+ "<p>No Output File Exist or empty string:"
-									+ "</p>" + fileOutput.getString();
-							System.out
-									.println("ERROR Found No Output File Exist or empty string:"
-											+ fileOutput.getString()
-											+ ",Exist"
-											+ outputFile.exists()
-											+ ","
-											+ outputFile.getAbsolutePath());
-							continue;
-						}
-						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
-						imageMimeTypes
-								.addMimeTypes("image png tif jpg jpeg bmp");
+							File outputFile = new File(tmpfolderPath
+									+ fileOutput.getString());
+							if (fileOutput.getString().length() < 1
+									|| !outputFile.exists()) {
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>No Output File Exist or empty string:"
+										+ "</p>" + fileOutput.getString();
+								System.out
+										.println("ERROR Found No Output File Exist or empty string:"
+												+ fileOutput.getString()
+												+ ",Exist"
+												+ outputFile.exists()
+												+ ","
+												+ outputFile.getAbsolutePath());
+								continue;
+							}
+							MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
+							imageMimeTypes
+									.addMimeTypes("image png tif jpg jpeg bmp");
 
-						String mimetype = imageMimeTypes
-								.getContentType(fileOutput.getString());
-						String fileDownloadPath = outputFolderURLPath
-								+ fileOutput.getString();
-						output.setValue(fileDownloadPath);
-						outputList.set(i,output);
-					} else {
-						System.out.println("other type not supported yet");
+							String mimetype = imageMimeTypes
+									.getContentType(fileOutput.getString());
+							String fileDownloadPath = outputFolderURLPath
+									+ fileOutput.getString();
+							output.setValue(fileDownloadPath);
+							outputList.set(i, output);
+						} else {
+							System.out.println("other type not supported yet");
+						}
 					}
 				}
 
