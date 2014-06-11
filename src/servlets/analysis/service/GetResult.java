@@ -78,9 +78,9 @@ public class GetResult extends HttpServlet {
 				JsonObject jo = new JsonObject();
 				jo.addProperty(AllConstants.ProgramConts.result,
 						AllConstants.ProgramConts.succeed);
-				JsonElement jresult = gson.toJsonTree(result);
 				String json_result_String = result.getJson_results();
 				result.setJson_results(null);
+				JsonElement jresult = gson.toJsonTree(result);
 				jo.add("job", jresult);
 				if (json_result_String != null
 						&& json_result_String.length() > 1) {
@@ -89,9 +89,7 @@ public class GetResult extends HttpServlet {
 							json_result_String, JsonAnalysisResultWapper.class);
 					JsonElement janalysis_result = gson.toJsonTree(jarw);
 					jo.add("service_results", janalysis_result);
-
 				}
-
 				System.out.println(gson.toJson(jo));
 				out.println(gson.toJson(jo));
 			} else {

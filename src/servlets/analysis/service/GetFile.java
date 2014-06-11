@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Leon
  */
-@WebServlet("/ar/getFile")
+@WebServlet("/as/getFile")
 public class GetFile extends HttpServlet {
 
 	/**
@@ -44,10 +44,11 @@ public class GetFile extends HttpServlet {
 			return;
 		}
 
-		String folderPath = "F:/octave/";
+		String folderPath = "F:/job_folder";
 		File imageFile = new File(folderPath + imagePath);
 
 		if (!imageFile.exists()) {
+			System.out.println("file:"+imagePath+" not found!"+folderPath+imagePath);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}

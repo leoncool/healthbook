@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Market Place</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/custom-styles.css" rel="stylesheet">
+    <link href="css/jquery.dataTables.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]>
+    <script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src="js/jquery-1.11.1.js"></script>
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.form.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+    <script src="js/jquery.confirm.js"></script>
+    <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+
+<!--Header-->
+
+
+<div class="navbar navbar-inverse nav-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span
+                    class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span
+                    class="icon-bar"></span> <span class="icon-bar"></span></button>
+            <a class="navbar-brand" href="#"> <img src="img/logo.png" alt="logo" class="img-responsive"> </a></div>
+
+
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-left">
+                <li class="active"><a href="#">My Health</a></li>
+                <li><a href="#">News Feed</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Events</a></li>
+                <li><a href="#">Groups</a></li>
+            </ul>
+            <div class="navbar-form navbar-right">
+                <a class="pull-left" href="#"> <img class="img-circle img-responsive" src="img/user.png" alt="avatar"/>
+                </a>
+
+                <div class="btn-group top-user">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"> LEON <span
+                            class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="active"><a href="#">Info</a></li>
+
+                        <li class="divider"></li>
+                        <li><a href="#">Log Out</a></li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--End Header -->
+
+
+<div class="clearfix"></div>
+
+<!-- Main Container -->
+
+<div class="container">
+    <div class="row text-center">
+        <h1 class="page-head"><img src="img/bucket.png" width="51" height="51"> Service and Model Execution Results</h1>
+
+    </div>
+
+
+    <div class="gap"></div>
+    <div class="row ">
+
+
+
+        <!--Content Container-->
+
+        <div class="col-sm-12 col-md-12 col-xs-12 col-lg-12 main white">
+            <table id="job_table" class="display" cellspacing="0" width="100%">
+                <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Model Name</th>
+                    <th>Service ID</th>
+                    <th>Model Status</th>
+                    <th>Job Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <!--<tfoot>-->
+                <!--<tr>-->
+                    <!--<th>Job ID</th>-->
+                    <!--<th>Start Time</th>-->
+                    <!--<th>End Time</th>-->
+                    <!--<th>Model Name</th>-->
+                    <!--<th>Service ID</th>-->
+                    <!--<th>Model Status</th>-->
+                    <!--<th>Job Status</th>-->
+                    <!--<th>Actions</th>-->
+                <!--</tr>-->
+                <!--</tfoot>-->
+                <tbody id="job_table_body">
+               </tbody>
+                </table>
+            <br>
+            <br>
+
+            <div class="clearfix"></div>
+        </div>
+
+        <!--End Content Container-->
+
+    </div>
+
+
+</div>
+<!--End Main Container -->
+<div class="gap"></div>
+<!--Footer -->
+
+<div class="footer">
+    <div class="container">
+        <div class="col-lg-4">
+            <h3 class="foot-head">Browse Site</h3>
+
+            <ul class="footlinks col-lg-6 col-xs-6">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Overview</a></li>
+                <li><a href="#">Login</a></li>
+            </ul>
+            <ul class="footlinks col-lg-6 col-xs-6">
+
+                <li><a href="#">Register</a></li>
+                <li><a href="#">Publish Service</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="col-lg-3">
+            <h3 class="foot-head">Keep In Touch</h3>
+
+            <p class="touch-txt">Connect to us.</p>
+            <a href="#"><img src="img/fb.png" width="32" height="32"></a>
+            <a href="#"><img src="img/twtr.png" width="32" height="32"></a>
+
+        </div>
+
+        <div class="col-lg-3 pull-right visible-lg">
+
+            <input type="text" class="form-control" placeholder="Search Site">
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+
+    // Attach a submit handler to the form
+    $(document).ready(function () {
+
+        var urlGetAllResults='http://localhost:8080/healthbook/GetResults';
+        var getAllResults = {
+            target: '#output',   // target element(s) to be updated with server response
+            beforeSubmit: showRequest,  // pre-submit callback
+            success: showResponse,  // post-submit callback
+
+            url: urlGetAllResults,        // override for form's 'action' attribute
+            type: 'post',      // 'get' or 'post', override for form's 'method' attribute
+            dataType: 'json'        // 'xml', 'script', or 'json' (expected server response type)
+
+        };
+        $(this).ajaxSubmit(getAllResults);
+
+    });
+
+    // pre-submit callback
+    function showRequest(formData, jqForm, options) {
+        $body = $("body");
+        $body.addClass("loading");
+
+
+        var queryString = $.param(formData);
+
+        var formElement = jqForm[0];
+
+        return true;
+    }
+
+    // post-submit callback
+    function showResponse(responseText, statusText, xhr, $form) {
+        $body = $("body");
+        $body.removeClass("loading");
+
+        var result = responseText;
+        if (result.result == 'succeed') {
+
+            for(var i=0;i<result.jobs.length;i++)
+            {
+                $('#job_table_body').append('' +
+                        '<tr> ' +
+                        '<th>'+result.jobs[i].jobId+'</th> ' +
+                        '<th>'+result.jobs[i].jobStartTime+'</th>' +
+                        '<th>'+result.jobs[i].jobEndTime+'</th> ' +
+                        '<th>'+result.jobs[i].model_name+'</th> ' +
+                        '<th>'+result.jobs[i].service_id+'</th> ' +
+                        '<th>'+result.jobs[i].model_status+'</th> ' +
+                        '<th>'+result.jobs[i].jobStatus+'</th> ' +
+                        '<th><a target="_blank" href="view-job.html?job_id='+result.jobs[i].jobId+'">View Result</a></th> ' +
+                        ' </tr>');
+//            <th>Job ID</th>
+//                    <th>Start Time</th>
+//                    <th>End Time</th>
+//                    <th>Model Name</th>
+//                    <th>Service ID</th>
+//                    <th>Model Status</th>
+//                    <th>Job Status</th>
+            }
+            $('#job_table').dataTable({
+                "order": [[ 1, "desc" ]]
+            });
+
+
+        } else {
+            alert(result.errorCode + ",targetObject:" + result.targetObject);
+        }
+    }
+</script>
+
+<div class="modal"><!-- Place at bottom of page --></div>
+</body>
+</html>

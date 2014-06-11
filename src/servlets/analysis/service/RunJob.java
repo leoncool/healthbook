@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
+
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import util.AScontants;
@@ -38,7 +40,7 @@ import com.analysis.service.ASOutput;
 import com.analysis.service.AnalysisWrapperUtil;
 import com.analysis.service.JsonAnalysisResultWapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import dk.ange.octave.OctaveEngine;
@@ -257,8 +259,8 @@ public class RunJob extends HttpServlet {
 	}
 
 	public class ExecutionEngineThread extends Thread {
-		String jobID;
-		String modelID;
+		String jobID=null;
+		String modelID=null;
 		public boolean OctaveExecutionSuccessful = false;
 		public boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
@@ -272,7 +274,13 @@ public class RunJob extends HttpServlet {
 		public void run() {
 			System.out.println("Hello from a thread!");
 			String tmpfolderPath = "F:/model_repository/" + modelID + "/";
+			String jobfolderPath = "F:/job_folder/" + jobID + "/";
+			outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
 			File folder = new File(tmpfolderPath);
+			File jobFolder = new File(jobfolderPath);
+			if (!jobFolder.exists()) {
+				jobFolder.mkdir();
+			}
 
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			AnalysisResult result = asDao.getJobResultByID(jobID);
@@ -305,7 +313,8 @@ public class RunJob extends HttpServlet {
 					ex.printStackTrace();
 					System.out.println(ex.getMessage());
 					outputLog = outputLog + ex.getMessage();
-					analysisDataMovementLog=analysisDataMovementLog+ex.getMessage();
+					analysisDataMovementLog = analysisDataMovementLog
+							+ ex.getMessage();
 					OctaveExecutionSuccessful = false;
 					WholeJobFinishedSuccessful = false;
 				}
@@ -378,6 +387,8 @@ public class RunJob extends HttpServlet {
 
 							File outputFile = new File(tmpfolderPath
 									+ fileOutput.getString());
+							File outputFileJob = new File(jobfolderPath
+									+ fileOutput.getString());
 							if (fileOutput.getString().length() < 1
 									|| !outputFile.exists()) {
 								analysisDataMovementLog = analysisDataMovementLog
@@ -391,6 +402,8 @@ public class RunJob extends HttpServlet {
 												+ ","
 												+ outputFile.getAbsolutePath());
 								continue;
+							}else{
+								FileUtils.copyFile(outputFile, outputFileJob);
 							}
 							MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
 							imageMimeTypes
@@ -435,7 +448,8 @@ public class RunJob extends HttpServlet {
 					result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
 				}
 				if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
-					Gson gson = new Gson();
+					Gson gson = new GsonBuilder().disableHtmlEscaping()
+							.create();
 					JsonAnalysisResultWapper jarw = new JsonAnalysisResultWapper();
 					jarw.setInputs(inputList);
 					jarw.setOutputs(outputList);
