@@ -39,6 +39,8 @@ import org.apache.commons.io.FilenameUtils;
 import server.exception.ReturnParser;
 import util.AScontants;
 import util.AllConstants;
+import util.ServerConfigUtil;
+import util.AllConstants.ServerConfigs;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -160,9 +162,19 @@ public class PostAnalysisService1 extends HttpServlet {
 				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
 				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
-		String tmpFolder = "F:/model_repository/temp/";
+
 		String modelRepository = "F:/model_repository/";
+		String tmpFolder = "F:/model_repository/temp/";
 		String thumbnailsFolder = "F:/model_repository/thumbnails/";
+		if (!new File(modelRepository).exists()) {
+			modelRepository = ServerConfigUtil
+					.getConfigValue(ServerConfigs.modelRepository);
+			tmpFolder = ServerConfigUtil
+					.getConfigValue(ServerConfigs.tmpRepository);
+			thumbnailsFolder = ServerConfigUtil
+					.getConfigValue(ServerConfigs.modelThumbnailDir);
+		}
+
 		PrintWriter out = response.getWriter();
 		try {
 
@@ -191,7 +203,7 @@ public class PostAnalysisService1 extends HttpServlet {
 					model.setStatus(AScontants.status_draft);
 					DiskFileItemFactory factory = new DiskFileItemFactory();
 					factory.setSizeThreshold(THRESHOLD_SIZE);
-
+					boolean modelZipFileUploaded = false;
 					factory.setRepository(new File(tmpFolder));
 
 					ServletFileUpload upload = new ServletFileUpload(factory);
@@ -335,6 +347,7 @@ public class PostAnalysisService1 extends HttpServlet {
 														null, filename);
 										return;
 									}
+									modelZipFileUploaded = true;
 								} else {
 									System.out.println("is Not ZipFile");
 								}
@@ -357,6 +370,15 @@ public class PostAnalysisService1 extends HttpServlet {
 										null, "missing name or publisher");
 						return;
 					}
+					if (!modelZipFileUploaded) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.model_zip_file_missing,
+										null, "missing model zip file");
+						return;
+					}
+
 					AnalysisModel returnModel = asDao.createModel(model);
 					boolean hasError = false;
 					if (returnModel == null) {

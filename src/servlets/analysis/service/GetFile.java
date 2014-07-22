@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import util.ServerConfigUtil;
+import util.AllConstants.ServerConfigs;
+
 /**
  * 
  * @author Leon
@@ -45,6 +48,12 @@ public class GetFile extends HttpServlet {
 		}
 
 		String folderPath = "F:/job_folder";
+		if(!new File(folderPath).exists())
+		{
+			String jobDir = ServerConfigUtil
+					.getConfigValue(ServerConfigs.jobDir);
+			folderPath=jobDir;
+		}
 		File imageFile = new File(folderPath + imagePath);
 
 		if (!imageFile.exists()) {

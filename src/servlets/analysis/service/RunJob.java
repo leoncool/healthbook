@@ -34,6 +34,8 @@ import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import util.AScontants;
 import util.AllConstants;
+import util.AllConstants.ServerConfigs;
+import util.ServerConfigUtil;
 
 import com.analysis.service.ASInput;
 import com.analysis.service.ASOutput;
@@ -259,22 +261,48 @@ public class RunJob extends HttpServlet {
 	}
 
 	public class ExecutionEngineThread extends Thread {
-		String jobID=null;
-		String modelID=null;
+		String jobID = null;
+		String modelID = null;
 		public boolean OctaveExecutionSuccessful = false;
 		public boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
 		String analysisDataMovementLog = "";
-
-		String outputFolderURLPath = "http://localhost:8080/healthbook/as/getFile?path=";
+		String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+		// String outputFolderURLPath =
+		// "http://localhost:8080/healthbook/as/getFile?path=";
 		ArrayList<ASInput> inputList = new ArrayList<ASInput>();
 
 		ArrayList<ASOutput> outputList = new ArrayList<ASOutput>();
 
 		public void run() {
 			System.out.println("Hello from a thread!");
+
+			String modelRepository = "F:/model_repository/" + modelID;
 			String tmpfolderPath = "F:/model_repository/" + modelID + "/";
 			String jobfolderPath = "F:/job_folder/" + jobID + "/";
+			if (!new File(modelRepository).exists()) {
+				modelRepository = ServerConfigUtil
+						.getConfigValue(ServerConfigs.modelRepository);
+				String tmpFolder = ServerConfigUtil
+						.getConfigValue(ServerConfigs.tmpRepository);
+				UUID uuid=UUID.randomUUID();
+				tmpfolderPath = tmpFolder + uuid.toString() + "/";
+				modelRepository = modelRepository + modelID;
+				if (new File(tmpfolderPath).exists()) {
+					new File(tmpfolderPath).delete();
+				}
+				try {
+					FileUtils.copyDirectory(new File(modelRepository),
+							new File(tmpfolderPath));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String jobFolder = ServerConfigUtil
+						.getConfigValue(ServerConfigs.jobDir);
+				jobfolderPath = jobFolder + jobID + "/";
+			}
+
 			outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
 			File folder = new File(tmpfolderPath);
 			File jobFolder = new File(jobfolderPath);
@@ -300,7 +328,6 @@ public class RunJob extends HttpServlet {
 									(String) input.getSource());
 							octave.put(input.getName(), octaveInput);
 						}
-
 					}
 					String mainFunctionString = awU.createMainFunction("main",
 							inputList, outputList);
@@ -402,7 +429,7 @@ public class RunJob extends HttpServlet {
 												+ ","
 												+ outputFile.getAbsolutePath());
 								continue;
-							}else{
+							} else {
 								FileUtils.copyFile(outputFile, outputFileJob);
 							}
 							MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();

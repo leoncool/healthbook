@@ -185,9 +185,10 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			jo.add("datastream", je);
-			JsonWriter jwriter = new JsonWriter(out);
-			gson.toJson(jo, jwriter);
-			System.out.println(gson.toJson(jobject));
+//			JsonWriter jwriter = new JsonWriter(out);
+//			gson.toJson(jo, jwriter);
+//			System.out.println(gson.toJson(jobject));
+			out.println(gson.toJson(jo));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		} finally {
