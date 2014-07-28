@@ -62,6 +62,7 @@ import static servlets.util.ServerUtil.isPostUserAvatar;
 import static servlets.util.ServerUtil.isPostUserRegister;
 import static servlets.util.ServerUtil.isSearchUsers;
 import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_Benchmark_DatapointsReq;
+import static servlets.util.ServerUtil.isGetHealthDatapointsByTitleBenchmarks;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 
@@ -96,6 +97,7 @@ import servlets.actions.get.health.GetHealthDatastreamBlocks;
 import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
+import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitleBenchmarks;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDataBlock;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
@@ -161,18 +163,18 @@ public class RestFul extends HttpServlet {
 	// ACCESS_CONTROL_ALLOW_METHODS);
 	// resp.setHeader("Access-Control-Expose-Headers",
 	// ACCESS_CONTROL_ALLOW_HEADERS);
-	
-	public static String getFullURL(HttpServletRequest request) {
-	    StringBuffer requestURL = request.getRequestURL();
-	    String queryString = request.getQueryString();
 
-	    if (queryString == null) {
-	        return requestURL.toString();
-	    } else {
-	        return requestURL.append('?').append(queryString).toString();
-	    }
+	public static String getFullURL(HttpServletRequest request) {
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+
+		if (queryString == null) {
+			return requestURL.toString();
+		} else {
+			return requestURL.append('?').append(queryString).toString();
+		}
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
@@ -189,9 +191,10 @@ public class RestFul extends HttpServlet {
 		// }
 		req.setCharacterEncoding("UTF-8");
 		resp.setCharacterEncoding("UTF-8");
-//		System.out.println(req.getMethod() + " is coming..." + ",contextPath:"
-//				+ contextPath(req) + "allow originls");
-		System.out.println("FULL URL(GET):"+getFullURL(req));
+		// System.out.println(req.getMethod() + " is coming..." +
+		// ",contextPath:"
+		// + contextPath(req) + "allow originls");
+		System.out.println("FULL URL(GET):" + getFullURL(req));
 		if (isGetSubjectsListReq(ServletPath(req))) {
 			GetSubjectList proceReq = new GetSubjectList();
 			proceReq.processRequest(req, resp);
@@ -266,7 +269,12 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetHealthDatapointsByTitle:");
 			GetHealthDataPointsByTitle proceReq = new GetHealthDataPointsByTitle();
 			proceReq.processRequest(req, resp);
-		} else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+		} else if (isGetHealthDatapointsByTitleBenchmarks(ServletPath(req))) {
+			System.out.println("isGetHealthDataPointsByTitleBenchmarks:");
+			GetHealthDataPointsByTitleBenchmarks proceReq = new GetHealthDataPointsByTitleBenchmarks();
+			proceReq.processRequest(req, resp);
+		}
+		else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetaHealthDatastreamByTitle proceReq = new GetaHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
@@ -344,9 +352,10 @@ public class RestFul extends HttpServlet {
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		System.out.println("FULL URL(DELETE):"+getFullURL(req));
-//		System.out.println(req.getMethod() + " is coming..." + ",contextPath:"
-//				+ contextPath(req));
+		System.out.println("FULL URL(DELETE):" + getFullURL(req));
+		// System.out.println(req.getMethod() + " is coming..." +
+		// ",contextPath:"
+		// + contextPath(req));
 		resp.setHeader("Access-Control-Allow-Origin", "*");
 		req.setCharacterEncoding("UTF-8");
 		resp.setCharacterEncoding("UTF-8");
@@ -400,9 +409,10 @@ public class RestFul extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		System.out.println("FULL URL(POST):"+getFullURL(req));
-//		System.out.println(req.getMethod() + " is coming..." + ",contextPath:"
-//				+ contextPath(req) + "allow originls");
+		System.out.println("FULL URL(POST):" + getFullURL(req));
+		// System.out.println(req.getMethod() + " is coming..." +
+		// ",contextPath:"
+		// + contextPath(req) + "allow originls");
 		resp.setHeader("Access-Control-Allow-Origin", "*");
 		resp.setHeader("Access-Control-Allow-Headers",
 				ACCESS_CONTROL_ALLOW_HEADERS);
@@ -477,8 +487,7 @@ public class RestFul extends HttpServlet {
 			System.out.println("isPostHealthTitle_Datastream_DatapointsReq");
 			PostDatapointsThroughHealthTitle proceReq = new PostDatapointsThroughHealthTitle();
 			proceReq.processRequest(req, resp);
-		} 
-		else if (isPostHealthTitle_Datastream_Benchmark_DatapointsReq(ServletPath(req))) {
+		} else if (isPostHealthTitle_Datastream_Benchmark_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostDatapointsBenchmarksThroughHealthTitle");
 			PostDatapointsBenchmarksThroughHealthTitle proceReq = new PostDatapointsBenchmarksThroughHealthTitle();
 			proceReq.processRequest(req, resp);

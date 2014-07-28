@@ -578,7 +578,16 @@ public class ServerUtil {
 			return false;
 		}
 	}
-
+	public static boolean isGetHealthDatapointsByTitleBenchmarks(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_datapoints_benchmarks + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isGetHealthDataSummariesByTitle(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"
