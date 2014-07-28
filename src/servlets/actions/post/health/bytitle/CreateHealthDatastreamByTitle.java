@@ -177,6 +177,14 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
 						null);
+				return;
+			}
+			if(datastream==null)
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Internal_Fault, null,
+						null);
+				return;
 			}
 			JsonDatastream jobject = dbtoJUtil.convertDatastream(datastream,
 					null);
@@ -191,6 +199,10 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 			out.println(gson.toJson(jo));
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, null,
+					null);
+			return;
 		} finally {
 			out.close();
 		}
