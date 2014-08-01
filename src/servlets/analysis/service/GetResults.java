@@ -67,14 +67,29 @@ public class GetResults extends HttpServlet {
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String jobID = request
 					.getParameter(AScontants.RequestParameters.Job_ID);
-			List<AnalysisResult> resultList = null;
-			List<JsonAnalysisResult> jresultList = new ArrayList<>();
-			resultList = asDao.getJobResultsList(null);
-			if (resultList == null) {
+			String serviceID = request.getParameter(AScontants.RequestParameters.Service_ID);
+			int serviceid=0;
+			try{
+				if(serviceID!=null)
+				{
+					serviceid=Integer.parseInt(serviceID);
+					System.out.println("serviceid:"+serviceid);
+				}
+			}catch(Exception ex)
+			{
+				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null, "");
+						AllConstants.ErrorDictionary.Input_Json_Format_Error, "service_id", "");
 				return;
 			}
+			List<AnalysisResult> resultList = null;
+			List<JsonAnalysisResult> jresultList = new ArrayList<>();
+			resultList = asDao.getJobResultsList(loginID, serviceid);
+//			if (resultList == null) {
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.Internal_Fault, null, "");
+//				return;
+//			}
 			for (int i = 0; i < resultList.size(); i++) {
 				AnalysisResult result = resultList.get(i);
 				JsonAnalysisResult jresult = new JsonAnalysisResult();
@@ -90,7 +105,7 @@ public class GetResults extends HttpServlet {
 					AllConstants.ProgramConts.succeed);
 			JsonElement jelement = gson.toJsonTree(jresultList);
 			jo.add("jobs", jelement);
-			System.out.println(gson.toJson(jo));
+//			System.out.println(gson.toJson(jo));
 			out.println(gson.toJson(jo));
 
 		} catch (Exception ex) {
