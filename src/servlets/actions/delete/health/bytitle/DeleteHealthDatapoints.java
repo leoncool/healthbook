@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import servlets.util.HealthDatastreamFilter;
 import servlets.util.HealthSubjectFilter;
@@ -102,7 +103,7 @@ public class DeleteHealthDatapoints extends HttpServlet {
 
 			String atString = request
 					.getParameter(api_entryPoints.request_api_at);
-			long totalDeleted=0;
+			long totalDeleted = 0;
 			if (atString != null) {
 				boolean isNumeric = atString.matches("[0-9]+");
 				long at = 0;
@@ -118,27 +119,48 @@ public class DeleteHealthDatapoints extends HttpServlet {
 						return;
 					}
 				} else {
-					try{
-					DateUtil dateUtil = new DateUtil();
-					Date at_date = dateUtil.convert_SetLenient(atString,
-							dateUtil.utcFormat);
-					at = at_date.getTime();
-					System.out.println("fromUTC:longAt:" + at);
-					}catch(Exception ex)
-					{
+					try {
+						DateUtil dateUtil = new DateUtil();
+						Date at_date = dateUtil.convert_SetLenient(atString,
+								dateUtil.utcFormat);
+						at = at_date.getTime();
+						System.out.println("fromUTC:longAt:" + at);
+					} catch (Exception ex) {
 						ex.printStackTrace();
-						ReturnParser.outputErrorException(response,
-								AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR, null,
-								null);
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR,
+										null, null);
 						return;
 					}
 				}
 				try {
-					HBaseDatapointDAO dpDap = new HBaseDatapointDAO();
-					totalDeleted=dpDap.delete_A_Datapoint(datastream.getStreamId(), at, null); // has
-																					// not
-																					// finished
-																					// yet
+
+					class DeleteThread extends Thread {
+						Datastream datastream;
+						long at;
+					    public DeleteThread(Datastream _datastream, long _at) {
+					    	datastream=_datastream;
+					    	at=_at;
+					    }
+					 
+					    public void run() {
+					    	System.out.println("Delete Runnable running");
+					        HBaseDatapointDAO dpDap = new HBaseDatapointDAO();
+							try {
+								dpDap.delete_A_Datapoint(
+										datastream.getStreamId(), at, null);
+							} catch (ErrorCodeException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+					    }
+					}
+					DeleteThread delete=new DeleteThread(datastream, at);
+					delete.start();
+					totalDeleted=1;
+	
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					ReturnParser.outputErrorException(response,
@@ -147,7 +169,7 @@ public class DeleteHealthDatapoints extends HttpServlet {
 					return;
 				}
 			} else if (request.getParameter(api_entryPoints.request_api_start) != null
-					|| request.getParameter(api_entryPoints.request_api_end) != null) {
+					&& request.getParameter(api_entryPoints.request_api_end) != null) {
 				long start = 0;
 				long end = 0;
 				String startStr = request
@@ -162,9 +184,11 @@ public class DeleteHealthDatapoints extends HttpServlet {
 						end = Long.parseLong(endStr);
 					}
 					HBaseDatapointDAO dpDap = new HBaseDatapointDAO();
-					totalDeleted=dpDap.delete_range_Datapoint(datastream.getStreamId(),
-							start, end); // has not finished yet
-					
+					totalDeleted = dpDap.delete_range_Datapoint(
+							datastream.getStreamId(), start, end); // has not
+																	// finished
+																	// yet
+
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					ReturnParser.outputErrorException(response,

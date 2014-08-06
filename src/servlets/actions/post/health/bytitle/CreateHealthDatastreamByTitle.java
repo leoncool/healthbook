@@ -104,86 +104,132 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 			JsonUtil jutil = new JsonUtil();
 			Gson gson = new Gson();
 			JsonDatastream jDatasteram = null;
-			
+
 			String input = jutil.readJsonStrFromHttpRequest(request);
 			System.out.println(input);
 			jDatasteram = gson.fromJson(input, JsonDatastream.class);
 			if (jDatasteram == null) {
-				ReturnParser
-						.outputErrorException(
-								response,
-								AllConstants.ErrorDictionary.Input_Json_Format_Error,
-								null, null);
-				return;
-			}
-			if (jDatasteram.getTitle() == null) {
 				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						null);
+						AllConstants.ErrorDictionary.Input_Json_Format_Error,
+						null, null);
 				return;
 			}
-			
+			String datastream_id = null;
+
 			DatastreamDAO dstreamDao = new DatastreamDAO();
-			
+
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-
-
-			Datastream datastream=null;
-			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(
-						subject.getId(), jDatasteram.getTitle(), true, false);
-			} catch (NonUniqueResultException ex) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						jDatasteram.getTitle());
-				return;
-			}
-			if (datastream != null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Such_Stream_title_EXIST,
-						null, jDatasteram.getTitle());
-				return;
-			}
-			if (jDatasteram.getUnits_list()==null||jDatasteram.getUnits_list().isEmpty()) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA,
-						"units_list", null);
-				return;
-			}else{
-				for (JsonDatastreamUnits unit : jDatasteram.getUnits_list()) {
-				if (unit.getValue_type()!=null&&!UnitValueTypes.existValueType(unit.getValue_type())) {
+			Datastream datastream = null;
+			if (jDatasteram.getDatastream_id() != null
+					&& jDatasteram.getDatastream_id().length() > 2) {
+				datastream_id = jDatasteram.getDatastream_id();
+				System.out.println("Update Data Stream:" + datastream_id);
+				// Editing Data Stream
+				datastream = dstreamDao.getDatastream(datastream_id, false,
+						false);
+				if (datastream == null) {
 					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_ValueType,
-							AllConstants.ErrorDictionary.Invalid_ValueType,
-							unit.getValue_type());
+							AllConstants.ErrorDictionary.Invalid_datastream_id,
+							null, null);
 					return;
 				}
-				else
-				{
-					unit.setValue_type(UnitValueTypes.DOUBLE_TYPE); //Setting Default to double
+				if (!datastream.getOwner().equals(accessUser.getLoginID())) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.PERMISSION_DENIED,
+							null, null);
+					return;
 				}
+				datastream = dbtoJUtil
+						.convert_a_JdataStream(jDatasteram, false, datastream);
+				datastream.setSubId(subject.getId());
+				datastream.setOwner(loginID);
+				datastream
+						.setPurpose(AllConstants.HealthConts.defaultDatastreamPurpose);
+				try {
+					datastream = dstreamDao.updateDatastream(datastream,
+							null);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+					return;
+				}
+			} else {
+				// adding new Data Stream
+				System.out.println("adding new Data Stream");
+				if (jDatasteram.getTitle() == null) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.MISSING_DATA, null,
+							null);
+					return;
+				}
+				try {
+					datastream = dstreamDao.getHealthDatastreamByTitle(
+							subject.getId(), jDatasteram.getTitle(), true,
+							false);
+				} catch (NonUniqueResultException ex) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							jDatasteram.getTitle());
+					return;
+				}
+				if (datastream != null) {
+					ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Such_Stream_title_EXIST,
+									null, jDatasteram.getTitle());
+					return;
+				}
+				if (jDatasteram.getUnits_list() == null
+						|| jDatasteram.getUnits_list().isEmpty()) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.MISSING_DATA,
+							"units_list", null);
+					return;
+				} else {
+					for (JsonDatastreamUnits unit : jDatasteram.getUnits_list()) {
+						if (unit.getValue_type() != null
+								&& !UnitValueTypes.existValueType(unit
+										.getValue_type())) {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Invalid_ValueType,
+											AllConstants.ErrorDictionary.Invalid_ValueType,
+											unit.getValue_type());
+							return;
+						} else {
+							unit.setValue_type(UnitValueTypes.DOUBLE_TYPE); // Setting
+																			// Default
+																			// to
+																			// double
+						}
+					}
+				}
+				datastream = dbtoJUtil.convert_a_JdataStream(jDatasteram, true,null);
+				datastream.setSubId(subject.getId());
+				datastream.setOwner(loginID);
+				datastream
+						.setPurpose(AllConstants.HealthConts.defaultDatastreamPurpose);
+				try {
+					datastream = dstreamDao.createDatastream(datastream,
+							datastream.getDatastreamUnitsList());
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Internal_Fault, null,
+							null);
+					return;
 				}
 			}
-			datastream=dbtoJUtil.convert_a_JdataStream(jDatasteram);
-			datastream.setSubId(subject.getId());
-			datastream.setOwner(loginID);
-			datastream.setPurpose(AllConstants.HealthConts.defaultDatastreamPurpose);
-			try{
-			datastream = dstreamDao.createDatastream(datastream,
-					datastream.getDatastreamUnitsList());
-			}catch(Exception ex)
-			{
-				ex.printStackTrace();
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
-				return;
-			}
-			if(datastream==null)
-			{
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						null);
+
+			if (datastream == null) {
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
 				return;
 			}
 			JsonDatastream jobject = dbtoJUtil.convertDatastream(datastream,
@@ -193,15 +239,14 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			jo.add("datastream", je);
-//			JsonWriter jwriter = new JsonWriter(out);
-//			gson.toJson(jo, jwriter);
-//			System.out.println(gson.toJson(jobject));
+			// JsonWriter jwriter = new JsonWriter(out);
+			// gson.toJson(jo, jwriter);
+			// System.out.println(gson.toJson(jobject));
 			out.println(gson.toJson(jo));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.Internal_Fault, null,
-					null);
+					AllConstants.ErrorDictionary.Internal_Fault, null, null);
 			return;
 		} finally {
 			out.close();
