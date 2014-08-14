@@ -76,7 +76,13 @@ public class GetModels extends HttpServlet {
 			{
 				searchName=null;
 			}
-			List<AnalysisModel> modelList = asDao.getModelList(searchName);
+			String statusType=request
+					.getParameter(AScontants.RequestParameters.ModelStatus);
+			if(statusType==null)
+			{
+				statusType="live";
+			}
+			List<AnalysisModel> modelList = asDao.getModelList(searchName,"live");
 			JsonElement jmodel = gson.toJsonTree(modelList);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
