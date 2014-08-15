@@ -6,7 +6,30 @@ private String type;
 private String notes;
 private Object value;
 private String source;
+private long start;
+private long end;
+private int maxDataPoints=1000;
 
+
+
+public int getMaxDataPoints() {
+	return maxDataPoints;
+}
+public void setMaxDataPoints(int maxDataPoints) {
+	this.maxDataPoints = maxDataPoints;
+}
+public long getStart() {
+	return start;
+}
+public void setStart(long start) {
+	this.start = start;
+}
+public long getEnd() {
+	return end;
+}
+public void setEnd(long end) {
+	this.end = end;
+}
 public String getName() {
 	return name;
 }

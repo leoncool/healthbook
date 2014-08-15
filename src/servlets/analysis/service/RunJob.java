@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
+import servlets.util.ServerUtil;
 import util.AScontants;
 import util.AllConstants;
 import util.AllConstants.ServerConfigs;
@@ -94,14 +96,36 @@ public class RunJob extends HttpServlet {
 				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
 				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
-
+		System.out.println("AS FULL URL:" + ServerUtil.getFullURL(request));
 		Gson gson = new Gson();
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		DatastreamDAO dsDao = new DatastreamDAO();
 		String loginID = "testtest3";
+		// retrieve service id information
 		String serviceID_String = request
 				.getParameter(AScontants.RequestParameters.Service_ID);
 		int serviceID = 0;
+		int globalMaxDatapoints = -1;
+		boolean runningLiveJob=false;
+		if (request
+				.getParameter(AScontants.RequestParameters.request_api_livejob) != null&&request
+						.getParameter(AScontants.RequestParameters.request_api_livejob).equalsIgnoreCase("true")) {
+			runningLiveJob=true;
+		}
+		try {
+			if (request
+					.getParameter(AScontants.RequestParameters.request_api_maxGlobal) != null) {
+				globalMaxDatapoints = Integer
+						.parseInt(request
+								.getParameter(AScontants.RequestParameters.request_api_maxGlobal));
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Invalid_data_format, null,
+					AScontants.RequestParameters.request_api_maxGlobal);
+			return;
+		}
 		if (serviceID_String == null || serviceID_String.length() < 1) {
 			System.out.println("Return Error Message to User. GetLineNumber:"
 					+ getLineNumber());
@@ -131,6 +155,7 @@ public class RunJob extends HttpServlet {
 					AScontants.RequestParameters.Service_ID);
 			return;
 		}
+		// get model information
 		model = asDao.getModelByID(service.getModelId());
 
 		List<AnalysisModelEntry> inputEntryList = asDao
@@ -138,8 +163,8 @@ public class RunJob extends HttpServlet {
 		List<AnalysisModelEntry> outputEntryList = asDao
 				.getModelEntriesByModelID(model.getId(), AScontants.as_output);
 		ArrayList<ASInput> inputList = new ArrayList<ASInput>();
-
 		ArrayList<ASOutput> outputList = new ArrayList<ASOutput>();
+		// check input and output settings
 		for (int i = 0; i < inputEntryList.size(); i++) {
 			ASInput input = new ASInput();
 			input.setName("input" + Integer.toString(i + 1));
@@ -149,6 +174,43 @@ public class RunJob extends HttpServlet {
 			try {
 				if (source != null && source.length() > 1) {
 					input.setSource(source);
+					long start = 0;
+					long end = 0;
+					int max = 1000;
+					try {
+						if (request.getParameter("input"
+								+ Integer.toString(i + 1) + "_start") != null) {
+							start = Long.parseLong("input"
+									+ Integer.toString(i + 1) + "_start");
+						}
+						if (request.getParameter("input"
+								+ Integer.toString(i + 1) + "_end") != null) {
+							end = Long.parseLong(request.getParameter("input"
+									+ Integer.toString(i + 1) + "_end"));
+						}
+						if (request.getParameter("input"
+								+ Integer.toString(i + 1) + "_max") != null) {
+							max = Integer.parseInt(request.getParameter("input"
+									+ Integer.toString(i + 1) + "_max"));
+						}
+						if (globalMaxDatapoints > 0) {
+							System.out.println("--globalMaxDatapoints---");
+							input.setMaxDataPoints(globalMaxDatapoints);
+						} else {
+							input.setMaxDataPoints(max);
+						}
+
+						input.setStart(start);
+						input.setEnd(end);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "");
+						return;
+					}
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -172,6 +234,7 @@ public class RunJob extends HttpServlet {
 			}
 			inputList.add(input);
 		}
+		// check and pre-load output list
 		for (int i = 0; i < outputEntryList.size(); i++) {
 			ASOutput output = new ASOutput();
 			String dataAction = outputEntryList.get(i).getDataAction();
@@ -212,6 +275,8 @@ public class RunJob extends HttpServlet {
 			output.setType(type);
 			outputList.add(output);
 		}
+		// start initial stage of creating TED folders and copy data to tmp
+		// folders
 		try {
 			AnalysisResult result = new AnalysisResult();
 			UUID uuid = UUID.randomUUID();
@@ -223,6 +288,7 @@ public class RunJob extends HttpServlet {
 			result.setUserId(service.getUserId());
 			result.setService_id(serviceID);
 			AnalysisResult returnedResult = asDao.createJobResultBy(result);
+			AnalysisResult asresult=null;
 			if (returnedResult == null) {
 				System.out
 						.println("Return Error Message to User. GetLineNumber:"
@@ -231,13 +297,19 @@ public class RunJob extends HttpServlet {
 						AllConstants.ErrorDictionary.Internal_Fault, null, "");
 				return;
 			}
+			if(runningLiveJob==false){
 			ExecutionEngineThread executionThread = new ExecutionEngineThread();
 			executionThread.inputList = inputList;
 			executionThread.outputList = outputList;
 			executionThread.jobID = jobID;
 			executionThread.modelID = model.getId();
 			executionThread.start();
-
+			}else{
+				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+				AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
+				asresult= awU.octaveRun(service.getModelId(), jobID, outputFolderURLPath, inputList,
+						outputList);
+			}
 			// List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			// totalEntryList.addAll(inputEntryList);
 			// totalEntryList.addAll(outputEntryList);
@@ -246,7 +318,14 @@ public class RunJob extends HttpServlet {
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
-			System.out.println(gson.toJson(jo));
+			if(runningLiveJob)
+			{
+				jo.add("asresult", gson.toJsonTree(asresult));
+				jo.addProperty("livejob","true");
+			}else{
+				jo.addProperty("livejob","false");
+			}
+//			System.out.println(gson.toJson(jo));
 			out.println(gson.toJson(jo));
 
 		} catch (Exception ex) {
@@ -276,232 +355,9 @@ public class RunJob extends HttpServlet {
 
 		public void run() {
 			System.out.println("Hello from a thread!");
-
-			String modelRepository = "F:/model_repository/" + modelID;
-			String tmpfolderPath = "F:/model_repository/" + modelID + "/";
-			String jobfolderPath = "F:/job_folder/" + jobID + "/";
-			if (!new File(modelRepository).exists()) {
-				modelRepository = ServerConfigUtil
-						.getConfigValue(ServerConfigs.modelRepository);
-				String tmpFolder = ServerConfigUtil
-						.getConfigValue(ServerConfigs.tmpRepository);
-				UUID uuid=UUID.randomUUID();
-				tmpfolderPath = tmpFolder + uuid.toString() + "/";
-				modelRepository = modelRepository + modelID;
-				if (new File(tmpfolderPath).exists()) {
-					new File(tmpfolderPath).delete();
-				}
-				try {
-					FileUtils.copyDirectory(new File(modelRepository),
-							new File(tmpfolderPath));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				String jobFolder = ServerConfigUtil
-						.getConfigValue(ServerConfigs.jobDir);
-				jobfolderPath = jobFolder + jobID + "/";
-			}
-
-			outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
-			File folder = new File(tmpfolderPath);
-			File jobFolder = new File(jobfolderPath);
-			if (!jobFolder.exists()) {
-				jobFolder.mkdir();
-			}
-
-			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
-			AnalysisResult result = asDao.getJobResultByID(jobID);
-			try {
-				AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
-				StringWriter stdout = new StringWriter();
-				OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
-				octaveFactory.setWorkingDir(folder);
-				OctaveEngine octave = octaveFactory.getScriptEngine();
-				try {
-					octave.setWriter(stdout);
-					octave.eval("addpath(\"signal_package\")");
-					octave.eval("addpath(\"general_package\")");
-					for (ASInput input : inputList) {
-						if (input.getType().equals("string")) {
-							OctaveString octaveInput = new OctaveString(
-									(String) input.getSource());
-							octave.put(input.getName(), octaveInput);
-						}
-					}
-					String mainFunctionString = awU.createMainFunction("main",
-							inputList, outputList);
-					System.out.println("mainFunctionString:"
-							+ mainFunctionString);
-					octave.eval(mainFunctionString);
-					OctaveExecutionSuccessful = true;
-
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					System.out.println(ex.getMessage());
-					outputLog = outputLog + ex.getMessage();
-					analysisDataMovementLog = analysisDataMovementLog
-							+ ex.getMessage();
-					OctaveExecutionSuccessful = false;
-					WholeJobFinishedSuccessful = false;
-				}
-
-				// result.setJobLog((outputLog);
-				if (OctaveExecutionSuccessful) {
-					for (int i = 0; i < outputList.size(); i++) {
-						ASOutput output = outputList.get(i);
-						if (output.getType().equalsIgnoreCase(
-								AScontants.sensordataType)
-								&& !output.getDataAction().equalsIgnoreCase(
-										AScontants.dataaction_ignore)) {
-							OctaveCell octaveResult = (OctaveCell) octave
-									.get(output.getName());
-							List<JsonDataPoints> datapointsList = awU
-									.unwrapOctaveSensorData(octaveResult);
-							if (datapointsList == null) {
-								System.out
-										.println("some problem---:datapointsList == null");
-							} else {
-								DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-								HBaseDataImport importData = new HBaseDataImport();
-								DatastreamDAO dsDao = new DatastreamDAO();
-								String datastreamID = output.getSource();
-								importData.setData_points(datapointsList);
-								HBaseDatapointDAO importDao = new HBaseDatapointDAO();
-								Datastream datastream = dsDao.getDatastream(
-										datastreamID, true, false);
-								importData.setDatastream_id(datastream
-										.getStreamId());
-								try {
-									importData
-											.setDatastream(dbtoJUtil
-													.convertDatastream(
-															datastream, null));
-									int totalStoredByte = importDao
-											.importDatapointsDatapoints(importData); // submit
-																						// data
-									analysisDataMovementLog = analysisDataMovementLog
-											+ "<p>Data Stored Successfully for datastream ID: "
-											+ datastreamID
-											+ ", total bytes:"
-											+ totalStoredByte + "</p>";
-									output.setValue(datastream.getTitle());
-									outputList.set(i, output);
-									System.out.println(totalStoredByte);
-								} catch (ErrorCodeException ex) {
-									WholeJobFinishedSuccessful = false;
-									if (ex.getErrorCode()
-											.equals(AllConstants.ErrorDictionary.Input_data_contains_invalid_unit_id)) {
-										analysisDataMovementLog = analysisDataMovementLog
-												+ "<p>Contains Invalid UnitID"
-												+ "</p>";
-									} else {
-										analysisDataMovementLog = analysisDataMovementLog
-												+ "<p>Internal Error unknown type"
-												+ "</p>";
-									}
-								} catch (Exception ex) {
-									WholeJobFinishedSuccessful = false;
-									ex.printStackTrace();
-									analysisDataMovementLog = analysisDataMovementLog
-											+ "<p>Internal Error" + "</p>";
-								}
-							}
-						} else if (output.getType().equalsIgnoreCase(
-								AScontants.fileType)) {
-							OctaveString fileOutput = (OctaveString) octave
-									.get(output.getName());
-
-							File outputFile = new File(tmpfolderPath
-									+ fileOutput.getString());
-							File outputFileJob = new File(jobfolderPath
-									+ fileOutput.getString());
-							if (fileOutput.getString().length() < 1
-									|| !outputFile.exists()) {
-								analysisDataMovementLog = analysisDataMovementLog
-										+ "<p>No Output File Exist or empty string:"
-										+ "</p>" + fileOutput.getString();
-								System.out
-										.println("ERROR Found No Output File Exist or empty string:"
-												+ fileOutput.getString()
-												+ ",Exist"
-												+ outputFile.exists()
-												+ ","
-												+ outputFile.getAbsolutePath());
-								continue;
-							} else {
-								FileUtils.copyFile(outputFile, outputFileJob);
-							}
-							MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
-							imageMimeTypes
-									.addMimeTypes("image png tif jpg jpeg bmp");
-
-							String mimetype = imageMimeTypes
-									.getContentType(fileOutput.getString());
-							String fileDownloadPath = outputFolderURLPath
-									+ fileOutput.getString();
-							output.setValue(fileDownloadPath);
-							outputList.set(i, output);
-						} else {
-							System.out.println("other type not supported yet");
-						}
-					}
-				}
-
-				try {
-					octave.close();
-					outputLog = outputLog + stdout.toString();
-					outputLog = outputLog.replace("\n", "<br>");
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					WholeJobFinishedSuccessful = false;
-				}
-
-				System.out.println(outputLog);
-				result.setModelLog(outputLog);
-
-				if (OctaveExecutionSuccessful) {
-					System.out.println("Model Execution Successful!");
-					result.setModel_status(AScontants.ModelJobStatus.finished_succesfully);
-				} else {
-					System.out.println("Model Execution Failed!");
-					result.setModel_status(AScontants.ModelJobStatus.finished_with_error);
-				}
-				if (WholeJobFinishedSuccessful) {
-					System.out.println("Job Execution Successful!");
-					result.setJobStatus(AScontants.ModelJobStatus.finished_succesfully);
-				} else {
-					System.out.println("Job Execution Failed!");
-					result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
-				}
-				if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
-					Gson gson = new GsonBuilder().disableHtmlEscaping()
-							.create();
-					JsonAnalysisResultWapper jarw = new JsonAnalysisResultWapper();
-					jarw.setInputs(inputList);
-					jarw.setOutputs(outputList);
-					String json_String = gson.toJson(jarw);
-					result.setJson_results(json_String);
-					System.out.println(gson.toJson(json_String));
-					// JsonElement jinputs=gson.toJsonTree(inputList);
-					// JsonElement joutputs=gson.toJsonTree(outputList);
-					// JsonObject jo=new JsonObject();
-					// jo.add("outputs", joutputs);
-					// jo.add("inputs", jinputs);
-					// System.out.println(gson.toJson(jo));
-					// result.setJson_results(gson.toJson(jo));
-				}
-
-				result.setJobEndTime(new Date());
-				result.setJobLog(analysisDataMovementLog);
-				asDao.updateJobResult(result);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				result.setJobEndTime(new Date());
-				result.setJobLog(analysisDataMovementLog);
-				result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
-				asDao.updateJobResult(result);
-			}
+			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
+			awU.octaveRun(modelID, jobID, outputFolderURLPath, inputList,
+					outputList);
 		}
 	}
 

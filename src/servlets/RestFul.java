@@ -31,6 +31,7 @@ import static servlets.util.ServerUtil.isGetFollowings;
 import static servlets.util.ServerUtil.isGetHealthDataSummariesByTitle;
 import static servlets.util.ServerUtil.isGetHealthDatapoints;
 import static servlets.util.ServerUtil.isGetHealthDatapointsByTitle;
+import static servlets.util.ServerUtil.isGetHealthDatapointsByTitleBenchmarks;
 import static servlets.util.ServerUtil.isGetHealthDatastreamBlocks;
 import static servlets.util.ServerUtil.isGetHealthDatastreams;
 import static servlets.util.ServerUtil.isGetLocationLogs;
@@ -55,14 +56,13 @@ import static servlets.util.ServerUtil.isPostDeviceDatapoints;
 import static servlets.util.ServerUtil.isPostDeviceSerialBinding;
 import static servlets.util.ServerUtil.isPostFollower;
 import static servlets.util.ServerUtil.isPostHealthDataPointThroughUnitIDfromURL;
+import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_Benchmark_DatapointsReq;
 import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_DatapointsReq;
 import static servlets.util.ServerUtil.isPostSubjectReq;
 import static servlets.util.ServerUtil.isPostUpload;
 import static servlets.util.ServerUtil.isPostUserAvatar;
 import static servlets.util.ServerUtil.isPostUserRegister;
 import static servlets.util.ServerUtil.isSearchUsers;
-import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_Benchmark_DatapointsReq;
-import static servlets.util.ServerUtil.isGetHealthDatapointsByTitleBenchmarks;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 
@@ -128,7 +128,6 @@ import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
-import servlets.analysis.service.GetFile;
 import servlets.device.actions.GetADeviceBinding;
 import servlets.device.actions.GetDeviceBindingList;
 import servlets.device.actions.GetDeviceDataPoints;
@@ -138,9 +137,7 @@ import servlets.device.actions.PostDevice;
 import servlets.device.actions.PostDeviceDatapoints;
 import servlets.humanmodels.get.GetTemperatureSimulation;
 import servlets.util.HMServerUtil;
-import util.AllConstants.api_entryPoints;
-
-import com.analysis.service.AnalysisWrapperUtil;
+import servlets.util.ServerUtil;
 
 //import servlets.actions.get.GetDataPointsLocalDebug;
 
@@ -164,16 +161,7 @@ public class RestFul extends HttpServlet {
 	// resp.setHeader("Access-Control-Expose-Headers",
 	// ACCESS_CONTROL_ALLOW_HEADERS);
 
-	public static String getFullURL(HttpServletRequest request) {
-		StringBuffer requestURL = request.getRequestURL();
-		String queryString = request.getQueryString();
-
-		if (queryString == null) {
-			return requestURL.toString();
-		} else {
-			return requestURL.append('?').append(queryString).toString();
-		}
-	}
+	
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -194,7 +182,7 @@ public class RestFul extends HttpServlet {
 		// System.out.println(req.getMethod() + " is coming..." +
 		// ",contextPath:"
 		// + contextPath(req) + "allow originls");
-		System.out.println("FULL URL(GET):" + getFullURL(req));
+		System.out.println("FULL URL(GET):" + ServerUtil.getFullURL(req));
 		if (isGetSubjectsListReq(ServletPath(req))) {
 			GetSubjectList proceReq = new GetSubjectList();
 			proceReq.processRequest(req, resp);
@@ -352,7 +340,7 @@ public class RestFul extends HttpServlet {
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		System.out.println("FULL URL(DELETE):" + getFullURL(req));
+		System.out.println("FULL URL(DELETE):" + ServerUtil.getFullURL(req));
 		// System.out.println(req.getMethod() + " is coming..." +
 		// ",contextPath:"
 		// + contextPath(req));
@@ -409,7 +397,7 @@ public class RestFul extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		System.out.println("FULL URL(POST):" + getFullURL(req));
+		System.out.println("FULL URL(POST):" + ServerUtil.getFullURL(req));
 		// System.out.println(req.getMethod() + " is coming..." +
 		// ",contextPath:"
 		// + contextPath(req) + "allow originls");

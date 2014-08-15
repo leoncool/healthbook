@@ -1,18 +1,42 @@
 package com.analysis.service;
 
+import health.database.DAO.DatastreamDAO;
+import health.database.DAO.as.AnalysisServiceDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
+import health.database.models.Datastream;
+import health.database.models.as.AnalysisResult;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataValues;
+import health.input.util.DBtoJsonUtil;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
+import javax.activation.MimetypesFileTypeMap;
+
+import org.apache.commons.io.FileUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import server.exception.ErrorCodeException;
 import util.AScontants;
 import util.AllConstants;
+import util.ServerConfigUtil;
+import util.AllConstants.ServerConfigs;
+import dk.ange.octave.OctaveEngine;
+import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
 import dk.ange.octave.type.OctaveDouble;
 import dk.ange.octave.type.OctaveString;
@@ -169,5 +193,307 @@ public class AnalysisWrapperUtil {
 		writer.close();
 		return outputFile;
 	}
+	public void dumpDatapointsToCsvFile(HBaseDataImport hbaseexport,String fileLocation) throws IOException
+	{
+		
+		List<JsonDataPoints> jDataPointsList=hbaseexport.getData_points();
+		StringBuilder dataLineSum=new StringBuilder();
+		
+		for(JsonDataPoints jDatapoint:jDataPointsList)
+		{
+			String line=jDatapoint.getAt();
+			line=line+" "+jDatapoint.getTimetag();
+			List<JsonDataValues> valueList=jDatapoint.getValue_list();
+			for(JsonDataValues value:valueList)
+			{
+				line=line+" "+value.getUnit_id()+" "+"symbol"+" "+value.getVal()+" "+value.getVal_tag()+"\n";
+				dataLineSum.append(line);
+			}
+		}
+		File outputFile=new File(fileLocation);
+//		System.out.println(dataLineSum.toString());
+		FileUtils.writeStringToFile(outputFile, dataLineSum.toString());
+	}
+	
+	
+	
 
+		// String outputFolderURLPath =
+	// "http://localhost:8080/healthbook/as/getFile?path=";
+	ArrayList<ASInput> inputList = new ArrayList<ASInput>();
+
+	ArrayList<ASOutput> outputList = new ArrayList<ASOutput>();
+	
+	public AnalysisResult octaveRun(String modelID, String jobID,String outputFolderURLPath,ArrayList<ASInput> inputList,ArrayList<ASOutput> outputList)
+	{
+		 boolean OctaveExecutionSuccessful = false;
+		 boolean WholeJobFinishedSuccessful = true;
+		 String outputLog = "";
+			String analysisDataMovementLog = "";
+//			String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+
+		
+		String modelRepository = "F:/model_repository/" + modelID;
+		String tmpfolderPath = "F:/model_repository/" + modelID + "/";
+		String jobfolderPath = "F:/job_folder/" + jobID + "/";
+		if (!new File(modelRepository).exists()) {
+			modelRepository = ServerConfigUtil
+					.getConfigValue(ServerConfigs.modelRepository);
+			String tmpFolder = ServerConfigUtil
+					.getConfigValue(ServerConfigs.tmpRepository);
+			UUID uuid = UUID.randomUUID();
+			tmpfolderPath = tmpFolder + uuid.toString() + "/";
+			modelRepository = modelRepository + modelID;
+			if (new File(tmpfolderPath).exists()) {
+				new File(tmpfolderPath).delete();
+			}
+			try {
+				FileUtils.copyDirectory(new File(modelRepository),
+						new File(tmpfolderPath));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String jobFolder = ServerConfigUtil
+					.getConfigValue(ServerConfigs.jobDir);
+			jobfolderPath = jobFolder + jobID + "/";
+		}
+
+		outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
+		File folder = new File(tmpfolderPath);
+		File jobFolder = new File(jobfolderPath);
+		if (!jobFolder.exists()) {
+			jobFolder.mkdir();
+		}
+
+		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
+		AnalysisResult result = asDao.getJobResultByID(jobID);
+		try {
+			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
+			StringWriter stdout = new StringWriter();
+			OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
+			octaveFactory.setWorkingDir(folder);
+			OctaveEngine octave = octaveFactory.getScriptEngine();
+			try {
+				octave.setWriter(stdout);
+				// octave.eval("addpath(\"signal_package\")");
+				// octave.eval("addpath(\"general_package\")");
+				octave.eval("pkg load all");
+				for (ASInput input : inputList) {
+					if (input.getType().equals("string")) {
+						OctaveString octaveInput = new OctaveString(
+								(String) input.getSource());
+						octave.put(input.getName(), octaveInput);
+					} else if (input.getType().equals("sensordata")) {
+						HBaseDatapointDAO diDao = new HBaseDatapointDAO();
+						DatastreamDAO dsDao = new DatastreamDAO();
+						DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+						Datastream datastream = dsDao
+								.getHealthDatastreamByTitle(
+										input.getSource(), "testtest3",
+										true, false);
+						long start = input.getStart();
+						long end = input.getEnd();
+						int maxDataPoints = input.getMaxDataPoints();
+						if (end == 0) {
+							end = new Date().getTime();
+						}
+						HashMap<String, Object> settings = new HashMap<String, Object>();
+						
+						settings.put(
+								AllConstants.ProgramConts.exportSetting_MAX,
+								maxDataPoints);
+						HBaseDataImport hbaseexport = diDao
+								.exportDatapoints(
+										datastream.getStreamId(),
+										start,
+										end,
+										null,
+										dbtoJUtil
+												.ToDatastreamUnitsMap(datastream),
+										null, settings);
+						UUID uuid = UUID.randomUUID();
+						String inputValue = "sensorData-" + uuid.toString();
+						awU.dumpDatapointsToCsvFile(hbaseexport,
+								tmpfolderPath + inputValue);
+						OctaveString octaveInput = new OctaveString(
+								(String) inputValue);
+						octave.put(input.getName(), octaveInput);
+					}
+				}
+				String mainFunctionString = awU.createMainFunction("main",
+						inputList, outputList);
+				System.out.println("mainFunctionString:"
+						+ mainFunctionString);
+				octave.eval(mainFunctionString);
+				OctaveExecutionSuccessful = true;
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				System.out.println(ex.getMessage());
+				outputLog = outputLog + ex.getMessage();
+				analysisDataMovementLog = analysisDataMovementLog
+						+ ex.getMessage();
+				OctaveExecutionSuccessful = false;
+				WholeJobFinishedSuccessful = false;
+			}
+
+			// result.setJobLog((outputLog);
+			if (OctaveExecutionSuccessful) {
+				for (int i = 0; i < outputList.size(); i++) {
+					ASOutput output = outputList.get(i);
+					if (output.getType().equalsIgnoreCase(
+							AScontants.sensordataType)
+							&& !output.getDataAction().equalsIgnoreCase(
+									AScontants.dataaction_ignore)) {
+						OctaveCell octaveResult = (OctaveCell) octave
+								.get(output.getName());
+						List<JsonDataPoints> datapointsList = awU
+								.unwrapOctaveSensorData(octaveResult);
+						if (datapointsList == null) {
+							System.out
+									.println("some problem---:datapointsList == null");
+						} else {
+							DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+							HBaseDataImport importData = new HBaseDataImport();
+							DatastreamDAO dsDao = new DatastreamDAO();
+							String datastreamID = output.getSource();
+							importData.setData_points(datapointsList);
+							HBaseDatapointDAO importDao = new HBaseDatapointDAO();
+							Datastream datastream = dsDao.getDatastream(
+									datastreamID, true, false);
+							importData.setDatastream_id(datastream
+									.getStreamId());
+							try {
+								importData
+										.setDatastream(dbtoJUtil
+												.convertDatastream(
+														datastream, null));
+								int totalStoredByte = importDao
+										.importDatapointsDatapoints(importData); // submit
+																					// data
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Data Stored Successfully for datastream ID: "
+										+ datastreamID
+										+ ", total bytes:"
+										+ totalStoredByte + "</p>";
+								output.setValue(datastream.getTitle());
+								outputList.set(i, output);
+								System.out.println(totalStoredByte);
+							} catch (ErrorCodeException ex) {
+								WholeJobFinishedSuccessful = false;
+								if (ex.getErrorCode()
+										.equals(AllConstants.ErrorDictionary.Input_data_contains_invalid_unit_id)) {
+									analysisDataMovementLog = analysisDataMovementLog
+											+ "<p>Contains Invalid UnitID"
+											+ "</p>";
+								} else {
+									analysisDataMovementLog = analysisDataMovementLog
+											+ "<p>Internal Error unknown type"
+											+ "</p>";
+								}
+							} catch (Exception ex) {
+								WholeJobFinishedSuccessful = false;
+								ex.printStackTrace();
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Internal Error" + "</p>";
+							}
+						}
+					} else if (output.getType().equalsIgnoreCase(
+							AScontants.fileType)) {
+						OctaveString fileOutput = (OctaveString) octave
+								.get(output.getName());
+
+						File outputFile = new File(tmpfolderPath
+								+ fileOutput.getString());
+						File outputFileJob = new File(jobfolderPath
+								+ fileOutput.getString());
+						if (fileOutput.getString().length() < 1
+								|| !outputFile.exists()) {
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>No Output File Exist or empty string:"
+									+ "</p>" + fileOutput.getString();
+							System.out
+									.println("ERROR Found No Output File Exist or empty string:"
+											+ fileOutput.getString()
+											+ ",Exist"
+											+ outputFile.exists()
+											+ ","
+											+ outputFile.getAbsolutePath());
+							continue;
+						} else {
+							FileUtils.copyFile(outputFile, outputFileJob);
+						}
+						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
+						imageMimeTypes
+								.addMimeTypes("image png tif jpg jpeg bmp");
+
+						String mimetype = imageMimeTypes
+								.getContentType(fileOutput.getString());
+						String fileDownloadPath = outputFolderURLPath
+								+ fileOutput.getString();
+						output.setValue(fileDownloadPath);
+						outputList.set(i, output);
+					} else {
+						System.out.println("other type not supported yet");
+					}
+				}
+			}
+
+			try {
+				octave.close();
+				outputLog = outputLog + stdout.toString();
+				outputLog = outputLog.replace("\n", "<br>");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				WholeJobFinishedSuccessful = false;
+			}
+
+//			System.out.println(outputLog);
+			result.setModelLog(outputLog);
+
+			if (OctaveExecutionSuccessful) {
+				System.out.println("Model Execution Successful!");
+				result.setModel_status(AScontants.ModelJobStatus.finished_succesfully);
+			} else {
+				System.out.println("Model Execution Failed!");
+				result.setModel_status(AScontants.ModelJobStatus.finished_with_error);
+			}
+			if (WholeJobFinishedSuccessful) {
+				System.out.println("Job Execution Successful!");
+				result.setJobStatus(AScontants.ModelJobStatus.finished_succesfully);
+			} else {
+				System.out.println("Job Execution Failed!");
+				result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+			}
+			if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
+				Gson gson = new GsonBuilder().disableHtmlEscaping()
+						.create();
+				JsonAnalysisResultWapper jarw = new JsonAnalysisResultWapper();
+				jarw.setInputs(inputList);
+				jarw.setOutputs(outputList);
+				String json_String = gson.toJson(jarw);
+				result.setJson_results(json_String);
+//				System.out.println(gson.toJson(json_String));
+				// JsonElement jinputs=gson.toJsonTree(inputList);
+				// JsonElement joutputs=gson.toJsonTree(outputList);
+				// JsonObject jo=new JsonObject();
+				// jo.add("outputs", joutputs);
+				// jo.add("inputs", jinputs);
+				// System.out.println(gson.toJson(jo));
+				// result.setJson_results(gson.toJson(jo));
+			}
+			FileUtils.deleteDirectory(new File(tmpfolderPath));
+			result.setJobEndTime(new Date());
+			result.setJobLog(analysisDataMovementLog);
+			asDao.updateJobResult(result);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			result.setJobEndTime(new Date());
+			result.setJobLog(analysisDataMovementLog);
+			result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+			asDao.updateJobResult(result);
+		}
+		return result;
+	}
 }

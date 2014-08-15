@@ -137,12 +137,12 @@ public class GetHealthDatastreamsList extends HttpServlet {
 			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 			List<Datastream> dsList = dstreamDao.getDatastreamList(subject.getId(), true,
 					false);
-			System.out.println("dsList size:" + dsList.size());
+//			System.out.println("dsList size:" + dsList.size());
 			List<JsonDatastream> jsonDsList = new ArrayList<JsonDatastream>();
 			for (Datastream ds : dsList) {
 				jsonDsList.add(dbtoJUtil.convertDatastream(ds, null));
 			}
-			System.out.println(jsonDsList.size());
+//			System.out.println(jsonDsList.size());
 			Gson gson = new Gson();
 			JsonElement je = gson.toJsonTree(jsonDsList);
 			JsonObject jo = new JsonObject();
@@ -153,7 +153,7 @@ public class GetHealthDatastreamsList extends HttpServlet {
 			jo.addProperty(AllConstants.api_entryPoints.request_api_loginid,
 					subject.getLoginID());
 			jo.add("datastream_list", je);
-			System.out.println(jo.toString());
+//			System.out.println(jo.toString());
 			out.println(gson.toJson(jo));
 		} catch (Exception ex) {
 			ex.printStackTrace();

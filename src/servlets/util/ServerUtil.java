@@ -7,6 +7,8 @@ package servlets.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+
 import util.AllConstants;
 import util.AllConstants.api_entryPoints;
 
@@ -16,6 +18,16 @@ import util.AllConstants.api_entryPoints;
  */
 public class ServerUtil {
 
+	public static String getFullURL(HttpServletRequest request) {
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+
+		if (queryString == null) {
+			return requestURL.toString();
+		} else {
+			return requestURL.append('?').append(queryString).toString();
+		}
+	}
 	public static int getSubjectID(String ServletPath) {
 		String values[] = ServletPath.replaceFirst(
 				AllConstants.api_entryPoints.api_url
