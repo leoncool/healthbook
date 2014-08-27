@@ -274,7 +274,17 @@ public class ServerUtil {
 			return false;
 		}
 	}
-
+	public static boolean isPostHealthTitle_Files_Req(
+			String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/"
+				+ "[-a-zA-Z0-9_]+/" + api_entryPoints.api_files + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isPostHealthTitle_Datastream_Benchmark_DatapointsReq(
 			String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url

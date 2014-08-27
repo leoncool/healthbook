@@ -201,10 +201,17 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 											unit.getValue_type());
 							return;
 						} else {
-							unit.setValue_type(UnitValueTypes.DOUBLE_TYPE); // Setting
+							ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Invalid_ValueType,
+									AllConstants.ErrorDictionary.Invalid_ValueType,
+									"missing value type");
+								return;
+							//unit.setValue_type(UnitValueTypes.DOUBLE_TYPE); // Setting
 																			// Default
 																			// to
-																			// double
+       														// double
 						}
 					}
 				}

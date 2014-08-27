@@ -47,6 +47,7 @@ import static servlets.util.ServerUtil.isPostCreateDatastreamBlock_ByTitleReq;
 import static servlets.util.ServerUtil.isPostCreateDatastream_ByTitleReq;
 import static servlets.util.ServerUtil.isPostCreateSingleDS_UnitReq;
 import static servlets.util.ServerUtil.isPostDataBlocksReq;
+import static servlets.util.ServerUtil.isPostHealthTitle_Files_Req;
 import static servlets.util.ServerUtil.isPostDataPointsReq;
 import static servlets.util.ServerUtil.isPostDatastreamReq;
 import static servlets.util.ServerUtil.isPostDefaultSuject_DatastreamReq;
@@ -125,6 +126,7 @@ import servlets.actions.post.health.bytitle.CreateHealthDataBlock;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsBenchmarksThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
+import servlets.actions.post.health.bytitle.PostFileThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
 import servlets.actions.post.throughdefaultsubject.PostDatastreamThroughDefaultSubject;
@@ -160,8 +162,6 @@ public class RestFul extends HttpServlet {
 	// ACCESS_CONTROL_ALLOW_METHODS);
 	// resp.setHeader("Access-Control-Expose-Headers",
 	// ACCESS_CONTROL_ALLOW_HEADERS);
-
-	
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -261,8 +261,7 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetHealthDataPointsByTitleBenchmarks:");
 			GetHealthDataPointsByTitleBenchmarks proceReq = new GetHealthDataPointsByTitleBenchmarks();
 			proceReq.processRequest(req, resp);
-		}
-		else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
+		} else if (isGetAHealthDatastreamByTitle(ServletPath(req))) {
 			System.out.println("isGetAHealthDatastreamByTitle:");
 			GetaHealthDatastreamByTitle proceReq = new GetaHealthDatastreamByTitle();
 			proceReq.processRequest(req, resp);
@@ -474,6 +473,10 @@ public class RestFul extends HttpServlet {
 		} else if (isPostHealthTitle_Datastream_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostHealthTitle_Datastream_DatapointsReq");
 			PostDatapointsThroughHealthTitle proceReq = new PostDatapointsThroughHealthTitle();
+			proceReq.processRequest(req, resp);
+		} else if (isPostHealthTitle_Files_Req(ServletPath(req))) {
+			System.out.println("isPostHealthTitle_Files_Req");
+			PostFileThroughHealthTitle proceReq = new PostFileThroughHealthTitle();
 			proceReq.processRequest(req, resp);
 		} else if (isPostHealthTitle_Datastream_Benchmark_DatapointsReq(ServletPath(req))) {
 			System.out.println("isPostDatapointsBenchmarksThroughHealthTitle");

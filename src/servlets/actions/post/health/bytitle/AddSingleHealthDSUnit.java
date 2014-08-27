@@ -31,6 +31,7 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.JsonUtil;
+import util.UnitValueTypes;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -149,6 +150,15 @@ public class AddSingleHealthDSUnit extends HttpServlet {
 			}
 			try{
 			DatastreamUnits unit=dbtoJUtil.convert_a_jdatastream_unit(junit);
+			if (UnitValueTypes.existValueType(unit.getValueType())) {
+				ReturnParser
+						.outputErrorException(
+								response,
+								AllConstants.ErrorDictionary.Invalid_ValueType,
+								AllConstants.ErrorDictionary.Invalid_ValueType,
+								unit.getValueType());
+				return;
+			}
 			unit.setStreamID(datastream);
 			dstreamDao.addSingleDS_Unit(unit);
 			}catch(Exception ex)

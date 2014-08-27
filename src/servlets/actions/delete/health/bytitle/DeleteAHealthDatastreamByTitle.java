@@ -73,7 +73,13 @@ public class DeleteAHealthDatastreamByTitle extends HttpServlet {
 			accessUser = userDao.getLogin(loginID);
 		}
 		PrintWriter out = response.getWriter();
-
+		if(loginID.equalsIgnoreCase("dongdong"))
+		{
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.PERMISSION_DENIED, null,
+					null);
+			return;
+		}
 		try {
 
 			SubjectDAO subjDao = new SubjectDAO();
