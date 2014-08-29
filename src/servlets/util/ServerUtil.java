@@ -104,6 +104,7 @@ public class ServerUtil {
 		return unitid;
 	}
 
+
 	public static String getHealthBlockID(String ServletPath) {
 		String values[] = ServletPath.replaceFirst(
 				AllConstants.api_entryPoints.api_url
@@ -595,6 +596,16 @@ public class ServerUtil {
 				+ AllConstants.api_entryPoints.api_health + "/"
 				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
 				+ AllConstants.api_entryPoints.api_datapoints + "[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public static boolean isGetHealthFileByTitleAndKey(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_health + "/"
+				+ AllConstants.api_entryPoints.api_title + "/[-a-zA-Z0-9_]+/"
+				+ AllConstants.api_entryPoints.api_files +"[/]*$")) {
 			return true;
 		} else {
 			return false;

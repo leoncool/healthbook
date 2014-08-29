@@ -31,6 +31,7 @@ import static servlets.util.ServerUtil.isGetFollowings;
 import static servlets.util.ServerUtil.isGetHealthDataSummariesByTitle;
 import static servlets.util.ServerUtil.isGetHealthDatapoints;
 import static servlets.util.ServerUtil.isGetHealthDatapointsByTitle;
+import static servlets.util.ServerUtil.isGetHealthFileByTitleAndKey;
 import static servlets.util.ServerUtil.isGetHealthDatapointsByTitleBenchmarks;
 import static servlets.util.ServerUtil.isGetHealthDatastreamBlocks;
 import static servlets.util.ServerUtil.isGetHealthDatastreams;
@@ -100,6 +101,7 @@ import servlets.actions.get.health.GetaHealthDatastream;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitleBenchmarks;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
+import servlets.actions.get.health.bytitle.GetHealthFileByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDataBlock;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
 import servlets.actions.get.health.bytitle.ListHealthDataBlocks;
@@ -256,6 +258,10 @@ public class RestFul extends HttpServlet {
 		} else if (isGetHealthDatapointsByTitle(ServletPath(req))) {
 			System.out.println("isGetHealthDatapointsByTitle:");
 			GetHealthDataPointsByTitle proceReq = new GetHealthDataPointsByTitle();
+			proceReq.processRequest(req, resp);
+		} else if (isGetHealthFileByTitleAndKey(ServletPath(req))) {
+			System.out.println("isGetHealthFileByTitleAndKey:");
+			GetHealthFileByTitle proceReq = new GetHealthFileByTitle();
 			proceReq.processRequest(req, resp);
 		} else if (isGetHealthDatapointsByTitleBenchmarks(ServletPath(req))) {
 			System.out.println("isGetHealthDataPointsByTitleBenchmarks:");

@@ -418,7 +418,7 @@ public class GetHealthDataPointsByTitleBenchmarks extends HttpServlet {
 						hbaseexport = diDao.exportDatapointsForSingleUnit(
 								datastream.getStreamId(), start, end, blockid,
 								datastream.getDatastreamUnitsList().get(0)
-										.getUnitID(), null);
+										.getUnitID(), null,null);
 
 					} else {
 
@@ -447,7 +447,7 @@ public class GetHealthDataPointsByTitleBenchmarks extends HttpServlet {
 								System.out.println("--------using single unit export with request_api_dataformat-----:"+shortUnitID);
 								hbaseexport = diDao.exportDatapointsForSingleUnit(
 										datastream.getStreamId(), start, end, blockid,
-										shortUnitID, null);
+										shortUnitID, null,null);
 							}
 							else{		
 								System.out.println("--------normal data export with request_api_dataformat-----");
@@ -502,7 +502,7 @@ public class GetHealthDataPointsByTitleBenchmarks extends HttpServlet {
 									System.out.println("--------using single unit export-----:"+shortUnitID);
 									hbaseexport = diDao.exportDatapointsForSingleUnit(
 											datastream.getStreamId(), start, end, blockid,
-											shortUnitID, null);
+											shortUnitID, null,null);
 								}
 								else{		
 									System.out.println("--------normal data export-----");

@@ -8,32 +8,18 @@ import static util.JsonUtil.ServletPath;
 import health.database.DAO.DataPermissionDAO;
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
-import health.database.DAO.SleepDataDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
-import health.database.DAO.nosql.DataPointsSimulators;
-import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.DataPermission;
 import health.database.models.Datastream;
-import health.database.models.SleepDataSummary;
 import health.database.models.Subject;
 import health.database.models.Users;
-import health.hbase.models.HBaseDataImport;
-import health.input.jsonmodels.JsonDataPoints;
 import health.input.util.DBtoJsonUtil;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.zip.GZIPOutputStream;
 
 import javax.persistence.NonUniqueResultException;
 import javax.servlet.ServletException;
@@ -41,18 +27,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import server.exception.ErrorCodeException;
+import server.conf.Constants;
 import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
-import util.DateUtil;
 import util.ServerConfigUtil;
+import cloudstorage.cacss.S3Engine;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonWriter;
+import com.zhumulangma.cloudstorage.server.entity.CloudFile;
+import com.zhumulangma.cloudstorage.server.exception.ErrorCodeException;
 
 /**
  * 
@@ -119,17 +103,18 @@ public class GetHealthFileByTitle extends HttpServlet {
 		// PrintWriter out = response.getWriter();
 		OutputStream outStream = null;
 		try {
-			
+
 			SubjectDAO subjDao = new SubjectDAO();
-			Subject subject = (Subject) subjDao.findHealthSubject(targetLoginID); // Retreive
+			Subject subject = (Subject) subjDao
+					.findHealthSubject(targetLoginID); // Retreive
 			if (subject == null) {
 
 				try {
 					subject = subjDao.createDefaultHealthSubject(targetLoginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
-					hdsDao.createDefaultDatastreamsOnDefaultSubject(targetLoginID,
-							subject.getId());
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(
+							targetLoginID, subject.getId());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -149,7 +134,7 @@ public class GetHealthFileByTitle extends HttpServlet {
 			try {
 				datastream = dstreamDao.getHealthDatastreamByTitle(
 						subject.getId(), streamTitle, true, false);
-				
+
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -162,14 +147,14 @@ public class GetHealthFileByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
-			if(!datastream.getOwner().equalsIgnoreCase(targetLoginID))
-			{
+			if (!datastream.getOwner().equalsIgnoreCase(targetLoginID)) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Unauthorized_Access, null,
 						streamTitle);
 				return;
 			}
-			if (loginID!=null&&targetLoginID != null&&!loginID.equals(targetLoginID)) {
+			if (loginID != null && targetLoginID != null
+					&& !loginID.equals(targetLoginID)) {
 				DataPermissionDAO permissionDao = new DataPermissionDAO();
 				List<DataPermission> permissionList = permissionDao
 						.getDataPermission(
@@ -196,24 +181,65 @@ public class GetHealthFileByTitle extends HttpServlet {
 					// return;
 				}
 			}
-			
-			
+			String timestampAndUnitIDAndFileName = request
+					.getParameter(AllConstants.api_entryPoints.request_api_filekey);
+			if (timestampAndUnitIDAndFileName == null) {
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA, null,
+						AllConstants.api_entryPoints.request_api_filekey);
+				return;
+			}
 			String bucketName = ServerConfigUtil
 					.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
-			String objectPrefix=loginID + "/" + datastream.getStreamId()
-					+ "/" + at + "/" + unitRequest + "/" ;
-
-			Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
-					.GetObject(bucketName, user.getUserName(), objectName,
-							null, cahcedResult);
+			String objectKey = loginID + "/" + datastream.getStreamId() + "/"
+					+ timestampAndUnitIDAndFileName;
+			System.out.println("objectKey:" + objectKey);
+			// if (S3Engine.s3.existObject(bucketName, objectKey) == null) {
+			// ReturnParser.outputErrorException(response,
+			// AllConstants.ErrorDictionary.file_not_found, null,
+			// streamTitle);
+			// return;
+			// }
+			Hashtable<String, Object> returnValues = null;
+			try {
+				returnValues = (Hashtable<String, Object>) S3Engine.s3
+						.GetObject(bucketName, "leoncool", objectKey, null,
+								null);
+			} catch (ErrorCodeException ex) {
+				if (ex.getErrorCode() == Constants.S3ERROR.NOT_SUCH_KEY) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.file_not_found, null,
+							streamTitle);
+					return;
+				}
+			}
 			if (returnValues == null || returnValues.get("owner") == null) {
-				throw new InternalErrorException("", "", "");
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.Unauthorized_Access, null,
+						streamTitle);
+				return;
 			}
 			CloudFile file = (CloudFile) returnValues.get("data");
 			if (file == null) {
-				throw new NoSuchKeyException(objectName, "requestID----uuid",
-						"hostid");
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.file_not_found, null,
+						streamTitle);
+				return;
 			}
+
+			if (file.get(CloudFile.S3_CONTENT_TYPE) != null) {
+				response.setHeader("Content-Type",
+						(String) file.get(CloudFile.S3_CONTENT_TYPE));
+				System.out.println("Head Request-----Contenttype:"
+						+ file.get(CloudFile.S3_CONTENT_TYPE));
+			} else {
+				response.setHeader("Content-Type", "application/octet-stream");
+			}
+			response.setHeader("Content-Length",
+					(String) file.get(CloudFile.SIZE));
+			outStream = response.getOutputStream();
+			S3Engine.s3.directAccessData((String) file.get(CloudFile.LINK),
+					outStream, null);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -20,6 +20,8 @@ import health.database.models.Subject;
 import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
+import health.input.jsonmodels.JsonDataValues;
+import health.input.jsonmodels.JsonDatastreamUnits;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.BufferedReader;
@@ -47,8 +49,11 @@ import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
 import util.DateUtil;
+import util.ServerConfigUtil;
+import util.UnitValueTypes;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
@@ -81,7 +86,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 		Users accessUser = null;
 		PermissionFilter filter = new PermissionFilter();
 		String loginID = filter.checkAndGetLoginFromToken(request, response);
-		
+
 		UserDAO userDao = new UserDAO();
 		if (loginID == null) {
 			if (filter.getCheckResult().equalsIgnoreCase(
@@ -112,9 +117,8 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				return;
 			}
 		}
-		if(targetLoginID==null)
-		{
-			targetLoginID=loginID;
+		if (targetLoginID == null) {
+			targetLoginID = loginID;
 		}
 		// PrintWriter out = response.getWriter();
 		OutputStream outStream = null;
@@ -188,15 +192,16 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			}
 
 			SubjectDAO subjDao = new SubjectDAO();
-			Subject subject = (Subject) subjDao.findHealthSubject(targetLoginID); // Retreive
+			Subject subject = (Subject) subjDao
+					.findHealthSubject(targetLoginID); // Retreive
 			if (subject == null) {
 
 				try {
 					subject = subjDao.createDefaultHealthSubject(targetLoginID);
 					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
-					hdsDao.createDefaultDatastreamsOnDefaultSubject(targetLoginID,
-							subject.getId());
+					hdsDao.createDefaultDatastreamsOnDefaultSubject(
+							targetLoginID, subject.getId());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -216,7 +221,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 			try {
 				datastream = dstreamDao.getHealthDatastreamByTitle(
 						subject.getId(), streamTitle, true, false);
-				
+
 			} catch (NonUniqueResultException ex) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Internal_Fault, null,
@@ -229,14 +234,14 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						streamTitle);
 				return;
 			}
-			if(!datastream.getOwner().equalsIgnoreCase(targetLoginID))
-			{
+			if (!datastream.getOwner().equalsIgnoreCase(targetLoginID)) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Unauthorized_Access, null,
 						streamTitle);
 				return;
 			}
-			if (loginID!=null&&targetLoginID != null&&!loginID.equals(targetLoginID)) {
+			if (loginID != null && targetLoginID != null
+					&& !loginID.equals(targetLoginID)) {
 				DataPermissionDAO permissionDao = new DataPermissionDAO();
 				List<DataPermission> permissionList = permissionDao
 						.getDataPermission(
@@ -287,9 +292,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 				for (String id : unitids) {
 					if (id.length() < 3) {
 						// error
-						ReturnParser
-						.outputErrorException(
-								response,
+						ReturnParser.outputErrorException(response,
 								AllConstants.ErrorDictionary.Invalid_Unit_ID,
 								null, null);
 						return;
@@ -303,320 +306,352 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						}
 					}
 				}
-			}else{
-				mapUnits=dbtoJUtil.ToDatastreamUnitsMap(datastream);
+			} else {
+				mapUnits = dbtoJUtil.ToDatastreamUnitsMap(datastream);
 			}
-			if(mapUnits.size()==0)
-			{
+			if (mapUnits.size() == 0) {
 				ReturnParser
-				.outputErrorException(
-						response,
-						AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist,
-						null, null);
+						.outputErrorException(
+								response,
+								AllConstants.ErrorDictionary.invalid_unitid_or_request_unitid_not_exist,
+								null, null);
 				return;
 			}
 			System.out.println("mapUnits.size():" + mapUnits.size() + ", "
 					+ mapUnits);
-			Gson gson = new Gson();
-			int debug = 1;
-			if (debug == 1) {
-				System.out.println("debuging.....going to hbase");
-				HBaseDatapointDAO diDao =null;
-				System.out.println("datastreamID:" + datastream.getStreamId());
-				HBaseDataImport hbaseexport = null;
-				try {
-					if (streamTitle
-							.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_sleep)) {
-						// sleep record
-						if (request
-								.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) == null) {
-							ReturnParser
-									.outputErrorException(
-											response,
-											AllConstants.ErrorDictionary.Invalid_date_format,
-											null, null);
-							return;
-						}
-						DateUtil dateUtil = new DateUtil();
-						String yearMonthDateString = request
-								.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
-						Date date = dateUtil.convert(yearMonthDateString,
-								dateUtil.YearMonthDay_DateFormat);
+			Gson gson = new GsonBuilder().disableHtmlEscaping().create();;
+			System.out.println("debuging.....going to hbase");
+			HBaseDatapointDAO diDao = null;
+			System.out.println("datastreamID:" + datastream.getStreamId());
+			HBaseDataImport hbaseexport = null;
+			try {
+				if (streamTitle
+						.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_sleep)) {
+					// sleep record
+					if (request
+							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay) == null) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_date_format,
+										null, null);
+						return;
+					}
+					DateUtil dateUtil = new DateUtil();
+					String yearMonthDateString = request
+							.getParameter(AllConstants.api_entryPoints.request_api_YearMonthDay);
+					Date date = dateUtil.convert(yearMonthDateString,
+							dateUtil.YearMonthDay_DateFormat);
 
-						SleepDataDAO sleepdataDao = new SleepDataDAO();
-						List<SleepDataSummary> sleepSummaryList = sleepdataDao
-								.getSleepDataSummaries(
-										datastream.getStreamId(), null, date);
-						if (sleepSummaryList.size() < 1) {
-							ReturnParser
-									.outputErrorException(
-											response,
-											AllConstants.ErrorDictionary.NO_SLEEP_RECORD,
-											null, datastream.getStreamId());
-							return;
+					SleepDataDAO sleepdataDao = new SleepDataDAO();
+					List<SleepDataSummary> sleepSummaryList = sleepdataDao
+							.getSleepDataSummaries(datastream.getStreamId(),
+									null, date);
+					if (sleepSummaryList.size() < 1) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.NO_SLEEP_RECORD,
+								null, datastream.getStreamId());
+						return;
+					}
+					start = sleepSummaryList.get(0).getStartTime().getTime();
+					end = sleepSummaryList.get(0).getEndtime().getTime();
+					for (SleepDataSummary summary : sleepSummaryList) {
+						if (start > summary.getStartTime().getTime()) {
+							start = summary.getStartTime().getTime();
 						}
-						start = sleepSummaryList.get(0).getStartTime()
-								.getTime();
-						end = sleepSummaryList.get(0).getEndtime().getTime();
-						for (SleepDataSummary summary : sleepSummaryList) {
-							if (start > summary.getStartTime().getTime()) {
-								start = summary.getStartTime().getTime();
+						if (end < summary.getEndtime().getTime()) {
+							end = summary.getEndtime().getTime();
+						}
+					}
+					if (datastream.getDatastreamUnitsList().size() == 0) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.Unknown_StreamID,
+								null, datastream.getStreamId());
+						return;
+					}
+					if (datastream.getDatastreamUnitsList().size() > 1) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.MORE_THAN_ONE_DATASTREAM_UNIT,
+										null, datastream.getStreamId());
+						return;
+					}
+					mapUnits = new HashMap<String, String>();
+					mapUnits.put(datastream.getDatastreamUnitsList().get(0)
+							.getUnitID(), datastream.getDatastreamUnitsList()
+							.get(0).getUnitID());
+					diDao = new HBaseDatapointDAO();
+					hbaseexport = diDao.exportDatapointsForSingleUnit(
+							datastream.getStreamId(), start, end, blockid,
+							datastream.getDatastreamUnitsList().get(0)
+									.getUnitID(), null, null);
+
+				} else {
+
+					if (request
+							.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
+						DateUtil dateUtil = new DateUtil();
+						diDao = new HBaseDatapointDAO();
+						boolean useSingleUnitExport = false;
+
+						if (request
+								.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null
+								&& request
+										.getParameter(
+												AllConstants.api_entryPoints.request_api_single_unit)
+										.length() > 0) {
+
+							useSingleUnitExport = true;
+						}
+
+						if (useSingleUnitExport) {
+							String shortUnitID = datastream
+									.getDatastreamUnitsList().get(0)
+									.getShortUnitID();
+							if (shortUnitID == null) {
+								shortUnitID = datastream
+										.getDatastreamUnitsList().get(0)
+										.getUnitID();
 							}
-							if (end < summary.getEndtime().getTime()) {
-								end = summary.getEndtime().getTime();
-							}
+							System.out
+									.println("--------using single unit export with request_api_dataformat-----:"
+											+ shortUnitID);
+							hbaseexport = diDao.exportDatapointsForSingleUnit(
+									datastream.getStreamId(), start, end,
+									blockid, shortUnitID, null, null);
+						} else {
+							System.out
+									.println("--------normal data export with request_api_dataformat-----");
+							hbaseexport = diDao.exportDatapoints(
+									datastream.getStreamId(), start, end,
+									blockid, mapUnits, dateUtil.millisecFormat,
+									null);
 						}
-						if (datastream.getDatastreamUnitsList().size() == 0) {
-							ReturnParser
-									.outputErrorException(
-											response,
-											AllConstants.ErrorDictionary.Unknown_StreamID,
-											null, datastream.getStreamId());
-							return;
-						}
-						if (datastream.getDatastreamUnitsList().size() > 1) {
-							ReturnParser
-									.outputErrorException(
-											response,
-											AllConstants.ErrorDictionary.MORE_THAN_ONE_DATASTREAM_UNIT,
-											null, datastream.getStreamId());
-							return;
-						}
-						mapUnits = new HashMap<String, String>();
-						mapUnits.put(datastream.getDatastreamUnitsList().get(0)
-								.getUnitID(), datastream
-								.getDatastreamUnitsList().get(0).getUnitID());
-						diDao=new HBaseDatapointDAO();
-						hbaseexport = diDao.exportDatapointsForSingleUnit(
-								datastream.getStreamId(), start, end, blockid,
-								datastream.getDatastreamUnitsList().get(0)
-										.getUnitID(), null);
 
 					} else {
-
+						HashMap<String, Object> settings = new HashMap<String, Object>();
 						if (request
-								.getParameter(AllConstants.api_entryPoints.request_api_dataformat) != null) {
-							DateUtil dateUtil = new DateUtil();
-							diDao=new HBaseDatapointDAO();
-							boolean useSingleUnitExport=false;
-							if(request
-									.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null&&request
-											.getParameter(AllConstants.api_entryPoints.request_api_single_unit).length()>0)
-							{
-							
-								useSingleUnitExport=true;
+								.getParameter(AllConstants.api_entryPoints.request_max) != null) {
+							try {
+								int max = Integer
+										.parseInt(request
+												.getParameter(AllConstants.api_entryPoints.request_max));
+								settings.put(
+										AllConstants.ProgramConts.exportSetting_MAX,
+										max);
+							} catch (Exception ex) {
+								ReturnParser
+										.outputErrorException(
+												response,
+												AllConstants.ErrorDictionary.Invalid_ValueType,
+												null,
+												AllConstants.api_entryPoints.request_max);
+								return;
 							}
-							
-							if(useSingleUnitExport)
-							{
-								String shortUnitID=datastream.getDatastreamUnitsList().get(0)
-										.getShortUnitID();
-								if(shortUnitID==null)
-								{
-									shortUnitID=datastream.getDatastreamUnitsList().get(0)
-									.getUnitID();
-								}
-								System.out.println("--------using single unit export with request_api_dataformat-----:"+shortUnitID);
-								hbaseexport = diDao.exportDatapointsForSingleUnit(
-										datastream.getStreamId(), start, end, blockid,
-										shortUnitID, null);
-							}
-							else{		
-								System.out.println("--------normal data export with request_api_dataformat-----");
-								hbaseexport = diDao.exportDatapoints(
-										datastream.getStreamId(), start, end,
-										blockid, mapUnits, dateUtil.millisecFormat,null);
-							}
-							
-						
+						}
+						if (streamTitle
+								.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)) {
+							DataPointsSimulators simulator = new DataPointsSimulators();
+							hbaseexport = simulator.exportHeartRateDatapoints(
+									datastream.getStreamId(), start, end,
+									blockid, mapUnits, null, settings);
 						} else {
-							HashMap<String, Object> settings=new HashMap<String, Object>();
-							if(request.getParameter(AllConstants.api_entryPoints.request_max)!=null)
-							{
-								try{
-								int max=Integer.parseInt(request.getParameter(AllConstants.api_entryPoints.request_max));
-								settings.put(AllConstants.ProgramConts.exportSetting_MAX, max);
-								}catch(Exception ex)
-								{
-									ReturnParser
-									.outputErrorException(
-											response,
-											AllConstants.ErrorDictionary.Invalid_ValueType,
-											null, AllConstants.api_entryPoints.request_max);
-							return;
-								}
+							// normal data retrieval comes from here
+							diDao = new HBaseDatapointDAO();
+							boolean useSingleUnitExport = false;
+							if (request
+									.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null
+									&& request
+											.getParameter(
+													AllConstants.api_entryPoints.request_api_single_unit)
+											.length() > 0) {
+
+								useSingleUnitExport = true;
 							}
-							if(streamTitle
-									.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)){
-								DataPointsSimulators simulator=new DataPointsSimulators();
-								hbaseexport=simulator.exportHeartRateDatapoints(datastream.getStreamId(), start, end,blockid, mapUnits, null,settings);
-							}else{
-								//normal data retrieval comes from here
-								diDao=new HBaseDatapointDAO();
-								boolean useSingleUnitExport=false;
-								if(request
-										.getParameter(AllConstants.api_entryPoints.request_api_single_unit) != null&&request
-												.getParameter(AllConstants.api_entryPoints.request_api_single_unit).length()>0)
-								{
-								
-									useSingleUnitExport=true;
+
+							if (useSingleUnitExport) {
+								String shortUnitID = datastream
+										.getDatastreamUnitsList().get(0)
+										.getShortUnitID();
+								if (shortUnitID == null) {
+									shortUnitID = datastream
+											.getDatastreamUnitsList().get(0)
+											.getUnitID();
 								}
-								
-								if(useSingleUnitExport)
-								{
-									String shortUnitID=datastream.getDatastreamUnitsList().get(0)
-											.getShortUnitID();
-									if(shortUnitID==null)
-									{
-										shortUnitID=datastream.getDatastreamUnitsList().get(0)
-										.getUnitID();
-									}
-									System.out.println("--------using single unit export-----:"+shortUnitID);
-									hbaseexport = diDao.exportDatapointsForSingleUnit(
-											datastream.getStreamId(), start, end, blockid,
-											shortUnitID, null);
-								}
-								else{		
-									System.out.println("--------normal data export-----");
+								System.out
+										.println("--------using single unit export-----:"
+												+ shortUnitID);
+								hbaseexport = diDao
+										.exportDatapointsForSingleUnit(
+												datastream.getStreamId(),
+												start, end, blockid,
+												shortUnitID, null, null);
+							} else {
+								System.out
+										.println("--------normal data export-----");
 								hbaseexport = diDao.exportDatapoints(
 										datastream.getStreamId(), start, end,
-										blockid, mapUnits, null,settings);
-								}
+										blockid, mapUnits, null, settings);
 							}
-							
+						}
+
+					}
+				}
+			} catch (ErrorCodeException ex) {
+				ex.printStackTrace();
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
+				return;
+			} catch (Throwable ex) {
+				ex.printStackTrace();
+				ReturnParser
+						.outputErrorException(response,
+								AllConstants.ErrorDictionary.Internal_Fault,
+								null, null);
+				return;
+			}
+			if (hbaseexport != null) {
+				hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
+						datastream, mapUnits).getUnits_list());
+			} else {
+				hbaseexport = new HBaseDataImport();
+				hbaseexport.setBlock_id(blockid);
+				hbaseexport.setData_points(new ArrayList<JsonDataPoints>());
+				hbaseexport.setStream_title(datastream.getTitle());
+				// hbaseexport.setDatastream_id(datastream.getStreamId());
+				hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
+						datastream, mapUnits).getUnits_list());
+				// hbaseexport.setDeviceid(streamID);
+			}
+			outStream = null;
+			boolean iftoZip = true;
+			GZIPOutputStream gzipStream = null;
+			if (request.getParameter("nocompress") != null) {
+				iftoZip = false;
+			}
+			String encodings = request.getHeader("Accept-Encoding");
+			if (encodings != null && encodings.indexOf("gzip") >= 0
+					&& iftoZip == true) {
+				// Go with GZIP
+				System.out
+						.println("---------------responding with GZIP data--------------");
+				response.setHeader("Content-Encoding", "gzip");
+				gzipStream = new GZIPOutputStream(response.getOutputStream());
+				// outStream = new
+				// GZIPOutputStream(response.getOutputStream());
+			} else {
+				response.setContentType("application/json");
+				outStream = response.getOutputStream();
+			}
+			// response.setHeader("Vary", "Accept-Encoding");
+			Date timerStart = new Date();
+			hbaseexport.setStream_title(datastream.getTitle());
+			hbaseexport.setDatastream_id(datastream.getStreamId());
+			hbaseexport.setDevice_id(null);
+
+			int totalData_pointsSize = 0;
+
+			if (hbaseexport.getData_points() != null) {
+				// for file data
+				totalData_pointsSize = hbaseexport.getData_points().size();
+				HashMap<String, String> fileUnits = new HashMap<>();
+				for (JsonDatastreamUnits unit : hbaseexport.getUnits_list()) {
+					if (unit.getValue_type().equalsIgnoreCase(
+							UnitValueTypes.FILE_TYPE)) {
+						fileUnits.put(unit.getUnit_id(), unit.getUnit_id());
+					}
+				}
+				if (fileUnits.size() > 0) {
+					System.out.println("exist file type.........");
+					String filebaseURL = ServerConfigUtil
+							.getConfigValue(AllConstants.ServerConfigs.fileGetBaseURL);
+					String objectKeyPrefix = filebaseURL + "title" + "/"
+							+ datastream.getTitle() + "/"
+							+ AllConstants.api_entryPoints.api_files;
+					List<JsonDataPoints> jdatapointsList = hbaseexport
+							.getData_points();
+					for (int i = 0; i < jdatapointsList.size(); i++) {
+						for (int j = 0; j < jdatapointsList.get(i)
+								.getValue_list().size(); j++) {
+							if (fileUnits.containsKey(jdatapointsList.get(i)
+									.getValue_list().get(j).getUnit_id())) {
+								System.out.println("exist unit:......"
+										+ jdatapointsList.get(i)
+												.getValue_list().get(j)
+												.getUnit_id());
+								List<JsonDataValues> jValueList = jdatapointsList
+										.get(i).getValue_list();
+								JsonDataValues jValue = jValueList.get(j);
+								System.out.println(jdatapointsList.get(i).getAt());
+								jValue.setLink(objectKeyPrefix
+										+ "?"
+										+ AllConstants.api_entryPoints.request_api_filekey
+										+ "="
+										+ jdatapointsList.get(i).getAt()
+										+ "/"
+										+ jdatapointsList.get(i)
+												.getValue_list().get(j)
+												.getUnit_id() + "/"
+										+ jValue.getVal());
+								jValueList.set(j, jValue);
+								JsonDataPoints jp = jdatapointsList.get(i);
+								jp.setValue_list(jValueList);
+								jdatapointsList.set(i, jp);
+							}
 						}
 					}
-				} catch (ErrorCodeException ex) {
-					ex.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Internal_Fault, null,
-							null);
-					return;
-				} catch (Throwable ex) {
-					ex.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Internal_Fault, null,
-							null);
-					return;
+					hbaseexport.setData_points(jdatapointsList);
 				}
-				if (hbaseexport != null) {
-					hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
-							datastream, mapUnits).getUnits_list());
-				} else {
-					hbaseexport = new HBaseDataImport();
-					hbaseexport.setBlock_id(blockid);
-					hbaseexport.setData_points(new ArrayList<JsonDataPoints>());
-					hbaseexport.setStream_title(datastream.getTitle());
-//					hbaseexport.setDatastream_id(datastream.getStreamId());
-					hbaseexport.setUnits_list(dbtoJUtil.convertDatastream(
-							datastream, mapUnits).getUnits_list());
-					// hbaseexport.setDeviceid(streamID);
-				}
-				outStream = null;
-				boolean iftoZip = true;
-				GZIPOutputStream gzipStream = null;
-				if (request.getParameter("nocompress") != null) {
-					iftoZip = false;
-				}
-				String encodings = request.getHeader("Accept-Encoding");
-				if (encodings != null && encodings.indexOf("gzip") >= 0
-						&& iftoZip == true) {
-					// Go with GZIP
-					System.out
-							.println("---------------responding with GZIP data--------------");
-					response.setHeader("Content-Encoding", "gzip");
-					gzipStream = new GZIPOutputStream(
-							response.getOutputStream());
-					// outStream = new
-					// GZIPOutputStream(response.getOutputStream());
-				} else {
-					response.setContentType("application/json");
-					outStream = response.getOutputStream();
-				}
-				// response.setHeader("Vary", "Accept-Encoding");
-				Date timerStart = new Date();
-				hbaseexport.setStream_title(datastream.getTitle());
-				hbaseexport.setDatastream_id(datastream.getStreamId());
-				hbaseexport.setDevice_id(null);
-				JsonElement je = gson.toJsonTree(hbaseexport);
-				JsonObject jo = new JsonObject();
-				jo.addProperty(AllConstants.ProgramConts.result,
-						AllConstants.ProgramConts.succeed);
-				jo.addProperty(AllConstants.api_entryPoints.request_api_targetid,
-						targetLoginID);
-				int totalData_pointsSize=0;
-				if(hbaseexport.getData_points()!=null){
-					totalData_pointsSize=hbaseexport.getData_points().size();
-				}
-				else if(hbaseexport.getData_points_single_list()!=null){
-					totalData_pointsSize=hbaseexport.getData_points_single_list().size();
-				}
-			
-				jo.addProperty(AllConstants.ProgramConts.total_points,
-						totalData_pointsSize);
-				jo.add("datapoints_list", je);
-				OutputStreamWriter osWriter = null;
-				if (gzipStream != null) {
-					osWriter = new OutputStreamWriter(gzipStream);
-				} else {
-					if(outStream==null)
-					{
-						outStream=response.getOutputStream();
-					}
-					osWriter = new OutputStreamWriter(outStream);
-				}
-				JsonWriter jwriter = new JsonWriter(osWriter);
-				String callbackStr = null;
-				if (request
-						.getParameter(AllConstants.api_entryPoints.requset_api_callback) != null) {
-					callbackStr = request
-							.getParameter(AllConstants.api_entryPoints.requset_api_callback);
-					osWriter.append(callbackStr + "(");
-				}
-				gson.toJson(jo, jwriter);
-				if (callbackStr != null) {
-					osWriter.append(");");
-				}
-				jwriter.close();
-				Date timerEnd = new Date();
-				System.out.println("Json Time takes:"
-						+ (timerEnd.getTime() - timerStart.getTime())
-						/ (1000.00) + "seconds");
-				osWriter.close();
-				if (gzipStream != null) {
-					gzipStream.close();
-				} else {
-					outStream.close();
-				}
-				
+
+			} else if (hbaseexport.getData_points_single_list() != null) {
+				totalData_pointsSize = hbaseexport.getData_points_single_list()
+						.size();
+			}
+			JsonElement je = gson.toJsonTree(hbaseexport);
+			JsonObject jo = new JsonObject();
+			jo.addProperty(AllConstants.ProgramConts.result,
+					AllConstants.ProgramConts.succeed);
+			jo.addProperty(AllConstants.api_entryPoints.request_api_targetid,
+					targetLoginID);
+			jo.addProperty(AllConstants.ProgramConts.total_points,
+					totalData_pointsSize);
+			jo.add("datapoints_list", je);
+			OutputStreamWriter osWriter = null;
+			if (gzipStream != null) {
+				osWriter = new OutputStreamWriter(gzipStream);
 			} else {
-				String encodings = request.getHeader("Accept-Encoding");
-				boolean iftoZip = true;
-				if (request.getParameter("nocompress") != null) {
-					iftoZip = false;
-				}
-				if (encodings != null && encodings.indexOf("gzip") != -1
-						&& iftoZip == true) {
-					// Go with GZIP
-					response.setHeader("Content-Encoding", "gzip");
-					outStream = new GZIPOutputStream(response.getOutputStream());
-				} else {
+				if (outStream == null) {
 					outStream = response.getOutputStream();
 				}
-				// response.setHeader("Vary", "Accept-Encoding");
-				File inputFile = new File(
-						"E:/IC_Dropbox/Dropbox/java/healthbook/sample_data/download.txt");
-				// File inputFile = new
-				// File("F:/Dropbox/Dropbox/java/healthbook/sample_data/download.txt");
-				BufferedReader reader = new BufferedReader(new FileReader(
-						inputFile));
-				String inputLine;
-				while ((inputLine = reader.readLine()) != null) {
-					outStream.write(inputLine.getBytes());
-					// out.print(inputLine);
-				}
+				osWriter = new OutputStreamWriter(outStream);
+			}
+			JsonWriter jwriter = new JsonWriter(osWriter);
+			String callbackStr = null;
+			if (request
+					.getParameter(AllConstants.api_entryPoints.requset_api_callback) != null) {
+				callbackStr = request
+						.getParameter(AllConstants.api_entryPoints.requset_api_callback);
+				osWriter.append(callbackStr + "(");
+			}
+			gson.toJson(jo, jwriter);
+			if (callbackStr != null) {
+				osWriter.append(");");
+			}
+			jwriter.close();
+			Date timerEnd = new Date();
+			System.out.println("Json Time takes:"
+					+ (timerEnd.getTime() - timerStart.getTime()) / (1000.00)
+					+ "seconds");
+			osWriter.close();
+			if (gzipStream != null) {
+				gzipStream.close();
+			} else {
 				outStream.close();
 			}
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ReturnParser.outputErrorException(response,

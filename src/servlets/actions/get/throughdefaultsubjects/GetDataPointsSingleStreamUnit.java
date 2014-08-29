@@ -188,7 +188,7 @@ public class GetDataPointsSingleStreamUnit extends HttpServlet {
                 System.out.println("datastreamID:" + datastream.getStreamId());
                 HBaseDataImport hbaseexport = null;
                 try {
-                    hbaseexport = diDao.exportDatapointsForSingleUnit(streamID, start, end, blockid,datastream.getDatastreamUnitsList().get(0).getUnitID(),null);
+                    hbaseexport = diDao.exportDatapointsForSingleUnit(streamID, start, end, blockid,datastream.getDatastreamUnitsList().get(0).getUnitID(),null,null);
                 } catch (ErrorCodeException ex) {
                     ex.printStackTrace();
                     ReturnParser.outputErrorException(response, AllConstants.ErrorDictionary.Internal_Fault, null, null);
