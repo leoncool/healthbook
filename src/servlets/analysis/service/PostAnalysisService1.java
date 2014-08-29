@@ -103,8 +103,10 @@ public class PostAnalysisService1 extends HttpServlet {
 			in.close();
 			// String s =
 			// "function [TimeStamp,UnitID,ValueList,TagList]=main(aaa)";
+//			Pattern p = Pattern
+//					.compile("^function \\[(.+?)\\]=main[(](.*?)[)]");
 			Pattern p = Pattern
-					.compile("^function \\[(.+?)\\]=main[(](.*?)[)]");
+					.compile("^function *\\[ *(.+?)\\ *] *= *main *[(] *(.*?) *[)] *");
 			Matcher m = p.matcher(firstLine);
 			HashMap<String, String[]> returnValues = new HashMap<>();
 			if (m.matches()) {

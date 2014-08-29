@@ -193,6 +193,7 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 						if (unit.getValue_type() != null
 								&& !UnitValueTypes.existValueType(unit
 										.getValue_type())) {
+							System.out.println("invalid type:"+unit.getValue_type());
 							ReturnParser
 									.outputErrorException(
 											response,
@@ -200,7 +201,7 @@ public class CreateHealthDatastreamByTitle extends HttpServlet {
 											AllConstants.ErrorDictionary.Invalid_ValueType,
 											unit.getValue_type());
 							return;
-						} else {
+						} else if(unit.getValue_type() == null){
 							ReturnParser
 							.outputErrorException(
 									response,
