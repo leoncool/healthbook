@@ -193,6 +193,7 @@ public class GetHealthFileByTitle extends HttpServlet {
 					.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
 			String objectKey = loginID + "/" + datastream.getStreamId() + "/"
 					+ timestampAndUnitIDAndFileName;
+			String fileName=timestampAndUnitIDAndFileName.substring(timestampAndUnitIDAndFileName.lastIndexOf("/")+1,timestampAndUnitIDAndFileName.length());
 			System.out.println("objectKey:" + objectKey);
 			// if (S3Engine.s3.existObject(bucketName, objectKey) == null) {
 			// ReturnParser.outputErrorException(response,
@@ -232,9 +233,13 @@ public class GetHealthFileByTitle extends HttpServlet {
 						(String) file.get(CloudFile.S3_CONTENT_TYPE));
 				System.out.println("Head Request-----Contenttype:"
 						+ file.get(CloudFile.S3_CONTENT_TYPE));
+				System.out.println("Content-Type:"+(String) file.get(CloudFile.S3_CONTENT_TYPE));
 			} else {
-				response.setHeader("Content-Type", "application/octet-stream");
-			}
+				response.setHeader("overwrite Content-Type", "application/octet-stream");
+				System.out.println("Content-Type:"+"application/octet-stream");
+					}
+			response.setHeader("Content-Disposition", "inline; filename=\"" + fileName + "\"");
+			
 			response.setHeader("Content-Length",
 					(String) file.get(CloudFile.SIZE));
 			outStream = response.getOutputStream();

@@ -232,7 +232,7 @@ public class PostFileThroughHealthTitle extends HttpServlet {
 							Long.parseLong(at), Long.parseLong(at), null,
 							unitRequest, null,null);
 
-			if (hbaseexport.getData_points_single_list().size() > 0) {
+			if (hbaseexport!=null&&hbaseexport.getData_points()!=null&&hbaseexport.getData_points_single_list().size() > 0) {
 				if (!hbaseexport.getData_points_single_list().get(0).getAt()
 						.equalsIgnoreCase(at)) {
 					ReturnParser.outputErrorException(response,
