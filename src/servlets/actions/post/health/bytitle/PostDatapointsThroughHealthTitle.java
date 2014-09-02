@@ -183,6 +183,7 @@ public class PostDatapointsThroughHealthTitle extends HttpServlet {
 																	// existing
 																	// units
 			}
+			System.out.println("unitIDList Size:"+unitIDList.size());
 
 			if (jdataImport == null) {
 				ReturnParser.outputErrorException(response,
