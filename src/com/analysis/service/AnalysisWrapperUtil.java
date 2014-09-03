@@ -337,7 +337,7 @@ public class AnalysisWrapperUtil {
 				OctaveExecutionSuccessful = false;
 				WholeJobFinishedSuccessful = false;
 			}
-
+			//processing results
 			// result.setJobLog((outputLog);
 			if (OctaveExecutionSuccessful) {
 				for (int i = 0; i < outputList.size(); i++) {

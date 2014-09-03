@@ -171,6 +171,7 @@ public class RunJob extends HttpServlet {
 			input.setType(inputEntryList.get(i).getDataType());
 			String source = request.getParameter("input"
 					+ Integer.toString(i + 1) + "_source");
+
 			try {
 				if (source != null && source.length() > 1) {
 					input.setSource(source);
