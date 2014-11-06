@@ -9,6 +9,7 @@ import health.database.DAO.DatastreamDAO;
 import health.database.DAO.HealthDataStreamDAO;
 import health.database.DAO.SubjectDAO;
 import health.database.DAO.UserDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
 import health.database.models.Subject;
 import health.database.models.Users;
@@ -127,7 +128,12 @@ public class DeleteAHealthDatastreamByTitle extends HttpServlet {
 				return;
 			}
 			try{
+	
+			HBaseDatapointDAO hDDAO=new HBaseDatapointDAO();
+	     hDDAO.delete_range_Datapoint(datastream.getStreamId(), Long.MIN_VALUE, Long.MAX_VALUE);
 			dstreamDao.DeleteDatastream(datastream);
+			
+		
 			}catch (Exception ex) {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,

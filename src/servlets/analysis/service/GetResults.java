@@ -1,8 +1,6 @@
 package servlets.analysis.service;
 
 import health.database.DAO.as.AnalysisServiceDAO;
-import health.database.models.as.AnalysisModel;
-import health.database.models.as.AnalysisModelEntry;
 import health.database.models.as.AnalysisResult;
 
 import java.io.IOException;
@@ -19,13 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
 
 import server.exception.ReturnParser;
 import util.AScontants;
 import util.AllConstants;
 
 import com.analysis.service.JsonAnalysisResult;
-import com.analysis.service.JsonAnalysisResultWapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
