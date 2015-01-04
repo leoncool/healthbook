@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,17 +101,19 @@ public class RunJob extends HttpServlet {
 		Gson gson = new Gson();
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		DatastreamDAO dsDao = new DatastreamDAO();
-		String loginID = "testtest3";
+		String loginID = "testtest4";
 		// retrieve service id information
 		String serviceID_String = request
 				.getParameter(AScontants.RequestParameters.Service_ID);
 		int serviceID = 0;
 		int globalMaxDatapoints = -1;
-		boolean runningLiveJob=false;
+		boolean runningLiveJob = false;
 		if (request
-				.getParameter(AScontants.RequestParameters.request_api_livejob) != null&&request
-						.getParameter(AScontants.RequestParameters.request_api_livejob).equalsIgnoreCase("true")) {
-			runningLiveJob=true;
+				.getParameter(AScontants.RequestParameters.request_api_livejob) != null
+				&& request.getParameter(
+						AScontants.RequestParameters.request_api_livejob)
+						.equalsIgnoreCase("true")) {
+			runningLiveJob = true;
 		}
 		try {
 			if (request
@@ -169,70 +172,100 @@ public class RunJob extends HttpServlet {
 			ASInput input = new ASInput();
 			input.setName("input" + Integer.toString(i + 1));
 			input.setType(inputEntryList.get(i).getDataType());
-			String source = request.getParameter("input"
-					+ Integer.toString(i + 1) + "_source");
-
-			try {
-				if (source != null && source.length() > 1) {
-					input.setSource(source);
-					long start = 0;
-					long end = 0;
-					int max = 1000;
-					try {
-						if (request.getParameter("input"
-								+ Integer.toString(i + 1) + "_start") != null) {
-							start = Long.parseLong("input"
-									+ Integer.toString(i + 1) + "_start");
+			String[] dataTypes = { AScontants.sensordataType,
+					AScontants.fileType };
+			int typeEntry = Arrays.asList(dataTypes).indexOf(input.getType());
+			switch (typeEntry) {
+			case 0:// sensor data type
+				System.out.println("-----------case 0:-------------");
+				try {
+					String source = request.getParameter("input"
+							+ Integer.toString(i + 1) + "_source");
+					if (source != null && source.length() > 1) {
+						input.setSource(source);
+						long start = 0;
+						long end = 0;
+						int max = 1000;
+						try {
+							if (request.getParameter("input"
+									+ Integer.toString(i + 1) + "_start") != null) {
+								start = Long.parseLong("input"
+										+ Integer.toString(i + 1) + "_start");
+							}
+							if (request.getParameter("input"
+									+ Integer.toString(i + 1) + "_end") != null) {
+								end = Long.parseLong(request
+										.getParameter("input"
+												+ Integer.toString(i + 1)
+												+ "_end"));
+							}
+							if (request.getParameter("input"
+									+ Integer.toString(i + 1) + "_max") != null) {
+								max = Integer.parseInt(request
+										.getParameter("input"
+												+ Integer.toString(i + 1)
+												+ "_max"));
+							}
+							if (globalMaxDatapoints > 0) {
+								System.out.println("--globalMaxDatapoints---");
+								input.setMaxDataPoints(globalMaxDatapoints);
+							} else {
+								input.setMaxDataPoints(max);
+							}
+							input.setStart(start);
+							input.setEnd(end);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Invalid_data_format,
+											null, "");
+							return;
 						}
-						if (request.getParameter("input"
-								+ Integer.toString(i + 1) + "_end") != null) {
-							end = Long.parseLong(request.getParameter("input"
-									+ Integer.toString(i + 1) + "_end"));
-						}
-						if (request.getParameter("input"
-								+ Integer.toString(i + 1) + "_max") != null) {
-							max = Integer.parseInt(request.getParameter("input"
-									+ Integer.toString(i + 1) + "_max"));
-						}
-						if (globalMaxDatapoints > 0) {
-							System.out.println("--globalMaxDatapoints---");
-							input.setMaxDataPoints(globalMaxDatapoints);
-						} else {
-							input.setMaxDataPoints(max);
-						}
-
-						input.setStart(start);
-						input.setEnd(end);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						ReturnParser
-								.outputErrorException(
-										response,
-										AllConstants.ErrorDictionary.Invalid_data_format,
-										null, "");
+					} else {
+						System.out
+								.println("Return Error Message to User. GetLineNumber:"
+										+ getLineNumber());
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.MISSING_DATA,
+								null, "");
 						return;
 					}
-				} else {
+				} catch (Exception ex) {
+					ex.printStackTrace();
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
 									+ getLineNumber());
-					ReturnParser
-							.outputErrorException(response,
-									AllConstants.ErrorDictionary.MISSING_DATA,
-									null, "");
+
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_data_format,
+							null, "");
 					return;
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				System.out
-						.println("Return Error Message to User. GetLineNumber:"
-								+ getLineNumber());
+				break;
 
+			case 1: // if data type is file
+				System.out.println("-----------case 0:-------------");
+				String datastreamID = "c1730c84-8644-4d10-bfdc-c858030e6be5";
+				String bucketName = ServerConfigUtil
+						.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+				String objectKey = loginID + "/" + datastreamID + "/"
+						+ "1420325580000/O8GsK/brain_001.dcm";
+				String fileName = objectKey.substring(
+						objectKey.lastIndexOf("/") + 1, objectKey.length());
+				System.out.println("objectKey:" + objectKey);
+				System.out.println("fileName:" + fileName);
+
+				input.setSource(objectKey);
+				break;
+			default:
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Invalid_data_format, null,
 						"");
 				return;
 			}
+
 			inputList.add(input);
 		}
 		// check and pre-load output list
@@ -272,6 +305,21 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
+			} else if (!dataAction
+					.equalsIgnoreCase(AScontants.dataaction_ignore)
+					&& type.equals(AScontants.sensordataType)) {
+				if (source != null) {
+					output.setSource(source);
+				} else {
+					System.out
+							.println("Return Error Message to User. GetLineNumber:"
+									+ getLineNumber());
+					ReturnParser
+							.outputErrorException(response,
+									AllConstants.ErrorDictionary.MISSING_DATA,
+									null, "");
+					return;
+				}
 			}
 			output.setType(type);
 			outputList.add(output);
@@ -289,7 +337,7 @@ public class RunJob extends HttpServlet {
 			result.setUserId(service.getUserId());
 			result.setService_id(serviceID);
 			AnalysisResult returnedResult = asDao.createJobResultBy(result);
-			AnalysisResult asresult=null;
+			AnalysisResult asresult = null;
 			if (returnedResult == null) {
 				System.out
 						.println("Return Error Message to User. GetLineNumber:"
@@ -298,18 +346,18 @@ public class RunJob extends HttpServlet {
 						AllConstants.ErrorDictionary.Internal_Fault, null, "");
 				return;
 			}
-			if(runningLiveJob==false){
-			ExecutionEngineThread executionThread = new ExecutionEngineThread();
-			executionThread.inputList = inputList;
-			executionThread.outputList = outputList;
-			executionThread.jobID = jobID;
-			executionThread.modelID = model.getId();
-			executionThread.start();
-			}else{
+			if (runningLiveJob == false) {
+				ExecutionEngineThread executionThread = new ExecutionEngineThread();
+				executionThread.inputList = inputList;
+				executionThread.outputList = outputList;
+				executionThread.jobID = jobID;
+				executionThread.modelID = model.getId();
+				executionThread.start();
+			} else {
 				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 				AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
-				asresult= awU.octaveRun(service.getModelId(), jobID, outputFolderURLPath, inputList,
-						outputList);
+				asresult = awU.octaveRun(service.getModelId(), jobID,
+						outputFolderURLPath, inputList, outputList);
 			}
 			// List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			// totalEntryList.addAll(inputEntryList);
@@ -319,14 +367,13 @@ public class RunJob extends HttpServlet {
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
-			if(runningLiveJob)
-			{
+			if (runningLiveJob) {
 				jo.add("asresult", gson.toJsonTree(asresult));
-				jo.addProperty("livejob","true");
-			}else{
-				jo.addProperty("livejob","false");
+				jo.addProperty("livejob", "true");
+			} else {
+				jo.addProperty("livejob", "false");
 			}
-//			System.out.println(gson.toJson(jo));
+			// System.out.println(gson.toJson(jo));
 			out.println(gson.toJson(jo));
 
 		} catch (Exception ex) {

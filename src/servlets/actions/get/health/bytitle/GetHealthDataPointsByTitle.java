@@ -596,6 +596,12 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 												.getValue_list().get(j)
 												.getUnit_id() + "/"
 										+ jValue.getVal());
+								jValue.setFilekey(jdatapointsList.get(i).getAt()
+										+ "/"
+										+ jdatapointsList.get(i)
+												.getValue_list().get(j)
+												.getUnit_id() + "/"
+										+ jValue.getVal());
 								jValueList.set(j, jValue);
 								JsonDataPoints jp = jdatapointsList.get(i);
 								jp.setValue_list(jValueList);

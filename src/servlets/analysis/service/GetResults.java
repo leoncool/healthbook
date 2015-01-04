@@ -1,6 +1,8 @@
 package servlets.analysis.service;
 
+import health.database.DAO.UserDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
+import health.database.models.Users;
 import health.database.models.as.AnalysisResult;
 
 import java.io.IOException;
@@ -20,6 +22,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 
 import server.exception.ReturnParser;
+import servlets.util.PermissionFilter;
 import util.AScontants;
 import util.AllConstants;
 
@@ -60,8 +63,45 @@ public class GetResults extends HttpServlet {
 				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
+			Users accessUser = null;
+			PermissionFilter filter = new PermissionFilter();
+			String loginID = filter.checkAndGetLoginFromToken(request, response);
+
+			UserDAO userDao = new UserDAO();
+			if (loginID == null) {
+				if (filter.getCheckResult().equalsIgnoreCase(
+						filter.INVALID_LOGIN_TOKEN_ID)) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_login_token_id,
+							null, null);
+					return;
+				} else if (filter.getCheckResult().equalsIgnoreCase(
+						AllConstants.ErrorDictionary.login_token_expired)) {
+					return;
+				} else {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_login_token_id,
+							null, null);
+					return;
+				}
+			} else {
+				accessUser = userDao.getLogin(loginID);
+			}
+			String targetLoginID = filter.getTargetUserID(request, response);
+			if (targetLoginID != null) {
+				Users targetUser = userDao.getLogin(targetLoginID);
+				if (targetUser == null) {
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_Target_LoginID,
+							null, null);
+					return;
+				}
+			}
+			if (targetLoginID == null) {
+				targetLoginID = loginID;
+			}
 			Gson gson = new Gson();
-			String loginID = "testtest3";
+			
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String jobID = request
 					.getParameter(AScontants.RequestParameters.Job_ID);
@@ -82,7 +122,7 @@ public class GetResults extends HttpServlet {
 			}
 			List<AnalysisResult> resultList = null;
 			List<JsonAnalysisResult> jresultList = new ArrayList<>();
-			resultList = asDao.getJobResultsList(loginID, serviceid);
+			resultList = asDao.getJobResultsList(targetLoginID, serviceid);
 //			if (resultList == null) {
 //				ReturnParser.outputErrorException(response,
 //						AllConstants.ErrorDictionary.Internal_Fault, null, "");

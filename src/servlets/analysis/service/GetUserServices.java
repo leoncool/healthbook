@@ -65,6 +65,10 @@ public class GetUserServices extends HttpServlet {
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String target_user_id = request
 					.getParameter(AllConstants.api_entryPoints.request_api_targetid);
+			if(target_user_id==null)
+			{
+				target_user_id="testtest4";//for debugging 
+			}
 		List<AnalysisService> serviceList=asDao.getUserServices(target_user_id);
 		List<AnalysisServiceReturn> serviceReturnList=new ArrayList<>();
 		for(AnalysisService aService:serviceList)
