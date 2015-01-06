@@ -247,17 +247,52 @@ public class RunJob extends HttpServlet {
 
 			case 1: // if data type is file
 				System.out.println("-----------case 0:-------------");
-				String datastreamID = "c1730c84-8644-4d10-bfdc-c858030e6be5";
-				String bucketName = ServerConfigUtil
-						.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
-				String objectKey = loginID + "/" + datastreamID + "/"
-						+ "1420325580000/O8GsK/brain_001.dcm";
-				String fileName = objectKey.substring(
-						objectKey.lastIndexOf("/") + 1, objectKey.length());
-				System.out.println("objectKey:" + objectKey);
-				System.out.println("fileName:" + fileName);
+				String source = request.getParameter("input"
+						+ Integer.toString(i + 1) + "_source");
 
-				input.setSource(objectKey);
+				if (source == null && source.length() < 2) {
+					// if source not found
+					System.out
+							.println("Return Error Message to User. GetLineNumber:"
+									+ getLineNumber());
+
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_data_format,
+							null, "data stream title");
+					return;
+				}
+				Datastream datastream = dsDao.getHealthDatastreamByTitle(
+						source, loginID, true, false);
+				if (datastream == null) {
+					System.out
+							.println("Return Error Message to User. GetLineNumber:"
+									+ getLineNumber());
+
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Unknown_StreamTitle,
+							null, "data stream title");
+					return;
+				}
+				String filekey = request.getParameter("input"
+						+ Integer.toString(i + 1) + "_filekey");
+
+				if (filekey == null && filekey.length() < 2) {
+					// if source not found
+					System.out
+							.println("Return Error Message to User. GetLineNumber:"
+									+ getLineNumber());
+
+					ReturnParser.outputErrorException(response,
+							AllConstants.ErrorDictionary.Invalid_data_format,
+							null, "filekey");
+					return;
+				}
+
+				input.setSource(source);
+
+				
+				input.setFilekey(filekey);
+
 				break;
 			default:
 				ReturnParser.outputErrorException(response,

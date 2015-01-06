@@ -6,12 +6,19 @@ private String type;
 private String notes;
 private Object value;
 private String source;
+private String filekey;
 private long start;
 private long end;
 private int maxDataPoints=1000;
 
 
 
+public String getFilekey() {
+	return filekey;
+}
+public void setFilekey(String filekey) {
+	this.filekey = filekey;
+}
 public int getMaxDataPoints() {
 	return maxDataPoints;
 }

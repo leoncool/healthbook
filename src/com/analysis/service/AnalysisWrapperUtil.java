@@ -324,8 +324,37 @@ public class AnalysisWrapperUtil {
 								(String) inputValue);
 						octave.put(input.getName(), octaveInput);
 					} else if (input.getType().equals(AScontants.fileType)) {
+						// file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
+						DatastreamDAO dsDao = new DatastreamDAO();
+						Datastream datastream = dsDao
+								.getHealthDatastreamByTitle(input.getSource(),
+										null, true, false);
+						if (datastream == null) {
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>Cannot find data stream, title:"
+									+ input.getSource() + "</p>";
+						}
+						String datastreamID = datastream.getStreamId();
+						String loginID = datastream.getOwner();
+						// String datastreamID =
+						// "c1730c84-8644-4d10-bfdc-c858030e6be5";
+						// String objectKey = loginID + "/" + datastreamID + "/"
+						// + "1420325580000/O8GsK/brain_001.dcm";
+						// String fileName = objectKey.substring(
+						// objectKey.lastIndexOf("/") + 1, objectKey.length());
+						// String objectKey = loginID + "/" + datastreamID + "/"
+						// + "1420325580000/O8GsK/brain_001.dcm";
+						String objectKey = loginID + "/" + datastreamID + "/"
+								+ input.getFilekey();
+						String fileName = objectKey.substring(
+								objectKey.lastIndexOf("/") + 1,
+								objectKey.length());
+						System.out.println("datastreamID:" + datastreamID);
+						System.out.println("objectKey:" + objectKey);
+						System.out.println("fileName:" + fileName);
+
 						Hashtable<String, Object> returnValues = null;
 						try {
 							String bucketName = ServerConfigUtil
@@ -333,31 +362,45 @@ public class AnalysisWrapperUtil {
 							// input.getSource() temperary is object key
 							returnValues = (Hashtable<String, Object>) S3Engine.s3
 									.GetObject(bucketName, "leoncool",
-											input.getSource(), null, null);
+											objectKey, null, null);
 						} catch (com.zhumulangma.cloudstorage.server.exception.ErrorCodeException ex) {
 							ex.printStackTrace();
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>Cloud storage data access exception for objectKey key:"
+									+ objectKey + "</p>";
 						}
 						if (returnValues == null
 								|| returnValues.get("owner") == null) {
 							// permission error
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>Cloud storage permission exception for objectKey key:"
+									+ objectKey + "</p>";
 						}
 						CloudFile file = (CloudFile) returnValues.get("data");
 						if (file == null) {
 							// file not found
-						}else{
-							//file found continue
-							System.out.println("File Found Continue to copy to tmp folder");
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>cannot find file in the Cloud storage system for file key:"
+									+ input.getFilekey() + "</p>";
+						} else {
+							// file found continue
+							analysisDataMovementLog = analysisDataMovementLog
+									+ "<p>Found object in the Cloud Storage system with objectKey:"
+									+ objectKey + "</p>";
+							System.out
+									.println("File Found Continue to copy to tmp folder");
 							UUID uuid = UUID.randomUUID();
 							String inputValue = "fileData-" + uuid.toString();
-							FileOutputStream outStream=new FileOutputStream(new File(tmpfolderPath+inputValue));
-							S3Engine.s3.directAccessData((String) file.get(CloudFile.LINK),
-									outStream, null);							
+							FileOutputStream outStream = new FileOutputStream(
+									new File(tmpfolderPath + inputValue));
+							S3Engine.s3.directAccessData(
+									(String) file.get(CloudFile.LINK),
+									outStream, null);
 							outStream.close();
 							OctaveString octaveInput = new OctaveString(
 									(String) inputValue);
 							octave.put(input.getName(), octaveInput);
 						}
-						
 					}
 				}
 				String mainFunctionString = awU.createMainFunction("main",
@@ -448,8 +491,9 @@ public class AnalysisWrapperUtil {
 								|| !outputFile.exists()) {
 							analysisDataMovementLog = analysisDataMovementLog
 									+ "<p>No Output File Exist or empty string:"
-									+ "</p>" + fileOutput.getString()+"<p>Output File Path:"+tmpfolderPath
-									+ fileOutput.getString()+"</p>";
+									+ "</p>" + fileOutput.getString()
+									+ "<p>Output File Path:" + tmpfolderPath
+									+ fileOutput.getString() + "</p>";
 							System.out
 									.println("ERROR Found No Output File Exist or empty string:"
 											+ fileOutput.getString()
@@ -519,7 +563,7 @@ public class AnalysisWrapperUtil {
 				// System.out.println(gson.toJson(jo));
 				// result.setJson_results(gson.toJson(jo));
 			}
-//			FileUtils.deleteDirectory(new File(tmpfolderPath));
+			// FileUtils.deleteDirectory(new File(tmpfolderPath));
 			result.setJobEndTime(new Date());
 			result.setJobLog(analysisDataMovementLog);
 			asDao.updateJobResult(result);
