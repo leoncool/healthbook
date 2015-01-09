@@ -16,6 +16,7 @@ import static servlets.util.ServerUtil.isGetADatastream;
 import static servlets.util.ServerUtil.isGetAHealthDatastream;
 import static servlets.util.ServerUtil.isGetAHealthDatastreamByTitle;
 import static servlets.util.ServerUtil.isGetAPI_Document_Json;
+import static servlets.util.ServerUtil.isGetCloudStorageFileByFileKey;
 import static servlets.util.ServerUtil.isGetDataPointsAllUnits;
 import static servlets.util.ServerUtil.isGetDatastreamBlock_ByTitleReq;
 import static servlets.util.ServerUtil.isGetDatastreamBlocks;
@@ -31,10 +32,10 @@ import static servlets.util.ServerUtil.isGetFollowings;
 import static servlets.util.ServerUtil.isGetHealthDataSummariesByTitle;
 import static servlets.util.ServerUtil.isGetHealthDatapoints;
 import static servlets.util.ServerUtil.isGetHealthDatapointsByTitle;
-import static servlets.util.ServerUtil.isGetHealthFileByTitleAndKey;
 import static servlets.util.ServerUtil.isGetHealthDatapointsByTitleBenchmarks;
 import static servlets.util.ServerUtil.isGetHealthDatastreamBlocks;
 import static servlets.util.ServerUtil.isGetHealthDatastreams;
+import static servlets.util.ServerUtil.isGetHealthFileByTitleAndKey;
 import static servlets.util.ServerUtil.isGetLocationLogs;
 import static servlets.util.ServerUtil.isGetMyAccountData;
 import static servlets.util.ServerUtil.isGetSubjectsListReq;
@@ -42,13 +43,13 @@ import static servlets.util.ServerUtil.isGetUserAvatar;
 import static servlets.util.ServerUtil.isGetUserToken;
 import static servlets.util.ServerUtil.isGetUserinfo;
 import static servlets.util.ServerUtil.isGetaDeviceBinding;
+import static servlets.util.ServerUtil.isListCloudStorageFilesByTitleAndKey;
 import static servlets.util.ServerUtil.isListDatastreamBlock_ByTitleReq;
 import static servlets.util.ServerUtil.isListUsers;
 import static servlets.util.ServerUtil.isPostCreateDatastreamBlock_ByTitleReq;
 import static servlets.util.ServerUtil.isPostCreateDatastream_ByTitleReq;
 import static servlets.util.ServerUtil.isPostCreateSingleDS_UnitReq;
 import static servlets.util.ServerUtil.isPostDataBlocksReq;
-import static servlets.util.ServerUtil.isPostHealthTitle_Files_Req;
 import static servlets.util.ServerUtil.isPostDataPointsReq;
 import static servlets.util.ServerUtil.isPostDatastreamReq;
 import static servlets.util.ServerUtil.isPostDefaultSuject_DatastreamReq;
@@ -60,11 +61,14 @@ import static servlets.util.ServerUtil.isPostFollower;
 import static servlets.util.ServerUtil.isPostHealthDataPointThroughUnitIDfromURL;
 import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_Benchmark_DatapointsReq;
 import static servlets.util.ServerUtil.isPostHealthTitle_Datastream_DatapointsReq;
+import static servlets.util.ServerUtil.isPostHealthTitle_Files_Req;
 import static servlets.util.ServerUtil.isPostSubjectReq;
 import static servlets.util.ServerUtil.isPostUpload;
+import static servlets.util.ServerUtil.isPostUploadCloudStorageFile;
 import static servlets.util.ServerUtil.isPostUserAvatar;
 import static servlets.util.ServerUtil.isPostUserRegister;
 import static servlets.util.ServerUtil.isSearchUsers;
+import static servlets.util.ServerUtil.isDeleteCloudStorageFileByFileKey;
 import static util.JsonUtil.ServletPath;
 import static util.JsonUtil.contextPath;
 
@@ -84,6 +88,7 @@ import servlets.actions.delete.DeleteASubject;
 import servlets.actions.delete.DeleteFollower;
 import servlets.actions.delete.health.bytitle.DeleteAHealthDataBlock;
 import servlets.actions.delete.health.bytitle.DeleteAHealthDatastreamByTitle;
+import servlets.actions.delete.health.bytitle.DeleteCloudStorageFileByFilekey;
 import servlets.actions.delete.health.bytitle.DeleteHealthDatapoints;
 import servlets.actions.delete.health.bytitle.DeleteSingleHealthDSUnitByID;
 import servlets.actions.get.GetAPI_DocumentJson;
@@ -98,12 +103,14 @@ import servlets.actions.get.health.GetHealthDataPoints;
 import servlets.actions.get.health.GetHealthDatastreamBlocks;
 import servlets.actions.get.health.GetHealthDatastreamsList;
 import servlets.actions.get.health.GetaHealthDatastream;
+import servlets.actions.get.health.bytitle.GetCloudStorageFileByKey;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitle;
 import servlets.actions.get.health.bytitle.GetHealthDataPointsByTitleBenchmarks;
 import servlets.actions.get.health.bytitle.GetHealthDataSummariesByTitle;
 import servlets.actions.get.health.bytitle.GetHealthFileByTitle;
 import servlets.actions.get.health.bytitle.GetaHealthDataBlock;
 import servlets.actions.get.health.bytitle.GetaHealthDatastreamByTitle;
+import servlets.actions.get.health.bytitle.ListCloudStorageFilesByLogin;
 import servlets.actions.get.health.bytitle.ListHealthDataBlocks;
 import servlets.actions.get.lifestyle.location.GetLocations;
 import servlets.actions.get.throughdefaultsubjects.GetDataPointsSingleStreamUnit;
@@ -128,6 +135,7 @@ import servlets.actions.post.health.bytitle.CreateHealthDataBlock;
 import servlets.actions.post.health.bytitle.CreateHealthDatastreamByTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsBenchmarksThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostDatapointsThroughHealthTitle;
+import servlets.actions.post.health.bytitle.PostFileThroughCloudStorage;
 import servlets.actions.post.health.bytitle.PostFileThroughHealthTitle;
 import servlets.actions.post.health.bytitle.PostSingleUnstructuredDatapointThroughHealthTitle;
 import servlets.actions.post.throughdefaultsubject.PostDatapointsThoughDefaultSubject;
@@ -263,6 +271,10 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetHealthFileByTitleAndKey:");
 			GetHealthFileByTitle proceReq = new GetHealthFileByTitle();
 			proceReq.processRequest(req, resp);
+		} else if (isGetCloudStorageFileByFileKey(ServletPath(req))) {
+			System.out.println("isGetCloudStorageFileByFileKey:");
+			GetCloudStorageFileByKey proceReq = new GetCloudStorageFileByKey();
+			proceReq.processRequest(req, resp);
 		} else if (isGetHealthDatapointsByTitleBenchmarks(ServletPath(req))) {
 			System.out.println("isGetHealthDataPointsByTitleBenchmarks:");
 			GetHealthDataPointsByTitleBenchmarks proceReq = new GetHealthDataPointsByTitleBenchmarks();
@@ -315,7 +327,16 @@ public class RestFul extends HttpServlet {
 			System.out.println("isGetMyAccountData");
 			GetMyAccountData proceReq = new GetMyAccountData();
 			proceReq.processRequest(req, resp);
-		} else if (isGetLocationLogs(ServletPath(req))) {
+		} else if (isListCloudStorageFilesByTitleAndKey(ServletPath(req))) {
+			System.out.println("isListCloudStorageFilesByTitleAndKey");
+			ListCloudStorageFilesByLogin proceReq = new ListCloudStorageFilesByLogin();
+			proceReq.processRequest(req, resp);
+		} else if (isDeleteCloudStorageFileByFileKey(ServletPath(req))) {
+			System.out.println("isDeleteCloudStorageFileByFileKey");
+			DeleteCloudStorageFileByFilekey proceReq = new DeleteCloudStorageFileByFilekey	();
+			proceReq.processRequest(req, resp);
+		} 
+		else if (isGetLocationLogs(ServletPath(req))) {
 			System.out.println("isGetLocationLogs");
 			GetLocations proceReq = new GetLocations();
 			proceReq.processRequest(req, resp);
@@ -393,7 +414,13 @@ public class RestFul extends HttpServlet {
 			System.out.println("isDeleteHealthDatapoints");
 			DeleteHealthDatapoints proceReq = new DeleteHealthDatapoints();
 			proceReq.processRequest(req, resp);
-		} else {
+		} 
+		else if (isDeleteCloudStorageFileByFileKey(ServletPath(req))) {
+			System.out.println("isDeleteCloudStorageFileByFileKey");
+			DeleteCloudStorageFileByFilekey proceReq = new DeleteCloudStorageFileByFilekey	();
+			proceReq.processRequest(req, resp);
+		}
+		else {
 			PrintWriter out = resp.getWriter();
 			out.println("Unknown Request");
 		}
@@ -504,7 +531,12 @@ public class RestFul extends HttpServlet {
 			System.out.println("AddSingleHealthDSUnit");
 			AddSingleHealthDSUnit proceReq = new AddSingleHealthDSUnit();
 			proceReq.processRequest(req, resp);
-		} else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
+		}
+	 else if (isPostUploadCloudStorageFile(ServletPath(req))) {
+		System.out.println("isPostUploadCloudStorageFile");
+		PostFileThroughCloudStorage proceReq = new PostFileThroughCloudStorage();
+		proceReq.processRequest(req, resp);
+	} else if (HMServerUtil.isBodyTemperatureSimulation(ServletPath(req))) {
 			System.out.println("isPostBodyTemperatureSimulation");
 			GetTemperatureSimulation proceReq = new GetTemperatureSimulation();
 			proceReq.processRequest(req, resp);

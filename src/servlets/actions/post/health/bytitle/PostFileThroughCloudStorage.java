@@ -15,6 +15,7 @@ import health.database.models.DatastreamUnits;
 import health.database.models.Subject;
 import health.database.models.Users;
 import health.hbase.models.HBaseDataImport;
+import health.input.jsonmodels.JsonCloudStorageFile;
 import health.input.jsonmodels.JsonDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataPointsPostResult;
@@ -25,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -46,6 +49,7 @@ import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
 import servlets.util.ServerUtil;
 import util.AllConstants;
+import util.JsonUtil;
 import util.ServerConfigUtil;
 import cloudstorage.cacss.S3Engine;
 
@@ -53,12 +57,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
+import com.zhumulangma.cloudstorage.server.entity.CloudFile;
 
 /**
  * 
  * @author Leon
  */
-public class PostFileThroughHealthTitle extends HttpServlet {
+public class PostFileThroughCloudStorage extends HttpServlet {
 	private String getFileName(final Part part) {
 		final String partHeader = part.getHeader("content-disposition");
 		for (String content : part.getHeader("content-disposition").split(";")) {
@@ -120,134 +125,13 @@ public class PostFileThroughHealthTitle extends HttpServlet {
 			} else {
 				accessUser = userDao.getLogin(loginID);
 			}
-			SubjectDAO subjDao = new SubjectDAO();
-			Subject subject = (Subject) subjDao.findHealthSubject(loginID); // Retreive
-			if (subject == null) {
-				try {
-					subject = subjDao.createDefaultHealthSubject(loginID);
-					HealthDataStreamDAO hdsDao = new HealthDataStreamDAO();
 
-					hdsDao.createDefaultDatastreamsOnDefaultSubject(loginID,
-							subject.getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Internal_Fault, null,
-							null);
-				}
-			}
-
-			String streamTitle = ServerUtil
-					.getHealthStreamTitle(ServletPath(request));
-
-			DatastreamDAO dstreamDao = new DatastreamDAO();
-			DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-			Datastream datastream = null;
-			try {
-				datastream = dstreamDao.getHealthDatastreamByTitle(
-						subject.getId(), streamTitle, true, false);
-			} catch (NonUniqueResultException ex) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Internal_Fault, null,
-						streamTitle);
-				return;
-			}
-			if (datastream == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
-						streamTitle);
-				return;
-			}
-			if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Unauthorized_Access, null,
-						streamTitle);
-				return;
-			}
-
-			List<DatastreamUnits> unitsList = datastream
-					.getDatastreamUnitsList();
-			DatastreamUnits targetUnit = null;
-			String unitRequest = request
-					.getParameter(AllConstants.api_entryPoints.request_api_unit_id);
-			String at = null;
-			String aString = request
-					.getParameter(AllConstants.api_entryPoints.request_api_at);
-			if (unitRequest == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						AllConstants.api_entryPoints.request_api_unit_id);
-				return;
-			}
-			if (aString == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						AllConstants.api_entryPoints.request_api_at);
-				return;
-			}
-			try {
-				long checkDateLong = Long.parseLong(aString);
-				Date checkDate = new Date();
-				checkDate.setTime(checkDateLong);
-				at = Long.toString(checkDate.getTime());
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Invalid_data_format, null,
-						AllConstants.api_entryPoints.request_api_at);
-				return;
-			}
-			for (DatastreamUnits unit : unitsList) {
-				if (unit.getUnitID().equalsIgnoreCase(unitRequest)
-						|| unit.getShortUnitID().equalsIgnoreCase(unitRequest)) {
-					targetUnit = unit;
-				}
-			}
-			if (targetUnit == null) {
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						AllConstants.api_entryPoints.request_api_unit_id);
-				return;
-			}
-			String fileName = null;
-			String previousFileName = null;
-			HBaseDatapointDAO importDao = null;
-			try {
-				importDao = new HBaseDatapointDAO();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				ReturnParser
-						.outputErrorException(response,
-								AllConstants.ErrorDictionary.Internal_Fault,
-								null, null);
-				return;
-			}
-
-			HBaseDataImport hbaseexport = importDao
-					.exportDatapointsForSingleUnit(datastream.getStreamId(),
-							Long.parseLong(at), Long.parseLong(at), null,
-							unitRequest, null,null);
-
-			if (hbaseexport!=null&&hbaseexport.getData_points()!=null&&hbaseexport.getData_points_single_list().size() > 0) {
-				if (!hbaseexport.getData_points_single_list().get(0).getAt()
-						.equalsIgnoreCase(at)) {
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Internal_Fault, null,
-							null);
-					return;
-				}
-				previousFileName = hbaseexport.getData_points_single_list()
-						.get(0).getVal();// fetch previousFileName for remove
-											// old files
-			}
 			String bucketName = ServerConfigUtil
 					.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
-			String objectPrefix=loginID + "/" + datastream.getStreamId()
-					+ "/" + at + "/" + unitRequest + "/" ;
-			
-			
+			String objectPrefix = loginID + "/cs/";
 
+			String fileName = null;
+			JsonCloudStorageFile csFile = new JsonCloudStorageFile();
 			boolean fileUploaded = false;
 			List<FileItem> items = new ServletFileUpload(
 					new DiskFileItemFactory()).parseRequest(request);
@@ -274,6 +158,28 @@ public class PostFileThroughHealthTitle extends HttpServlet {
 								.PutObject("leoncool", bucketName,
 										newObjectName, (long) item.getSize(),
 										inputstream, 3, paramters, null);
+						Hashtable<String, Object> returnValues2 = (Hashtable<String, Object>) S3Engine.s3
+								.GetObject(bucketName, "leoncool",
+										newObjectName, null, null);
+						CloudFile file = (CloudFile) returnValues2.get("data");
+						if (file != null
+								&& (String) file.get(CloudFile.NAME) != null) {
+							String absKey=(String) file.get(CloudFile.NAME);
+							String relativeKey=absKey.replaceFirst(accessUser+"/cs/", "");
+							csFile.setKey((String) file.get(CloudFile.NAME));
+							csFile.setLastModified((String) file
+									.get(CloudFile.MODIFIED));
+							csFile.setETag((String) file.get(CloudFile.ETAG));
+							csFile.setSize((String) file.get(CloudFile.SIZE));
+						} else {
+							ReturnParser
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Internal_Fault,
+											null,
+											"file upload to cloud storage failed");
+							return;
+						}
 					} catch (Exception ex) {
 						ex.printStackTrace();
 						ReturnParser.outputErrorException(response,
@@ -293,57 +199,13 @@ public class PostFileThroughHealthTitle extends HttpServlet {
 				return;
 			}
 
-			HBaseDataImport importData = new HBaseDataImport();
-			List<JsonDataValues> jvalueList = new ArrayList<>();
-			List<JsonDataPoints> jdatapointsList = new ArrayList<>();
-
-			JsonDataImport jdataImport = new JsonDataImport();
-			JsonDataPoints jdataPoint = new JsonDataPoints();
-			JsonDataValues jvalue = new JsonDataValues();
-			System.out.println("fileName:" + fileName);
-			jvalue.setVal(fileName);
-			jvalue.setUnit_id(unitRequest);
-			jvalueList.add(jvalue);
-			jdataPoint.setAt(at);
-			jdataPoint.setValue_list(jvalueList);
-			jdatapointsList.add(jdataPoint);
-			jdataImport.setData_points(jdatapointsList);
-			importData.setDatastream(dbtoJUtil.convertDatastream(datastream,
-					null));
-			importData.setData_points(jdataImport.getData_points());
-			importData.setDatastream_id(datastream.getStreamId());
-
-			JsonDataPointsPostResult jsonResult = new JsonDataPointsPostResult();
-			try {
-				int totalStoredByte = importDao
-						.importDatapointsDatapoints(importData); // submit data
-				jsonResult.setTotal_stored_byte(totalStoredByte);
-			} catch (ErrorCodeException ex) {
-				ex.printStackTrace();
-				ReturnParser.outputErrorException(response, ex.getErrorCode(),
-						null, null);
-				return;
-			} catch (NumberFormatException ex) {
-				ex.printStackTrace();
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.INPUT_DATE_FORMAT_ERROR,
-						null, null);
-				return;
-			}
-			if (previousFileName != null
-					&& !previousFileName.equalsIgnoreCase(fileName)) {
-				String oldObjectName = objectPrefix + previousFileName;
-				S3Engine.s3.DeleteObject(bucketName, "leoncool", oldObjectName,
-						null);
-			}
-			int totalInputSize = 1;
 			Gson gson = new Gson();
-			jsonResult.setTotal_points(totalInputSize);
-			JsonElement je = gson.toJsonTree(jsonResult);
+
+			JsonElement je = gson.toJsonTree(csFile);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
-			jo.add("data_import_stat", je);
+			jo.add("cloudfile", je);
 			JsonWriter jwriter = new JsonWriter(out);
 			gson.toJson(jo, jwriter);
 		} catch (Exception ex) {

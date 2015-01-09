@@ -46,6 +46,7 @@ import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
 import dk.ange.octave.type.OctaveDouble;
+import dk.ange.octave.type.OctaveInt;
 import dk.ange.octave.type.OctaveString;
 
 public class AnalysisWrapperUtil {
@@ -141,6 +142,7 @@ public class AnalysisWrapperUtil {
 			JsonDataPoints point = new JsonDataPoints();
 
 			String at = Long.toString((long) timestampList[i]);
+			System.out.println("Data analysis, time at:"+at);
 			String timeTag = ((OctaveString) timeTagCell.get(i + 1))
 					.getString();
 			// System.out.println(timeTag);
@@ -157,19 +159,25 @@ public class AnalysisWrapperUtil {
 				OctaveCell unitIDCell = (OctaveCell) result.get(1, startPos);
 				String unitID = ((OctaveString) unitIDCell.get(i + 1))
 						.getString();
+				System.out.println("-------Data analysis----unitID:"+unitID+"-------");
 				OctaveDouble sensorOctaveValue = (OctaveDouble) result.get(1,
 						startPos + 1);
-
+				double sensorValue = sensorOctaveValue.getData()[i];
+				value.setVal(Double.toString(sensorValue));
+				
+				System.out.println("-------Data analysis----sensorValue:"+sensorValue+"-------");
+				
 				OctaveCell valueTagCell = (OctaveCell) result.get(1,
 						startPos + 2);
 				String valueTag = ((OctaveString) valueTagCell.get(i + 1))
 						.getString();
 				value.setUnit_id(unitID);
-				double sensorValue = sensorOctaveValue.getData()[i];
-				value.setVal(Double.toString(sensorValue));
+				
 				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
 						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
+					System.out.println("-------Data analysis----valueTag:"+valueTag+"-------");
+					
 				}
 				value_list.add(value);
 				// System.out.println(unitID + "," + valueTag + "," +
@@ -212,7 +220,11 @@ public class AnalysisWrapperUtil {
 			line = line + " " + jDatapoint.getTimetag();
 			List<JsonDataValues> valueList = jDatapoint.getValue_list();
 			for (JsonDataValues value : valueList) {
-				line = line + " " + value.getUnit_id() + " " + "symbol" + " "
+				//use symbol 
+//				line = line + " " + value.getUnit_id() + " " + "symbol" + " "
+//						+ value.getVal() + " " + value.getVal_tag() + "\n";
+				//do not use symbol
+				line = line + " " + value.getUnit_id() +  " "
 						+ value.getVal() + " " + value.getVal_tag() + "\n";
 				dataLineSum.append(line);
 			}
@@ -247,7 +259,9 @@ public class AnalysisWrapperUtil {
 			String tmpFolder = ServerConfigUtil
 					.getConfigValue(ServerConfigs.tmpRepository);
 			UUID uuid = UUID.randomUUID();
-			tmpfolderPath = tmpFolder + uuid.toString() + "/";
+//			tmpfolderPath = tmpFolder + uuid.toString() + "/";
+			tmpfolderPath = tmpFolder + jobID + "/";
+			
 			modelRepository = modelRepository + modelID;
 			if (new File(tmpfolderPath).exists()) {
 				new File(tmpfolderPath).delete();
@@ -291,16 +305,27 @@ public class AnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) input.getSource());
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType()
+					} else if(input.getType().equals(AScontants.integerType)) {
+						System.out.println("Input Name:" + input.getName()
+								+ ", Input Type:" + input.getType());
+						OctaveInt octaveInput = new OctaveInt(
+								Integer.parseInt(input.getSource()));
+						octave.put(input.getName(), octaveInput);
+					}else if(input.getType().equals(AScontants.doubleType)) {
+						System.out.println("Input Name:" + input.getName()
+								+ ", Input Type:" + input.getType());
+						OctaveDouble octaveInput = new OctaveDouble();
+						octaveInput.set(Double.parseDouble(input.getSource()), 1,1);
+						octave.put(input.getName(), octaveInput);
+					}else if (input.getType()
 							.equals(AScontants.sensordataType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						HBaseDatapointDAO diDao = new HBaseDatapointDAO();
 						DatastreamDAO dsDao = new DatastreamDAO();
 						DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
-						Datastream datastream = dsDao
-								.getHealthDatastreamByTitle(input.getSource(),
-										"testtest3", true, false);
+						Datastream datastream = dsDao.getDatastream(
+										(String)input.getValue(), true, false);
 						long start = input.getStart();
 						long end = input.getEnd();
 						int maxDataPoints = input.getMaxDataPoints();
@@ -329,8 +354,8 @@ public class AnalysisWrapperUtil {
 								+ ", Input Type:" + input.getType());
 						DatastreamDAO dsDao = new DatastreamDAO();
 						Datastream datastream = dsDao
-								.getHealthDatastreamByTitle(input.getSource(),
-										null, true, false);
+								.getDatastream((String)input.getValue(),
+										true, false);
 						if (datastream == null) {
 							analysisDataMovementLog = analysisDataMovementLog
 									+ "<p>Cannot find data stream, title:"
@@ -438,7 +463,8 @@ public class AnalysisWrapperUtil {
 							DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 							HBaseDataImport importData = new HBaseDataImport();
 							DatastreamDAO dsDao = new DatastreamDAO();
-							String datastreamID = output.getSource();
+							String datastreamID = output.getValue();
+							System.out.println("------datastreamID:"+datastreamID+"-------");
 							importData.setData_points(datapointsList);
 							HBaseDatapointDAO importDao = new HBaseDatapointDAO();
 							Datastream datastream = dsDao.getDatastream(

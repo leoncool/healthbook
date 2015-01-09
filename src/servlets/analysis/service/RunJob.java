@@ -173,38 +173,48 @@ public class RunJob extends HttpServlet {
 			input.setName("input" + Integer.toString(i + 1));
 			input.setType(inputEntryList.get(i).getDataType());
 			String[] dataTypes = { AScontants.sensordataType,
-					AScontants.fileType };
+					AScontants.fileType, AScontants.StringType,
+					AScontants.integerType, AScontants.doubleType };
 			int typeEntry = Arrays.asList(dataTypes).indexOf(input.getType());
+
+			String source = request.getParameter("input"
+					+ Integer.toString(i + 1) + "_source");
 			switch (typeEntry) {
 			case 0:// sensor data type
 				System.out.println("-----------case 0:-------------");
 				try {
-					String source = request.getParameter("input"
-							+ Integer.toString(i + 1) + "_source");
+
 					if (source != null && source.length() > 1) {
 						input.setSource(source);
+						Datastream datastream = dsDao.getHealthDatastreamByTitle(source, loginID, true, false);
+						if(datastream==null)
+						{
+							ReturnParser
+							.outputErrorException(
+									response,
+									AllConstants.ErrorDictionary.Invalid_datastream_title,
+									null, source);
+					return;
+						}
+						input.setValue(datastream.getStreamId());
 						long start = 0;
 						long end = 0;
 						int max = 1000;
 						try {
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_start") != null) {
-								start = Long.parseLong("input"
-										+ Integer.toString(i + 1) + "_start");
+								start = Long.parseLong(request.getParameter("input"
+										+ Integer.toString(i + 1) + "_start"));
 							}
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_end") != null) {
-								end = Long.parseLong(request
-										.getParameter("input"
-												+ Integer.toString(i + 1)
-												+ "_end"));
+								end = Long.parseLong(request.getParameter("input"
+										+ Integer.toString(i + 1) + "_end"));
 							}
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_max") != null) {
-								max = Integer.parseInt(request
-										.getParameter("input"
-												+ Integer.toString(i + 1)
-												+ "_max"));
+								max = Integer.parseInt(request.getParameter("input"
+										+ Integer.toString(i + 1) + "_max"));
 							}
 							if (globalMaxDatapoints > 0) {
 								System.out.println("--globalMaxDatapoints---");
@@ -246,9 +256,7 @@ public class RunJob extends HttpServlet {
 				break;
 
 			case 1: // if data type is file
-				System.out.println("-----------case 0:-------------");
-				String source = request.getParameter("input"
-						+ Integer.toString(i + 1) + "_source");
+				System.out.println("-----------case 1:--file input-----------");
 
 				if (source == null && source.length() < 2) {
 					// if source not found
@@ -289,20 +297,73 @@ public class RunJob extends HttpServlet {
 				}
 
 				input.setSource(source);
-
-				
 				input.setFilekey(filekey);
-
+				break;
+			case 2:// String Input Type
+				System.out
+						.println("-----------case 2:- String Input Type------------");
+				try {
+					if (source == null || source.length() < 1) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "source");
+						return;
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				input.setSource(source);
+				break;
+			case 3:// Integer Input Type
+				System.out
+						.println("-----------case 3:---Integer Input Type----------");
+				try {
+					if (source == null || source.length() < 1) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "source");
+						return;
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				input.setSource(source);
+				break;
+			case 4:// Double Input Type
+				System.out
+						.println("-----------case 4:----Double Input Type---------");
+				try {
+					if (source == null || source.length() < 1) {
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "source");
+						return;
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				input.setSource(source);
 				break;
 			default:
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Invalid_data_format, null,
-						"");
+						"missing data type");
 				return;
 			}
 
 			inputList.add(input);
 		}
+		
+		
+		
+		
+		
 		// check and pre-load output list
 		for (int i = 0; i < outputEntryList.size(); i++) {
 			ASOutput output = new ASOutput();
@@ -315,7 +376,7 @@ public class RunJob extends HttpServlet {
 			if (!dataAction.equalsIgnoreCase(AScontants.dataaction_ignore)
 					&& type.equals(AScontants.sensordataType)) {
 				if (source != null) {
-					output.setSource(source);
+					
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -326,9 +387,9 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
-				String datastreamID = source;
+				String datastreamTitle = source;
 				Datastream datastream = dsDao.getHealthDatastreamByTitle(
-						datastreamID, loginID, true, false);
+						datastreamTitle, loginID, true, false);
 				if (datastream == null) {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -340,9 +401,11 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
+				output.setSource(source);
+				output.setValue(datastream.getStreamId());
 			} else if (!dataAction
 					.equalsIgnoreCase(AScontants.dataaction_ignore)
-					&& type.equals(AScontants.sensordataType)) {
+					&& type.equals(AScontants.fileType)) {
 				if (source != null) {
 					output.setSource(source);
 				} else {
@@ -355,6 +418,13 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
+			}else{
+//				System.out.println("-----Unkown Type Name:"+type);
+//				ReturnParser
+//				.outputErrorException(response,
+//						AllConstants.ErrorDictionary.Invalid_data_format,
+//						null, "unknown data type");
+//		return;
 			}
 			output.setType(type);
 			outputList.add(output);

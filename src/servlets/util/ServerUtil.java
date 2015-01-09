@@ -611,6 +611,42 @@ public class ServerUtil {
 			return false;
 		}
 	}
+	public static boolean isGetCloudStorageFileByFileKey(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_cloud_storage + "/"
+				+ AllConstants.api_entryPoints.api_cloud_storage_get+"[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public static boolean isDeleteCloudStorageFileByFileKey(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_cloud_storage + "/"
+				+ AllConstants.api_entryPoints.api_cloud_storage_delete+"[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public static boolean isListCloudStorageFilesByTitleAndKey(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_cloud_storage + "/"
+				+ AllConstants.api_entryPoints.api_cloud_storage_list +"[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public static boolean isPostUploadCloudStorageFile(String ServletPath) {
+		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
+				+ AllConstants.api_entryPoints.api_cloud_storage + "/"
+				+ AllConstants.api_entryPoints.api_cloud_storage_upload +"[/]*$")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public static boolean isGetHealthDatapointsByTitleBenchmarks(String ServletPath) {
 		if (ServletPath.matches("^" + AllConstants.api_entryPoints.api_url
 				+ AllConstants.api_entryPoints.api_health + "/"

@@ -147,9 +147,11 @@ public class DeleteHealthDatapoints extends HttpServlet {
 					class DeleteThread extends Thread {
 						Datastream datastream;
 						long at;
-					    public DeleteThread(Datastream _datastream, long _at) {
+						String loginID;
+					    public DeleteThread(Datastream _datastream, long _at,String _loginID) {
 					    	datastream=_datastream;
 					    	at=_at;
+					    	loginID=_loginID;
 					    }
 					 
 					    public void run() {
@@ -157,14 +159,14 @@ public class DeleteHealthDatapoints extends HttpServlet {
 					        HBaseDatapointDAO dpDap = new HBaseDatapointDAO();
 							try {
 								dpDap.delete_A_Datapoint(
-										datastream.getStreamId(), at, null);
+										datastream.getStreamId(), at, null,loginID);
 							} catch (ErrorCodeException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 					    }
 					}
-					DeleteThread delete=new DeleteThread(datastream, at);
+					DeleteThread delete=new DeleteThread(datastream, at,loginID);
 					delete.start();
 					totalDeleted=1;
 	
