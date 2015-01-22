@@ -101,7 +101,7 @@ public class RunJob extends HttpServlet {
 		Gson gson = new Gson();
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		DatastreamDAO dsDao = new DatastreamDAO();
-		String loginID = "testtest4";
+	
 		// retrieve service id information
 		String serviceID_String = request
 				.getParameter(AScontants.RequestParameters.Service_ID);
@@ -150,6 +150,7 @@ public class RunJob extends HttpServlet {
 		AnalysisService service = null;
 		AnalysisModel model = null;
 		service = asDao.getServicebyID(serviceID);
+		String loginID = service.getUserId();
 		if (service == null) {
 			System.out.println("Return Error Message to User. GetLineNumber:"
 					+ getLineNumber());
@@ -198,7 +199,7 @@ public class RunJob extends HttpServlet {
 						}
 						input.setValue(datastream.getStreamId());
 						long start = 0;
-						long end = 0;
+						long end = Long.MAX_VALUE;
 						int max = 1000;
 						try {
 							if (request.getParameter("input"
@@ -221,6 +222,7 @@ public class RunJob extends HttpServlet {
 								input.setMaxDataPoints(globalMaxDatapoints);
 							} else {
 								input.setMaxDataPoints(max);
+								System.out.println("--Setting Max Data Points:"+max);
 							}
 							input.setStart(start);
 							input.setEnd(end);
@@ -257,7 +259,12 @@ public class RunJob extends HttpServlet {
 
 			case 1: // if data type is file
 				System.out.println("-----------case 1:--file input-----------");
-
+				String sub_fileType = request.getParameter("input"
+						+ Integer.toString(i + 1) + "_type");
+				
+				if(sub_fileType.equalsIgnoreCase(AScontants.healthfile))
+				{
+				System.out.println("---------"+AScontants.healthfile+"---------");
 				if (source == null && source.length() < 2) {
 					// if source not found
 					System.out
@@ -295,9 +302,22 @@ public class RunJob extends HttpServlet {
 							null, "filekey");
 					return;
 				}
-
+				
 				input.setSource(source);
 				input.setFilekey(filekey);
+				input.setType(AScontants.healthfile);
+				}else{
+					System.out.println("---------FileType:"+sub_fileType+"----"+AScontants.fileType+"---------");
+					String filekey = request.getParameter("input"
+							+ Integer.toString(i + 1) + "_filekey");
+					input.setSource(source);
+					String objectPrefix = loginID + "/cs/";
+					input.setFilekey(objectPrefix+filekey);
+					input.setLoginID(loginID);
+					input.setType(AScontants.cloudfile);
+				}
+				
+				
 				break;
 			case 2:// String Input Type
 				System.out

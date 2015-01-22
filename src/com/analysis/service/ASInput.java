@@ -7,12 +7,19 @@ private String notes;
 private Object value;
 private String source;
 private String filekey;
+private String loginID;
 private long start;
 private long end;
 private int maxDataPoints=1000;
 
 
 
+public String getLoginID() {
+	return loginID;
+}
+public void setLoginID(String loginID) {
+	this.loginID = loginID;
+}
 public String getFilekey() {
 	return filekey;
 }

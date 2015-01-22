@@ -217,15 +217,15 @@ public class AnalysisWrapperUtil {
 
 		for (JsonDataPoints jDatapoint : jDataPointsList) {
 			String line = jDatapoint.getAt();
-			line = line + " " + jDatapoint.getTimetag();
+			line = line + "#" + jDatapoint.getTimetag();
 			List<JsonDataValues> valueList = jDatapoint.getValue_list();
 			for (JsonDataValues value : valueList) {
 				//use symbol 
 //				line = line + " " + value.getUnit_id() + " " + "symbol" + " "
 //						+ value.getVal() + " " + value.getVal_tag() + "\n";
 				//do not use symbol
-				line = line + " " + value.getUnit_id() +  " "
-						+ value.getVal() + " " + value.getVal_tag() + "\n";
+				line = line + "#" + value.getUnit_id() +  "#"
+						+ value.getVal() + "#" + value.getVal_tag()+"" + "\n";
 				dataLineSum.append(line);
 			}
 		}
@@ -348,10 +348,13 @@ public class AnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) inputValue);
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.fileType)) {
-						// file type
+					} else if (input.getType().equals(AScontants.healthfile)||input.getType().equals(AScontants.cloudfile)) {
+						// health file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
+						String objectKey=null;
+						String fileName=null;
+						if(input.getType().equals(AScontants.healthfile)){
 						DatastreamDAO dsDao = new DatastreamDAO();
 						Datastream datastream = dsDao
 								.getDatastream((String)input.getValue(),
@@ -371,12 +374,18 @@ public class AnalysisWrapperUtil {
 						// objectKey.lastIndexOf("/") + 1, objectKey.length());
 						// String objectKey = loginID + "/" + datastreamID + "/"
 						// + "1420325580000/O8GsK/brain_001.dcm";
-						String objectKey = loginID + "/" + datastreamID + "/"
+						objectKey = loginID + "/" + datastreamID + "/"
 								+ input.getFilekey();
-						String fileName = objectKey.substring(
+
+						System.out.println("datastreamID:" + datastreamID);
+						}else{
+							objectKey=input.getFilekey();
+							System.out.println("-------cloud_storage_file-------");
+							
+						}
+						fileName = objectKey.substring(
 								objectKey.lastIndexOf("/") + 1,
 								objectKey.length());
-						System.out.println("datastreamID:" + datastreamID);
 						System.out.println("objectKey:" + objectKey);
 						System.out.println("fileName:" + fileName);
 
