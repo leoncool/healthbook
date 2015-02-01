@@ -136,13 +136,15 @@ public class AnalysisWrapperUtil {
 			return null;
 		}
 		List<JsonDataPoints> data_points = new ArrayList<>();
+		int TrancatedLogCounter=1;
+		int TrancatedLogMax=5;
 		// timestamp.getData().length
 		for (int i = 0; i < timestampList.length; i++) {
 			// matlab and java array difference is 1
 			JsonDataPoints point = new JsonDataPoints();
 
 			String at = Long.toString((long) timestampList[i]);
-			System.out.println("Data analysis, time at:"+at);
+//			System.out.println("Data analysis, time at:"+at);
 			String timeTag = ((OctaveString) timeTagCell.get(i + 1))
 					.getString();
 			// System.out.println(timeTag);
@@ -159,14 +161,19 @@ public class AnalysisWrapperUtil {
 				OctaveCell unitIDCell = (OctaveCell) result.get(1, startPos);
 				String unitID = ((OctaveString) unitIDCell.get(i + 1))
 						.getString();
-				System.out.println("-------Data analysis----unitID:"+unitID+"-------");
+				if(TrancatedLogCounter<TrancatedLogMax)
+				{
+					System.out.println("-------Data analysis----unitID:"+unitID+"-------");
+				}
 				OctaveDouble sensorOctaveValue = (OctaveDouble) result.get(1,
 						startPos + 1);
 				double sensorValue = sensorOctaveValue.getData()[i];
 				value.setVal(Double.toString(sensorValue));
-				
-				System.out.println("-------Data analysis----sensorValue:"+sensorValue+"-------");
-				
+				if(TrancatedLogCounter<TrancatedLogMax)
+				{
+				System.out.println("-------Data analysis----sensorValue:"+sensorValue+"-------");	
+				}
+			
 				OctaveCell valueTagCell = (OctaveCell) result.get(1,
 						startPos + 2);
 				String valueTag = ((OctaveString) valueTagCell.get(i + 1))
@@ -176,16 +183,26 @@ public class AnalysisWrapperUtil {
 				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
 						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
-					System.out.println("-------Data analysis----valueTag:"+valueTag+"-------");
-					
+//				
+					if(TrancatedLogCounter<TrancatedLogMax)
+					{
+						System.out.println("-------Data analysis----valueTag:"+valueTag+"-------");	
+					}
 				}
+				
 				value_list.add(value);
-				// System.out.println(unitID + "," + valueTag + "," +
-				// sensorValue);
+				if(TrancatedLogCounter<TrancatedLogMax)
+				{
+					 System.out.println(unitID + "," + valueTag + "," +
+								sensorValue);
+					 }
+				TrancatedLogCounter=TrancatedLogCounter+1;
+				
 			}
 			point.setValue_list(value_list);
 			data_points.add(point);
 		}
+		
 
 		return data_points;
 	}
