@@ -136,15 +136,15 @@ public class AnalysisWrapperUtil {
 			return null;
 		}
 		List<JsonDataPoints> data_points = new ArrayList<>();
-		int TrancatedLogCounter=1;
-		int TrancatedLogMax=5;
+		int TrancatedLogCounter = 1;
+		int TrancatedLogMax = 5;
 		// timestamp.getData().length
 		for (int i = 0; i < timestampList.length; i++) {
 			// matlab and java array difference is 1
 			JsonDataPoints point = new JsonDataPoints();
 
 			String at = Long.toString((long) timestampList[i]);
-//			System.out.println("Data analysis, time at:"+at);
+			// System.out.println("Data analysis, time at:"+at);
 			String timeTag = ((OctaveString) timeTagCell.get(i + 1))
 					.getString();
 			// System.out.println(timeTag);
@@ -161,48 +161,46 @@ public class AnalysisWrapperUtil {
 				OctaveCell unitIDCell = (OctaveCell) result.get(1, startPos);
 				String unitID = ((OctaveString) unitIDCell.get(i + 1))
 						.getString();
-				if(TrancatedLogCounter<TrancatedLogMax)
-				{
-					System.out.println("-------Data analysis----unitID:"+unitID+"-------");
+				if (TrancatedLogCounter < TrancatedLogMax) {
+					System.out.println("-------Data analysis----unitID:"
+							+ unitID + "-------");
 				}
 				OctaveDouble sensorOctaveValue = (OctaveDouble) result.get(1,
 						startPos + 1);
 				double sensorValue = sensorOctaveValue.getData()[i];
 				value.setVal(Double.toString(sensorValue));
-				if(TrancatedLogCounter<TrancatedLogMax)
-				{
-				System.out.println("-------Data analysis----sensorValue:"+sensorValue+"-------");	
+				if (TrancatedLogCounter < TrancatedLogMax) {
+					System.out.println("-------Data analysis----sensorValue:"
+							+ sensorValue + "-------");
 				}
-			
+
 				OctaveCell valueTagCell = (OctaveCell) result.get(1,
 						startPos + 2);
 				String valueTag = ((OctaveString) valueTagCell.get(i + 1))
 						.getString();
 				value.setUnit_id(unitID);
-				
+
 				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
 						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
-//				
-					if(TrancatedLogCounter<TrancatedLogMax)
-					{
-						System.out.println("-------Data analysis----valueTag:"+valueTag+"-------");	
+					//
+					if (TrancatedLogCounter < TrancatedLogMax) {
+						System.out.println("-------Data analysis----valueTag:"
+								+ valueTag + "-------");
 					}
 				}
-				
+
 				value_list.add(value);
-				if(TrancatedLogCounter<TrancatedLogMax)
-				{
-					 System.out.println(unitID + "," + valueTag + "," +
-								sensorValue);
-					 }
-				TrancatedLogCounter=TrancatedLogCounter+1;
-				
+				if (TrancatedLogCounter < TrancatedLogMax) {
+					System.out.println(unitID + "," + valueTag + ","
+							+ sensorValue);
+				}
+				TrancatedLogCounter = TrancatedLogCounter + 1;
+
 			}
 			point.setValue_list(value_list);
 			data_points.add(point);
 		}
-		
 
 		return data_points;
 	}
@@ -237,12 +235,12 @@ public class AnalysisWrapperUtil {
 			line = line + "#" + jDatapoint.getTimetag();
 			List<JsonDataValues> valueList = jDatapoint.getValue_list();
 			for (JsonDataValues value : valueList) {
-				//use symbol 
-//				line = line + " " + value.getUnit_id() + " " + "symbol" + " "
-//						+ value.getVal() + " " + value.getVal_tag() + "\n";
-				//do not use symbol
-				line = line + "#" + value.getUnit_id() +  "#"
-						+ value.getVal() + "#" + value.getVal_tag()+"" + "\n";
+				// use symbol
+				// line = line + " " + value.getUnit_id() + " " + "symbol" + " "
+				// + value.getVal() + " " + value.getVal_tag() + "\n";
+				// do not use symbol
+				line = line + "#" + value.getUnit_id() + "#" + value.getVal()
+						+ "#" + value.getVal_tag() + "" + "\n";
 				dataLineSum.append(line);
 			}
 		}
@@ -260,6 +258,7 @@ public class AnalysisWrapperUtil {
 	public AnalysisResult octaveRun(String modelID, String jobID,
 			String outputFolderURLPath, ArrayList<ASInput> inputList,
 			ArrayList<ASOutput> outputList) {
+
 		boolean OctaveExecutionSuccessful = false;
 		boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
@@ -267,6 +266,9 @@ public class AnalysisWrapperUtil {
 		// String outputFolderURLPath =
 		// "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 
+		analysisDataMovementLog = analysisDataMovementLog + "<p>Procedure 1:"
+				+ new Date() + "</p>";
+		System.out.println("<p>Procedure 1:" + new Date() + "</p>");
 		String modelRepository = "F:/model_repository/" + modelID;
 		String tmpfolderPath = "F:/model_repository/" + modelID + "/";
 		String jobfolderPath = "F:/job_folder/" + jobID + "/";
@@ -276,9 +278,9 @@ public class AnalysisWrapperUtil {
 			String tmpFolder = ServerConfigUtil
 					.getConfigValue(ServerConfigs.tmpRepository);
 			UUID uuid = UUID.randomUUID();
-//			tmpfolderPath = tmpFolder + uuid.toString() + "/";
+			// tmpfolderPath = tmpFolder + uuid.toString() + "/";
 			tmpfolderPath = tmpFolder + jobID + "/";
-			
+
 			modelRepository = modelRepository + modelID;
 			if (new File(tmpfolderPath).exists()) {
 				new File(tmpfolderPath).delete();
@@ -304,6 +306,9 @@ public class AnalysisWrapperUtil {
 
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		AnalysisResult result = asDao.getJobResultByID(jobID);
+		analysisDataMovementLog = analysisDataMovementLog + "<p>Procedure 2:"
+				+ new Date() + "</p>";
+		System.out.println("<p>Procedure 2:" + new Date() + "</p>");
 		try {
 			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 			StringWriter stdout = new StringWriter();
@@ -322,19 +327,20 @@ public class AnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) input.getSource());
 						octave.put(input.getName(), octaveInput);
-					} else if(input.getType().equals(AScontants.integerType)) {
+					} else if (input.getType().equals(AScontants.integerType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveInt octaveInput = new OctaveInt(
 								Integer.parseInt(input.getSource()));
 						octave.put(input.getName(), octaveInput);
-					}else if(input.getType().equals(AScontants.doubleType)) {
+					} else if (input.getType().equals(AScontants.doubleType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveDouble octaveInput = new OctaveDouble();
-						octaveInput.set(Double.parseDouble(input.getSource()), 1,1);
+						octaveInput.set(Double.parseDouble(input.getSource()),
+								1, 1);
 						octave.put(input.getName(), octaveInput);
-					}else if (input.getType()
+					} else if (input.getType()
 							.equals(AScontants.sensordataType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
@@ -342,7 +348,7 @@ public class AnalysisWrapperUtil {
 						DatastreamDAO dsDao = new DatastreamDAO();
 						DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 						Datastream datastream = dsDao.getDatastream(
-										(String)input.getValue(), true, false);
+								(String) input.getValue(), true, false);
 						long start = input.getStart();
 						long end = input.getEnd();
 						int maxDataPoints = input.getMaxDataPoints();
@@ -365,40 +371,44 @@ public class AnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) inputValue);
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.healthfile)||input.getType().equals(AScontants.cloudfile)) {
+					} else if (input.getType().equals(AScontants.healthfile)
+							|| input.getType().equals(AScontants.cloudfile)) {
 						// health file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
-						String objectKey=null;
-						String fileName=null;
-						if(input.getType().equals(AScontants.healthfile)){
-						DatastreamDAO dsDao = new DatastreamDAO();
-						Datastream datastream = dsDao
-								.getDatastream((String)input.getValue(),
-										true, false);
-						if (datastream == null) {
-							analysisDataMovementLog = analysisDataMovementLog
-									+ "<p>Cannot find data stream, title:"
-									+ input.getSource() + "</p>";
-						}
-						String datastreamID = datastream.getStreamId();
-						String loginID = datastream.getOwner();
-						// String datastreamID =
-						// "c1730c84-8644-4d10-bfdc-c858030e6be5";
-						// String objectKey = loginID + "/" + datastreamID + "/"
-						// + "1420325580000/O8GsK/brain_001.dcm";
-						// String fileName = objectKey.substring(
-						// objectKey.lastIndexOf("/") + 1, objectKey.length());
-						// String objectKey = loginID + "/" + datastreamID + "/"
-						// + "1420325580000/O8GsK/brain_001.dcm";
-						objectKey = loginID + "/" + datastreamID + "/"
-								+ input.getFilekey();
+						String objectKey = null;
+						String fileName = null;
+						if (input.getType().equals(AScontants.healthfile)) {
+							DatastreamDAO dsDao = new DatastreamDAO();
+							Datastream datastream = dsDao.getDatastream(
+									(String) input.getValue(), true, false);
+							if (datastream == null) {
+								analysisDataMovementLog = analysisDataMovementLog
+										+ "<p>Cannot find data stream, title:"
+										+ input.getSource() + "</p>";
+							}
+							String datastreamID = datastream.getStreamId();
+							String loginID = datastream.getOwner();
+							// String datastreamID =
+							// "c1730c84-8644-4d10-bfdc-c858030e6be5";
+							// String objectKey = loginID + "/" + datastreamID +
+							// "/"
+							// + "1420325580000/O8GsK/brain_001.dcm";
+							// String fileName = objectKey.substring(
+							// objectKey.lastIndexOf("/") + 1,
+							// objectKey.length());
+							// String objectKey = loginID + "/" + datastreamID +
+							// "/"
+							// + "1420325580000/O8GsK/brain_001.dcm";
+							objectKey = loginID + "/" + datastreamID + "/"
+									+ input.getFilekey();
 
-						System.out.println("datastreamID:" + datastreamID);
-						}else{
-							objectKey=input.getFilekey();
-							System.out.println("-------cloud_storage_file-------");
-							
+							System.out.println("datastreamID:" + datastreamID);
+						} else {
+							objectKey = input.getFilekey();
+							System.out
+									.println("-------cloud_storage_file-------");
+
 						}
 						fileName = objectKey.substring(
 								objectKey.lastIndexOf("/") + 1,
@@ -454,10 +464,16 @@ public class AnalysisWrapperUtil {
 						}
 					}
 				}
+				analysisDataMovementLog = analysisDataMovementLog
+						+ "<p>Procedure 3:" + new Date() + "</p>";
+				System.out.println("<p>Procedure 3:" + new Date() + "</p>");
 				String mainFunctionString = awU.createMainFunction("main",
 						inputList, outputList);
 				System.out.println("mainFunctionString:" + mainFunctionString);
 				octave.eval(mainFunctionString);
+				analysisDataMovementLog = analysisDataMovementLog
+						+ "<p>Procedure 4:" + new Date() + "</p>";
+				System.out.println("<p>Procedure 4:" + new Date() + "</p>");
 				OctaveExecutionSuccessful = true;
 
 			} catch (Exception ex) {
@@ -480,8 +496,16 @@ public class AnalysisWrapperUtil {
 									AScontants.dataaction_ignore)) {
 						OctaveCell octaveResult = (OctaveCell) octave
 								.get(output.getName());
+						long time1 = new Date().getTime();
 						List<JsonDataPoints> datapointsList = awU
 								.unwrapOctaveSensorData(octaveResult);
+						long time2 = new Date().getTime();
+						System.out
+								.println("--------------UnwrapOctaveSensorData----------Takes:"
+										+ (time2 - time1)
+										/ 1000.00
+										+ " seconds");
+
 						if (datapointsList == null) {
 							System.out
 									.println("some problem---:datapointsList == null");
@@ -490,7 +514,8 @@ public class AnalysisWrapperUtil {
 							HBaseDataImport importData = new HBaseDataImport();
 							DatastreamDAO dsDao = new DatastreamDAO();
 							String datastreamID = output.getValue();
-							System.out.println("------datastreamID:"+datastreamID+"-------");
+							System.out.println("------datastreamID:"
+									+ datastreamID + "-------");
 							importData.setData_points(datapointsList);
 							HBaseDatapointDAO importDao = new HBaseDatapointDAO();
 							Datastream datastream = dsDao.getDatastream(
@@ -500,9 +525,17 @@ public class AnalysisWrapperUtil {
 							try {
 								importData.setDatastream(dbtoJUtil
 										.convertDatastream(datastream, null));
+								time1 = new Date().getTime();
+
 								int totalStoredByte = importDao
 										.importDatapointsDatapoints(importData); // submit
-																					// data
+								time2 = new Date().getTime();
+								System.out
+										.println("--------------Octave:importDatapointsDatapoints----------Takes:"
+												+ (time2 - time1)
+												/ 1000.00
+												+ " seconds");
+								// data
 								analysisDataMovementLog = analysisDataMovementLog
 										+ "<p>Data Stored Successfully for datastream ID: "
 										+ datastreamID
@@ -573,6 +606,9 @@ public class AnalysisWrapperUtil {
 				}
 			}
 
+			analysisDataMovementLog = analysisDataMovementLog
+					+ "<p>Procedure 5:" + new Date() + "</p>";
+			System.out.println("<p>Procedure 5:" + new Date() + "</p>");
 			try {
 				octave.close();
 				outputLog = outputLog + stdout.toString();
