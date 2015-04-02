@@ -4,13 +4,13 @@ import health.database.DAO.DatastreamDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamUnits;
 import health.database.models.as.AnalysisResult;
 import health.hbase.models.HBaseDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataValues;
 import health.input.util.DBtoJsonUtil;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,19 +30,17 @@ import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.io.FileUtils;
 
+import server.exception.ErrorCodeException;
+import util.AScontants;
+import util.AllConstants;
+import util.AllConstants.ServerConfigs;
+import util.ServerConfigUtil;
 import cloudstorage.cacss.S3Engine;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zhumulangma.cloudstorage.server.entity.CloudFile;
 
-import server.conf.Constants;
-import server.exception.ErrorCodeException;
-import server.exception.ReturnParser;
-import util.AScontants;
-import util.AllConstants;
-import util.ServerConfigUtil;
-import util.AllConstants.ServerConfigs;
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
@@ -248,6 +247,7 @@ public class AnalysisWrapperUtil {
 		// System.out.println(dataLineSum.toString());
 		FileUtils.writeStringToFile(outputFile, dataLineSum.toString());
 	}
+
 
 	// String outputFolderURLPath =
 	// "http://localhost:8080/healthbook/as/getFile?path=";
