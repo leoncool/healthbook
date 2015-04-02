@@ -319,12 +319,13 @@ public class RunJobBenchmark extends HttpServlet {
 			executionThread.outputList = outputList;
 			executionThread.jobID = jobID;
 			executionThread.modelID = model.getId();
+			executionThread.loginID=loginID;
 			executionThread.start();
 			}else{
 				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 				AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 				asresult= awU.octaveRun(service.getModelId(), jobID, outputFolderURLPath, inputList,
-						outputList);
+						outputList,loginID);
 			}
 			// List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			// totalEntryList.addAll(inputEntryList);
@@ -358,6 +359,7 @@ public class RunJobBenchmark extends HttpServlet {
 	public class ExecutionEngineThread extends Thread {
 		String jobID = null;
 		String modelID = null;
+		String loginID = null;
 		public boolean OctaveExecutionSuccessful = false;
 		public boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
@@ -373,7 +375,7 @@ public class RunJobBenchmark extends HttpServlet {
 			System.out.println("Hello from a thread!");
 			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 			awU.octaveRun(modelID, jobID, outputFolderURLPath, inputList,
-					outputList);
+					outputList,loginID);
 		}
 	}
 

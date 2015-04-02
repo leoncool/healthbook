@@ -477,12 +477,16 @@ public class RunJob extends HttpServlet {
 				executionThread.outputList = outputList;
 				executionThread.jobID = jobID;
 				executionThread.modelID = model.getId();
+				executionThread.loginID=loginID;
 				executionThread.start();
 			} else {
-				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+				
+				String outputFolderURLPath =ServerConfigUtil
+						.getConfigValue(ServerConfigs.outputFolderURLPath);
+//				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 				AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 				asresult = awU.octaveRun(service.getModelId(), jobID,
-						outputFolderURLPath, inputList, outputList);
+						outputFolderURLPath, inputList, outputList,service.getUserId());
 			}
 			// List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			// totalEntryList.addAll(inputEntryList);
@@ -515,11 +519,14 @@ public class RunJob extends HttpServlet {
 	public class ExecutionEngineThread extends Thread {
 		String jobID = null;
 		String modelID = null;
+		String loginID = null;
 		public boolean OctaveExecutionSuccessful = false;
 		public boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
 		String analysisDataMovementLog = "";
-		String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+		String outputFolderURLPath =ServerConfigUtil
+				.getConfigValue(ServerConfigs.outputFolderURLPath);
+//		String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 		// String outputFolderURLPath =
 		// "http://localhost:8080/healthbook/as/getFile?path=";
 		ArrayList<ASInput> inputList = new ArrayList<ASInput>();
@@ -530,7 +537,7 @@ public class RunJob extends HttpServlet {
 			System.out.println("Hello from a thread!");
 			AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
 			awU.octaveRun(modelID, jobID, outputFolderURLPath, inputList,
-					outputList);
+					outputList,loginID);
 		}
 	}
 

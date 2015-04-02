@@ -13,9 +13,11 @@ import health.input.util.DBtoJsonUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -255,8 +257,7 @@ public class PythonAnalysisWrapperUtil {
 
 		List<JsonDataPoints> jDataPointsList = hbaseexport.getData_points();
 		StringBuilder dataLineSum = new StringBuilder();
-		SimpleDateFormat sdf = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss.SSSSSS");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		List<DatastreamUnits> unitList = datastream.getDatastreamUnitsList();
 		String unitidX = null;
 		String unitidY = null;
@@ -303,7 +304,7 @@ public class PythonAnalysisWrapperUtil {
 
 	public AnalysisResult pythonRun(String modelID, String jobID,
 			String outputFolderURLPath, ArrayList<ASInput> inputList,
-			ArrayList<ASOutput> outputList) {
+			ArrayList<ASOutput> outputList,String loginID) {
 
 		boolean OctaveExecutionSuccessful = false;
 		boolean WholeJobFinishedSuccessful = true;
@@ -326,7 +327,7 @@ public class PythonAnalysisWrapperUtil {
 			UUID uuid = UUID.randomUUID();
 			// tmpfolderPath = tmpFolder + uuid.toString() + "/";
 			tmpfolderPath = tmpFolder + jobID + "/";
-
+			System.out.println("tmpfolderPath:"+tmpfolderPath);
 			modelRepository = modelRepository + modelID;
 			if (new File(tmpfolderPath).exists()) {
 				new File(tmpfolderPath).delete();
@@ -341,6 +342,7 @@ public class PythonAnalysisWrapperUtil {
 			String jobFolder = ServerConfigUtil
 					.getConfigValue(ServerConfigs.jobDir);
 			jobfolderPath = jobFolder + jobID + "/";
+			System.out.println("jobfolderPath:"+jobfolderPath);
 		}
 
 		outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
@@ -358,9 +360,9 @@ public class PythonAnalysisWrapperUtil {
 		try {
 			PythonAnalysisWrapperUtil awU = new PythonAnalysisWrapperUtil();
 			StringWriter stdout = new StringWriter();
-			 OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
-			 octaveFactory.setWorkingDir(folder);
-			 OctaveEngine octave = octaveFactory.getScriptEngine();
+//			 OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
+//			 octaveFactory.setWorkingDir(folder);
+//			 OctaveEngine octave = octaveFactory.getScriptEngine();
 			try {
 				// octave.setWriter(stdout);
 				// octave.eval("addpath(\"signal_package\")");
@@ -406,6 +408,7 @@ public class PythonAnalysisWrapperUtil {
 						settings.put(
 								AllConstants.ProgramConts.exportSetting_MAX,
 								maxDataPoints);
+						System.out.println("exportDatapoints:start and end:"+start+","+end);
 						HBaseDataImport hbaseexport = diDao.exportDatapoints(
 								datastream.getStreamId(), start, end, null,
 								dbtoJUtil.ToDatastreamUnitsMap(datastream),
@@ -435,7 +438,7 @@ public class PythonAnalysisWrapperUtil {
 										+ input.getSource() + "</p>";
 							}
 							String datastreamID = datastream.getStreamId();
-							String loginID = datastream.getOwner();
+//							String loginID = datastream.getOwner();
 							// String datastreamID =
 							// "c1730c84-8644-4d10-bfdc-c858030e6be5";
 							// String objectKey = loginID + "/" + datastreamID +
@@ -574,8 +577,7 @@ public class PythonAnalysisWrapperUtil {
 							AScontants.sensordataType)
 							&& !output.getDataAction().equalsIgnoreCase(
 									AScontants.dataaction_ignore)) {
-						OctaveCell octaveResult = (OctaveCell) octave
-								.get(output.getName());
+						OctaveCell octaveResult =null;
 						long time1 = new Date().getTime();
 						List<JsonDataPoints> datapointsList = awU
 								.unwrapOctaveSensorData(octaveResult);
@@ -643,11 +645,9 @@ public class PythonAnalysisWrapperUtil {
 										+ "<p>Internal Error" + "</p>";
 							}
 						}
-					} else if (output.getType().equalsIgnoreCase(
-							AScontants.fileType)) {
-						OctaveString fileOutput = (OctaveString) octave
-								.get(output.getName());
-						fileOutput.setString("fig/test_estimated_speed.png");
+					} else if (output.getType().equals(AScontants.healthfile)
+							|| output.getType().equals(AScontants.cloudfile)) {
+						OctaveString fileOutput = new OctaveString("fig/test_estimated_speed.png");
 						File outputFile = new File(tmpfolderPath
 								+ fileOutput.getString());
 						File outputFileJob = new File(jobfolderPath
@@ -669,7 +669,32 @@ public class PythonAnalysisWrapperUtil {
 							continue;
 						} else {
 							FileUtils.copyFile(outputFile, outputFileJob);
-						}
+//							String loginID = datastream.getOwner();
+							if(output.getType().equalsIgnoreCase(AScontants.cloudfile))
+									{
+								//for cloud file type
+								String bucketName = ServerConfigUtil
+										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+								String objectPrefix = loginID + "/cs/";
+								try {
+									FileInputStream inStream=new FileInputStream(outputFile);
+									System.out.println("output.getValue():"+output.getSource());
+									Hashtable<String, Object> paramters = new Hashtable<String, Object>();
+										paramters.put("Content-Type",
+												"application/octet-stream");
+									String newObjectName = objectPrefix + output.getSource();
+									Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
+											.PutObject("leoncool", bucketName,
+													newObjectName, outputFile.length(),
+													inStream, 3, paramters, null);
+									inStream.close();
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									analysisDataMovementLog=analysisDataMovementLog+ex;
+								}
+									}
+							
+						
 						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
 						imageMimeTypes
 								.addMimeTypes("image png tif jpg jpeg bmp");
@@ -680,6 +705,7 @@ public class PythonAnalysisWrapperUtil {
 								+ fileOutput.getString();
 						output.setValue(fileDownloadPath);
 						outputList.set(i, output);
+						}
 					} else {
 						System.out.println("other type not supported yet");
 					}
@@ -690,7 +716,7 @@ public class PythonAnalysisWrapperUtil {
 					+ "<p>Procedure 5:" + new Date() + "</p>";
 			System.out.println("<p>Procedure 5:" + new Date() + "</p>");
 			try {
-				octave.close();
+//				octave.close();
 				outputLog = outputLog + stdout.toString();
 				outputLog = outputLog.replace("\n", "<br>");
 			} catch (Exception ex) {

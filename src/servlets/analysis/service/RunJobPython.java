@@ -26,10 +26,11 @@ import server.exception.ReturnParser;
 import servlets.util.ServerUtil;
 import util.AScontants;
 import util.AllConstants;
+import util.AllConstants.ServerConfigs;
+import util.ServerConfigUtil;
 
 import com.analysis.service.ASInput;
 import com.analysis.service.ASOutput;
-import com.analysis.service.AnalysisWrapperUtil;
 import com.analysis.service.PythonAnalysisWrapperUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -82,7 +83,7 @@ public class RunJobPython extends HttpServlet {
 		Gson gson = new Gson();
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		DatastreamDAO dsDao = new DatastreamDAO();
-	
+
 		// retrieve service id information
 		String serviceID_String = request
 				.getParameter(AScontants.RequestParameters.Service_ID);
@@ -168,15 +169,16 @@ public class RunJobPython extends HttpServlet {
 
 					if (source != null && source.length() > 1) {
 						input.setSource(source);
-						Datastream datastream = dsDao.getHealthDatastreamByTitle(source, loginID, true, false);
-						if(datastream==null)
-						{
+						Datastream datastream = dsDao
+								.getHealthDatastreamByTitle(source, loginID,
+										true, false);
+						if (datastream == null) {
 							ReturnParser
-							.outputErrorException(
-									response,
-									AllConstants.ErrorDictionary.Invalid_datastream_title,
-									null, source);
-					return;
+									.outputErrorException(
+											response,
+											AllConstants.ErrorDictionary.Invalid_datastream_title,
+											null, source);
+							return;
 						}
 						input.setValue(datastream.getStreamId());
 						long start = 0;
@@ -185,25 +187,32 @@ public class RunJobPython extends HttpServlet {
 						try {
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_start") != null) {
-								start = Long.parseLong(request.getParameter("input"
-										+ Integer.toString(i + 1) + "_start"));
+								start = Long.parseLong(request
+										.getParameter("input"
+												+ Integer.toString(i + 1)
+												+ "_start"));
 							}
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_end") != null) {
-								end = Long.parseLong(request.getParameter("input"
-										+ Integer.toString(i + 1) + "_end"));
+								end = Long.parseLong(request
+										.getParameter("input"
+												+ Integer.toString(i + 1)
+												+ "_end"));
 							}
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_max") != null) {
-								max = Integer.parseInt(request.getParameter("input"
-										+ Integer.toString(i + 1) + "_max"));
+								max = Integer.parseInt(request
+										.getParameter("input"
+												+ Integer.toString(i + 1)
+												+ "_max"));
 							}
 							if (globalMaxDatapoints > 0) {
 								System.out.println("--globalMaxDatapoints---");
 								input.setMaxDataPoints(globalMaxDatapoints);
 							} else {
 								input.setMaxDataPoints(max);
-								System.out.println("--Setting Max Data Points:"+max);
+								System.out.println("--Setting Max Data Points:"
+										+ max);
 							}
 							input.setStart(start);
 							input.setEnd(end);
@@ -242,63 +251,69 @@ public class RunJobPython extends HttpServlet {
 				System.out.println("-----------case 1:--file input-----------");
 				String sub_fileType = request.getParameter("input"
 						+ Integer.toString(i + 1) + "_type");
-				
-				if(sub_fileType.equalsIgnoreCase(AScontants.healthfile))
-				{
-				System.out.println("---------"+AScontants.healthfile+"---------");
-				if (source == null && source.length() < 2) {
-					// if source not found
-					System.out
-							.println("Return Error Message to User. GetLineNumber:"
-									+ getLineNumber());
 
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_data_format,
-							null, "data stream title");
-					return;
-				}
-				Datastream datastream = dsDao.getHealthDatastreamByTitle(
-						source, loginID, true, false);
-				if (datastream == null) {
-					System.out
-							.println("Return Error Message to User. GetLineNumber:"
-									+ getLineNumber());
+				if (sub_fileType.equalsIgnoreCase(AScontants.healthfile)) {
+					System.out.println("---------" + AScontants.healthfile
+							+ "---------");
+					if (source == null && source.length() < 2) {
+						// if source not found
+						System.out
+								.println("Return Error Message to User. GetLineNumber:"
+										+ getLineNumber());
 
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Unknown_StreamTitle,
-							null, "data stream title");
-					return;
-				}
-				String filekey = request.getParameter("input"
-						+ Integer.toString(i + 1) + "_filekey");
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "data stream title");
+						return;
+					}
+					Datastream datastream = dsDao.getHealthDatastreamByTitle(
+							source, loginID, true, false);
+					if (datastream == null) {
+						System.out
+								.println("Return Error Message to User. GetLineNumber:"
+										+ getLineNumber());
 
-				if (filekey == null && filekey.length() < 2) {
-					// if source not found
-					System.out
-							.println("Return Error Message to User. GetLineNumber:"
-									+ getLineNumber());
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Unknown_StreamTitle,
+										null, "data stream title");
+						return;
+					}
+					String filekey = request.getParameter("input"
+							+ Integer.toString(i + 1) + "_filekey");
 
-					ReturnParser.outputErrorException(response,
-							AllConstants.ErrorDictionary.Invalid_data_format,
-							null, "filekey");
-					return;
-				}
-				
-				input.setSource(source);
-				input.setFilekey(filekey);
-				input.setType(AScontants.healthfile);
-				}else{
-					System.out.println("---------FileType:"+sub_fileType+"----"+AScontants.fileType+"---------");
+					if (filekey == null && filekey.length() < 2) {
+						// if source not found
+						System.out
+								.println("Return Error Message to User. GetLineNumber:"
+										+ getLineNumber());
+
+						ReturnParser
+								.outputErrorException(
+										response,
+										AllConstants.ErrorDictionary.Invalid_data_format,
+										null, "filekey");
+						return;
+					}
+
+					input.setSource(source);
+					input.setFilekey(filekey);
+					input.setType(AScontants.healthfile);
+				} else {
+					System.out.println("---------FileType:" + sub_fileType
+							+ "----" + AScontants.fileType + "---------");
 					String filekey = request.getParameter("input"
 							+ Integer.toString(i + 1) + "_filekey");
 					input.setSource(source);
 					String objectPrefix = loginID + "/cs/";
-					input.setFilekey(objectPrefix+filekey);
+					input.setFilekey(objectPrefix + filekey);
 					input.setLoginID(loginID);
 					input.setType(AScontants.cloudfile);
 				}
-				
-				
+
 				break;
 			case 2:// String Input Type
 				System.out
@@ -360,11 +375,7 @@ public class RunJobPython extends HttpServlet {
 
 			inputList.add(input);
 		}
-		
-		
-		
-		
-		
+
 		// check and pre-load output list
 		for (int i = 0; i < outputEntryList.size(); i++) {
 			ASOutput output = new ASOutput();
@@ -377,7 +388,7 @@ public class RunJobPython extends HttpServlet {
 			if (!dataAction.equalsIgnoreCase(AScontants.dataaction_ignore)
 					&& type.equals(AScontants.sensordataType)) {
 				if (source != null) {
-					
+
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -407,8 +418,18 @@ public class RunJobPython extends HttpServlet {
 			} else if (!dataAction
 					.equalsIgnoreCase(AScontants.dataaction_ignore)
 					&& type.equals(AScontants.fileType)) {
-				if (source != null) {
-					output.setSource(source);
+
+				String sub_fileType = request.getParameter("output"
+						+ Integer.toString(i + 1) + "_type");
+				String fileName = request.getParameter("output"
+						+ Integer.toString(i + 1) + "_filename");
+				System.out.println("fileName:"+fileName);
+				output.setSource(fileName);
+				if (sub_fileType.equalsIgnoreCase(AScontants.healthfile)) {
+					output.setType(AScontants.healthfile);
+
+				} else if (sub_fileType.equalsIgnoreCase(AScontants.cloudfile)) {
+					output.setType(AScontants.cloudfile);
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -419,16 +440,9 @@ public class RunJobPython extends HttpServlet {
 									null, "");
 					return;
 				}
-			}else{
-//				System.out.println("-----Unkown Type Name:"+type);
-//				ReturnParser
-//				.outputErrorException(response,
-//						AllConstants.ErrorDictionary.Invalid_data_format,
-//						null, "unknown data type");
-//		return;
+
+				outputList.add(output);
 			}
-			output.setType(type);
-			outputList.add(output);
 		}
 		// start initial stage of creating TED folders and copy data to tmp
 		// folders
@@ -458,12 +472,18 @@ public class RunJobPython extends HttpServlet {
 				executionThread.outputList = outputList;
 				executionThread.jobID = jobID;
 				executionThread.modelID = model.getId();
+				executionThread.loginID = loginID;
 				executionThread.start();
 			} else {
-				String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+
+				// String outputFolderURLPath =
+				// "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+				String outputFolderURLPath = ServerConfigUtil
+						.getConfigValue(ServerConfigs.outputFolderURLPath);
 				PythonAnalysisWrapperUtil awU = new PythonAnalysisWrapperUtil();
 				asresult = awU.pythonRun(service.getModelId(), jobID,
-						outputFolderURLPath, inputList, outputList);
+						outputFolderURLPath, inputList, outputList,
+						service.getUserId());
 			}
 			// List<AnalysisModelEntry> totalEntryList = new ArrayList<>();
 			// totalEntryList.addAll(inputEntryList);
@@ -496,11 +516,15 @@ public class RunJobPython extends HttpServlet {
 	public class ExecutionEngineThread extends Thread {
 		String jobID = null;
 		String modelID = null;
+		String loginID = null;
 		public boolean OctaveExecutionSuccessful = false;
 		public boolean WholeJobFinishedSuccessful = true;
 		String outputLog = "";
 		String analysisDataMovementLog = "";
-		String outputFolderURLPath = "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
+		String outputFolderURLPath = ServerConfigUtil
+				.getConfigValue(ServerConfigs.outputFolderURLPath);
+		// String outputFolderURLPath =
+		// "http://api.wiki-health.org:55555/healthbook/as/getFile?path=";
 		// String outputFolderURLPath =
 		// "http://localhost:8080/healthbook/as/getFile?path=";
 		ArrayList<ASInput> inputList = new ArrayList<ASInput>();
@@ -511,7 +535,7 @@ public class RunJobPython extends HttpServlet {
 			System.out.println("Hello from a thread!");
 			PythonAnalysisWrapperUtil awU = new PythonAnalysisWrapperUtil();
 			awU.pythonRun(modelID, jobID, outputFolderURLPath, inputList,
-					outputList);
+					outputList, loginID);
 		}
 	}
 

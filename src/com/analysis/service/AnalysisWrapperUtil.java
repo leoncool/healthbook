@@ -257,7 +257,7 @@ public class AnalysisWrapperUtil {
 
 	public AnalysisResult octaveRun(String modelID, String jobID,
 			String outputFolderURLPath, ArrayList<ASInput> inputList,
-			ArrayList<ASOutput> outputList) {
+			ArrayList<ASOutput> outputList,String loginID) {
 
 		boolean OctaveExecutionSuccessful = false;
 		boolean WholeJobFinishedSuccessful = true;
@@ -388,7 +388,7 @@ public class AnalysisWrapperUtil {
 										+ input.getSource() + "</p>";
 							}
 							String datastreamID = datastream.getStreamId();
-							String loginID = datastream.getOwner();
+//							String loginID = datastream.getOwner();
 							// String datastreamID =
 							// "c1730c84-8644-4d10-bfdc-c858030e6be5";
 							// String objectKey = loginID + "/" + datastreamID +
