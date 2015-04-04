@@ -4,21 +4,22 @@ import health.database.DAO.DatastreamDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
 import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
-import health.database.models.DatastreamUnits;
 import health.database.models.as.AnalysisResult;
 import health.hbase.models.HBaseDataImport;
+import health.input.jsonmodels.JsonDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataValues;
 import health.input.util.DBtoJsonUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -248,7 +249,6 @@ public class AnalysisWrapperUtil {
 		FileUtils.writeStringToFile(outputFile, dataLineSum.toString());
 	}
 
-
 	// String outputFolderURLPath =
 	// "http://localhost:8080/healthbook/as/getFile?path=";
 	ArrayList<ASInput> inputList = new ArrayList<ASInput>();
@@ -257,7 +257,7 @@ public class AnalysisWrapperUtil {
 
 	public AnalysisResult octaveRun(String modelID, String jobID,
 			String outputFolderURLPath, ArrayList<ASInput> inputList,
-			ArrayList<ASOutput> outputList,String loginID) {
+			ArrayList<ASOutput> outputList, String loginID) {
 
 		boolean OctaveExecutionSuccessful = false;
 		boolean WholeJobFinishedSuccessful = true;
@@ -388,7 +388,7 @@ public class AnalysisWrapperUtil {
 										+ input.getSource() + "</p>";
 							}
 							String datastreamID = datastream.getStreamId();
-//							String loginID = datastream.getOwner();
+							// String loginID = datastream.getOwner();
 							// String datastreamID =
 							// "c1730c84-8644-4d10-bfdc-c858030e6be5";
 							// String objectKey = loginID + "/" + datastreamID +
@@ -563,8 +563,8 @@ public class AnalysisWrapperUtil {
 										+ "<p>Internal Error" + "</p>";
 							}
 						}
-					} else if (output.getType().equalsIgnoreCase(
-							AScontants.fileType)) {
+					} else if (output.getType().equals(AScontants.healthfile)
+							|| output.getType().equals(AScontants.cloudfile)) {
 						OctaveString fileOutput = (OctaveString) octave
 								.get(output.getName());
 
@@ -589,6 +589,127 @@ public class AnalysisWrapperUtil {
 							continue;
 						} else {
 							FileUtils.copyFile(outputFile, outputFileJob);
+
+							if (output.getType().equalsIgnoreCase(
+									AScontants.cloudfile)) {
+								// for cloud file type
+								String bucketName = ServerConfigUtil
+										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+								String objectPrefix = loginID + "/cs/";
+								try {
+									FileInputStream inStream = new FileInputStream(
+											outputFile);
+									System.out.println("output.getValue():"
+											+ output.getSource());
+									Hashtable<String, Object> paramters = new Hashtable<String, Object>();
+									paramters.put("Content-Type",
+											"application/octet-stream");
+									String newObjectName = objectPrefix
+											+ output.getSource();
+									Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
+											.PutObject("leoncool", bucketName,
+													newObjectName,
+													outputFile.length(),
+													inStream, 3, paramters,
+													null);
+									inStream.close();
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									analysisDataMovementLog = analysisDataMovementLog
+											+ ex;
+								}
+							}else{
+								//for healthfile data migration
+								String unitRequest=output.getUnitid();
+								String streamTitle=output.getSource();
+								String filename=output.getValue();
+								System.out.println("unitRequest:"+unitRequest+",streamTitle:"+streamTitle+",filename:"+filename);
+								String at=Long.toString(new Date().getTime());	
+								String previousFileName = null;
+								HBaseDatapointDAO importDao = null;
+								DatastreamDAO dsDao=new DatastreamDAO();
+								Datastream datastream=dsDao.getHealthDatastreamByTitle(streamTitle, loginID, true, false);
+								HBaseDataImport hbaseexport=null;
+								try {
+									importDao = new HBaseDatapointDAO();
+									
+									hbaseexport = importDao
+											.exportDatapointsForSingleUnit(datastream.getStreamId(),
+													Long.parseLong(at), Long.parseLong(at), null,
+													unitRequest, null,null);
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									analysisDataMovementLog=analysisDataMovementLog+ex.getMessage();
+									WholeJobFinishedSuccessful=false;
+								}
+								
+								if (hbaseexport!=null&&hbaseexport.getData_points()!=null&&hbaseexport.getData_points_single_list().size() > 0) {
+									previousFileName = hbaseexport.getData_points_single_list()
+											.get(0).getVal();// fetch previousFileName for remove
+																// old files
+								}
+								
+								String bucketName = ServerConfigUtil
+										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+								String objectPrefix=loginID + "/" + datastream.getStreamId()
+										+ "/" + at + "/" + unitRequest + "/" ;
+								
+								boolean fileUploaded = false;
+								
+								String fileName = output.getValue();
+								InputStream inputstream = new FileInputStream(outputFile);
+								Hashtable<String, Object> paramters = new Hashtable<String, Object>();
+									paramters.put("Content-Type",
+											"application/octet-stream");
+									
+									try {
+										String newObjectName = objectPrefix + filename;
+										Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
+												.PutObject("leoncool", bucketName,
+														newObjectName, (long) outputFile.length(),
+														inputstream, 3, paramters, null);
+									} catch (Exception ex) {
+										ex.printStackTrace();
+										WholeJobFinishedSuccessful=false;
+										inputstream.close();
+									}
+									fileUploaded = true;
+									inputstream.close();
+									if (fileUploaded == false) {
+										WholeJobFinishedSuccessful=false;
+										analysisDataMovementLog=analysisDataMovementLog+"<br>data migration error!<br>";
+									}else{
+										//add data point to data stream
+										DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+										HBaseDataImport importData = new HBaseDataImport();
+										List<JsonDataValues> jvalueList = new ArrayList<>();
+										List<JsonDataPoints> jdatapointsList = new ArrayList<>();
+										JsonDataImport jdataImport = new JsonDataImport();
+										JsonDataPoints jdataPoint = new JsonDataPoints();
+										JsonDataValues jvalue = new JsonDataValues();
+										System.out.println("fileName:" + fileName);
+										jvalue.setVal(fileName);
+										jvalue.setUnit_id(unitRequest);
+										jvalueList.add(jvalue);
+										jdataPoint.setAt(at);
+										jdataPoint.setValue_list(jvalueList);
+										jdatapointsList.add(jdataPoint);
+										jdataImport.setData_points(jdatapointsList);
+										importData.setDatastream(dbtoJUtil.convertDatastream(datastream,
+												null));
+										importData.setData_points(jdataImport.getData_points());
+										importData.setDatastream_id(datastream.getStreamId());
+										int totalStoredByte = importDao
+												.importDatapointsDatapoints(importData); // submit data
+									}
+									if (previousFileName != null
+											&& !previousFileName.equalsIgnoreCase(fileName)) {
+										String oldObjectName = objectPrefix + previousFileName;
+										S3Engine.s3.DeleteObject(bucketName, "leoncool", oldObjectName,
+												null);
+									}
+							}
+
 						}
 						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
 						imageMimeTypes

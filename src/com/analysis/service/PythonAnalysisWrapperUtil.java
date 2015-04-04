@@ -7,6 +7,7 @@ import health.database.models.Datastream;
 import health.database.models.DatastreamUnits;
 import health.database.models.as.AnalysisResult;
 import health.hbase.models.HBaseDataImport;
+import health.input.jsonmodels.JsonDataImport;
 import health.input.jsonmodels.JsonDataPoints;
 import health.input.jsonmodels.JsonDataValues;
 import health.input.util.DBtoJsonUtil;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import javax.activation.MimetypesFileTypeMap;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import server.exception.ErrorCodeException;
 import util.AScontants;
@@ -45,8 +47,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.zhumulangma.cloudstorage.server.entity.CloudFile;
 
-import dk.ange.octave.OctaveEngine;
-import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
 import dk.ange.octave.type.OctaveDouble;
 import dk.ange.octave.type.OctaveInt;
@@ -304,7 +304,7 @@ public class PythonAnalysisWrapperUtil {
 
 	public AnalysisResult pythonRun(String modelID, String jobID,
 			String outputFolderURLPath, ArrayList<ASInput> inputList,
-			ArrayList<ASOutput> outputList,String loginID) {
+			ArrayList<ASOutput> outputList, String loginID) {
 
 		boolean OctaveExecutionSuccessful = false;
 		boolean WholeJobFinishedSuccessful = true;
@@ -327,7 +327,7 @@ public class PythonAnalysisWrapperUtil {
 			UUID uuid = UUID.randomUUID();
 			// tmpfolderPath = tmpFolder + uuid.toString() + "/";
 			tmpfolderPath = tmpFolder + jobID + "/";
-			System.out.println("tmpfolderPath:"+tmpfolderPath);
+			System.out.println("tmpfolderPath:" + tmpfolderPath);
 			modelRepository = modelRepository + modelID;
 			if (new File(tmpfolderPath).exists()) {
 				new File(tmpfolderPath).delete();
@@ -342,7 +342,7 @@ public class PythonAnalysisWrapperUtil {
 			String jobFolder = ServerConfigUtil
 					.getConfigValue(ServerConfigs.jobDir);
 			jobfolderPath = jobFolder + jobID + "/";
-			System.out.println("jobfolderPath:"+jobfolderPath);
+			System.out.println("jobfolderPath:" + jobfolderPath);
 		}
 
 		outputFolderURLPath = outputFolderURLPath + "/" + jobID + "/";
@@ -360,9 +360,9 @@ public class PythonAnalysisWrapperUtil {
 		try {
 			PythonAnalysisWrapperUtil awU = new PythonAnalysisWrapperUtil();
 			StringWriter stdout = new StringWriter();
-//			 OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
-//			 octaveFactory.setWorkingDir(folder);
-//			 OctaveEngine octave = octaveFactory.getScriptEngine();
+			// OctaveEngineFactory octaveFactory = new OctaveEngineFactory();
+			// octaveFactory.setWorkingDir(folder);
+			// OctaveEngine octave = octaveFactory.getScriptEngine();
 			try {
 				// octave.setWriter(stdout);
 				// octave.eval("addpath(\"signal_package\")");
@@ -408,7 +408,8 @@ public class PythonAnalysisWrapperUtil {
 						settings.put(
 								AllConstants.ProgramConts.exportSetting_MAX,
 								maxDataPoints);
-						System.out.println("exportDatapoints:start and end:"+start+","+end);
+						System.out.println("exportDatapoints:start and end:"
+								+ start + "," + end);
 						HBaseDataImport hbaseexport = diDao.exportDatapoints(
 								datastream.getStreamId(), start, end, null,
 								dbtoJUtil.ToDatastreamUnitsMap(datastream),
@@ -438,7 +439,7 @@ public class PythonAnalysisWrapperUtil {
 										+ input.getSource() + "</p>";
 							}
 							String datastreamID = datastream.getStreamId();
-//							String loginID = datastream.getOwner();
+							// String loginID = datastream.getOwner();
 							// String datastreamID =
 							// "c1730c84-8644-4d10-bfdc-c858030e6be5";
 							// String objectKey = loginID + "/" + datastreamID +
@@ -524,7 +525,8 @@ public class PythonAnalysisWrapperUtil {
 
 				// hard code
 				Process p = null;
-				ProcessBuilder pb = new ProcessBuilder("/usr/local/anaconda/bin/python","run.py");
+				ProcessBuilder pb = new ProcessBuilder(
+						"/usr/local/anaconda/bin/python", "run.py");
 				pb.directory(new File(tmpfolderPath));
 				pb.redirectErrorStream(true);
 				p = pb.start();
@@ -538,21 +540,20 @@ public class PythonAnalysisWrapperUtil {
 						previous = line;
 						out.append(line).append('\n');
 						System.out.println(line);
-						outputLog=outputLog+line;
+						outputLog = outputLog + line;
 					}
 
 				// Check result
 				if (p.waitFor() == 0) {
 					System.out.println("Success!");
-					
-				}else{
-					OctaveExecutionSuccessful = false;
-					// Abnormal termination: Log command parameters and output and
-					// throw ExecutionException
-					outputLog=outputLog+out.toString();
-				}
 
-				
+				} else {
+					OctaveExecutionSuccessful = false;
+					// Abnormal termination: Log command parameters and output
+					// and
+					// throw ExecutionException
+					outputLog = outputLog + out.toString();
+				}
 
 				analysisDataMovementLog = analysisDataMovementLog
 						+ "<p>Procedure 4:" + new Date() + "</p>";
@@ -577,7 +578,7 @@ public class PythonAnalysisWrapperUtil {
 							AScontants.sensordataType)
 							&& !output.getDataAction().equalsIgnoreCase(
 									AScontants.dataaction_ignore)) {
-						OctaveCell octaveResult =null;
+						OctaveCell octaveResult = null;
 						long time1 = new Date().getTime();
 						List<JsonDataPoints> datapointsList = awU
 								.unwrapOctaveSensorData(octaveResult);
@@ -647,7 +648,8 @@ public class PythonAnalysisWrapperUtil {
 						}
 					} else if (output.getType().equals(AScontants.healthfile)
 							|| output.getType().equals(AScontants.cloudfile)) {
-						OctaveString fileOutput = new OctaveString("fig/test_estimated_speed.png");
+						OctaveString fileOutput = new OctaveString(
+								"fig/test_estimated_speed.png");
 						File outputFile = new File(tmpfolderPath
 								+ fileOutput.getString());
 						File outputFileJob = new File(jobfolderPath
@@ -669,42 +671,137 @@ public class PythonAnalysisWrapperUtil {
 							continue;
 						} else {
 							FileUtils.copyFile(outputFile, outputFileJob);
-//							String loginID = datastream.getOwner();
-							if(output.getType().equalsIgnoreCase(AScontants.cloudfile))
-									{
-								//for cloud file type
+							// String loginID = datastream.getOwner();
+							if (output.getType().equalsIgnoreCase(
+									AScontants.cloudfile)) {
+								// for cloud file type
 								String bucketName = ServerConfigUtil
 										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
 								String objectPrefix = loginID + "/cs/";
 								try {
-									FileInputStream inStream=new FileInputStream(outputFile);
-									System.out.println("output.getValue():"+output.getSource());
+									FileInputStream inStream = new FileInputStream(
+											outputFile);
+									System.out.println("output.getValue():"
+											+ output.getSource());
 									Hashtable<String, Object> paramters = new Hashtable<String, Object>();
-										paramters.put("Content-Type",
-												"application/octet-stream");
-									String newObjectName = objectPrefix + output.getSource();
+									paramters.put("Content-Type",
+											"application/octet-stream");
+									String newObjectName = objectPrefix
+											+ output.getSource();
 									Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
 											.PutObject("leoncool", bucketName,
-													newObjectName, outputFile.length(),
-													inStream, 3, paramters, null);
+													newObjectName,
+													outputFile.length(),
+													inStream, 3, paramters,
+													null);
 									inStream.close();
 								} catch (Exception ex) {
 									ex.printStackTrace();
-									analysisDataMovementLog=analysisDataMovementLog+ex;
+									analysisDataMovementLog = analysisDataMovementLog
+											+ ex;
 								}
+							}else{
+								//for healthfile data migration
+								String unitRequest=output.getUnitid();
+								String streamTitle=output.getSource();
+								String filename=output.getValue();
+								System.out.println("unitRequest:"+unitRequest+",streamTitle:"+streamTitle+",filename:"+filename);
+								String at=Long.toString(new Date().getTime());	
+								String previousFileName = null;
+								HBaseDatapointDAO importDao = null;
+								DatastreamDAO dsDao=new DatastreamDAO();
+								Datastream datastream=dsDao.getHealthDatastreamByTitle(streamTitle, loginID, true, false);
+								HBaseDataImport hbaseexport=null;
+								try {
+									importDao = new HBaseDatapointDAO();
+									
+									hbaseexport = importDao
+											.exportDatapointsForSingleUnit(datastream.getStreamId(),
+													Long.parseLong(at), Long.parseLong(at), null,
+													unitRequest, null,null);
+								} catch (Exception ex) {
+									ex.printStackTrace();
+									analysisDataMovementLog=analysisDataMovementLog+ex.getMessage();
+									WholeJobFinishedSuccessful=false;
+								}
+								
+								if (hbaseexport!=null&&hbaseexport.getData_points()!=null&&hbaseexport.getData_points_single_list().size() > 0) {
+									previousFileName = hbaseexport.getData_points_single_list()
+											.get(0).getVal();// fetch previousFileName for remove
+																// old files
+								}
+								
+								String bucketName = ServerConfigUtil
+										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+								String objectPrefix=loginID + "/" + datastream.getStreamId()
+										+ "/" + at + "/" + unitRequest + "/" ;
+								
+								boolean fileUploaded = false;
+								
+								String fileName = output.getValue();
+								InputStream inputstream = new FileInputStream(outputFile);
+								Hashtable<String, Object> paramters = new Hashtable<String, Object>();
+									paramters.put("Content-Type",
+											"application/octet-stream");
+									
+									try {
+										String newObjectName = objectPrefix + filename;
+										Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3
+												.PutObject("leoncool", bucketName,
+														newObjectName, (long) outputFile.length(),
+														inputstream, 3, paramters, null);
+									} catch (Exception ex) {
+										ex.printStackTrace();
+										WholeJobFinishedSuccessful=false;
+										inputstream.close();
 									}
-							
-						
-						MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
-						imageMimeTypes
-								.addMimeTypes("image png tif jpg jpeg bmp");
+									fileUploaded = true;
+									inputstream.close();
+									if (fileUploaded == false) {
+										WholeJobFinishedSuccessful=false;
+										analysisDataMovementLog=analysisDataMovementLog+"<br>data migration error!<br>";
+									}else{
+										//add data point to data stream
+										DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
+										HBaseDataImport importData = new HBaseDataImport();
+										List<JsonDataValues> jvalueList = new ArrayList<>();
+										List<JsonDataPoints> jdatapointsList = new ArrayList<>();
+										JsonDataImport jdataImport = new JsonDataImport();
+										JsonDataPoints jdataPoint = new JsonDataPoints();
+										JsonDataValues jvalue = new JsonDataValues();
+										System.out.println("fileName:" + fileName);
+										jvalue.setVal(fileName);
+										jvalue.setUnit_id(unitRequest);
+										jvalueList.add(jvalue);
+										jdataPoint.setAt(at);
+										jdataPoint.setValue_list(jvalueList);
+										jdatapointsList.add(jdataPoint);
+										jdataImport.setData_points(jdatapointsList);
+										importData.setDatastream(dbtoJUtil.convertDatastream(datastream,
+												null));
+										importData.setData_points(jdataImport.getData_points());
+										importData.setDatastream_id(datastream.getStreamId());
+										int totalStoredByte = importDao
+												.importDatapointsDatapoints(importData); // submit data
+									}
+									if (previousFileName != null
+											&& !previousFileName.equalsIgnoreCase(fileName)) {
+										String oldObjectName = objectPrefix + previousFileName;
+										S3Engine.s3.DeleteObject(bucketName, "leoncool", oldObjectName,
+												null);
+									}
+							}
 
-						String mimetype = imageMimeTypes
-								.getContentType(fileOutput.getString());
-						String fileDownloadPath = outputFolderURLPath
-								+ fileOutput.getString();
-						output.setValue(fileDownloadPath);
-						outputList.set(i, output);
+							MimetypesFileTypeMap imageMimeTypes = new MimetypesFileTypeMap();
+							imageMimeTypes
+									.addMimeTypes("image png tif jpg jpeg bmp");
+
+							String mimetype = imageMimeTypes
+									.getContentType(fileOutput.getString());
+							String fileDownloadPath = outputFolderURLPath
+									+ fileOutput.getString();
+							output.setValue(fileDownloadPath);
+							outputList.set(i, output);
 						}
 					} else {
 						System.out.println("other type not supported yet");
@@ -716,7 +813,7 @@ public class PythonAnalysisWrapperUtil {
 					+ "<p>Procedure 5:" + new Date() + "</p>";
 			System.out.println("<p>Procedure 5:" + new Date() + "</p>");
 			try {
-//				octave.close();
+				// octave.close();
 				outputLog = outputLog + stdout.toString();
 				outputLog = outputLog.replace("\n", "<br>");
 			} catch (Exception ex) {

@@ -7,6 +7,7 @@ public class ASOutput {
 	private String source;
 	private String value;
 	private String dataAction;
+	private String unitid;
 	public String getName() {
 		return name;
 	}
@@ -28,10 +29,10 @@ public class ASOutput {
 	public String getSource() {
 		return source;
 	}
-	public void setSource(String source) {
+	public void setSource(String source) { //datastream title for healthfile, filename for cloud storage
 		this.source = source;
 	}
-	public String getValue() {
+	public String getValue() {//filename for healthfile
 		return value;
 	}
 	public void setValue(String value) {
@@ -42,6 +43,12 @@ public class ASOutput {
 	}
 	public void setDataAction(String dataAction) {
 		this.dataAction = dataAction;
+	}
+	public String getUnitid() {
+		return unitid;
+	}
+	public void setUnitid(String unitid) {
+		this.unitid = unitid;
 	}
 	
 	

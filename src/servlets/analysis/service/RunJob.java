@@ -2,37 +2,27 @@ package servlets.analysis.service;
 
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
-import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamUnits;
 import health.database.models.as.AnalysisModel;
 import health.database.models.as.AnalysisModelEntry;
 import health.database.models.as.AnalysisResult;
 import health.database.models.as.AnalysisService;
-import health.hbase.models.HBaseDataImport;
-import health.input.jsonmodels.JsonDataPoints;
-import health.input.util.DBtoJsonUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
-
-import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import servlets.util.ServerUtil;
 import util.AScontants;
@@ -43,15 +33,8 @@ import util.ServerConfigUtil;
 import com.analysis.service.ASInput;
 import com.analysis.service.ASOutput;
 import com.analysis.service.AnalysisWrapperUtil;
-import com.analysis.service.JsonAnalysisResultWapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-
-import dk.ange.octave.OctaveEngine;
-import dk.ange.octave.OctaveEngineFactory;
-import dk.ange.octave.type.OctaveCell;
-import dk.ange.octave.type.OctaveString;
 
 /**
  * Servlet implementation class PostAnalysisService1
@@ -223,6 +206,13 @@ public class RunJob extends HttpServlet {
 							} else {
 								input.setMaxDataPoints(max);
 								System.out.println("--Setting Max Data Points:"+max);
+							}
+							if(start<0)
+							{
+								start=0;
+							}if(end<0)
+							{
+								end=Long.MAX_VALUE;
 							}
 							input.setStart(start);
 							input.setEnd(end);
@@ -426,8 +416,58 @@ public class RunJob extends HttpServlet {
 			} else if (!dataAction
 					.equalsIgnoreCase(AScontants.dataaction_ignore)
 					&& type.equals(AScontants.fileType)) {
-				if (source != null) {
-					output.setSource(source);
+				String sub_fileType = request.getParameter("output"
+						+ Integer.toString(i + 1) + "_type");
+				String fileName = request.getParameter("output"
+						+ Integer.toString(i + 1) + "_filename");
+				System.out.println("fileName:"+fileName);
+			
+				if (sub_fileType.equalsIgnoreCase(AScontants.healthfile)) {
+					output.setType(AScontants.healthfile);
+					
+					String unitRequest = request.getParameter("output"
+							+ Integer.toString(i + 1) + "_unit");
+					String streamTitle = request.getParameter("output"
+							+ Integer.toString(i + 1) + "_source");
+				
+					Datastream datastream=dsDao.getHealthDatastreamByTitle(streamTitle, loginID, true, false);
+					if (datastream == null) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
+								streamTitle);
+						return;
+					}
+					if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.Unauthorized_Access, null,
+								streamTitle);
+						return;
+					}
+					List<DatastreamUnits> unitsList = datastream
+							.getDatastreamUnitsList();
+					DatastreamUnits targetUnit = null;
+					for (DatastreamUnits unit : unitsList) {
+						if (unit.getUnitID().equalsIgnoreCase(unitRequest)
+								|| unit.getShortUnitID().equalsIgnoreCase(unitRequest)) {
+							targetUnit = unit;
+						}
+					}
+					if (targetUnit == null) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.MISSING_DATA, null,
+								AllConstants.api_entryPoints.request_api_unit_id);
+						return;
+					}
+									
+					output.setSource(streamTitle);
+					output.setValue(fileName);
+					output.setUnitid(unitRequest);
+					
+					
+
+				} else if (sub_fileType.equalsIgnoreCase(AScontants.cloudfile)) {
+					output.setType(AScontants.cloudfile);
+					output.setSource(fileName);
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
@@ -438,16 +478,9 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
-			}else{
-//				System.out.println("-----Unkown Type Name:"+type);
-//				ReturnParser
-//				.outputErrorException(response,
-//						AllConstants.ErrorDictionary.Invalid_data_format,
-//						null, "unknown data type");
-//		return;
+
+				outputList.add(output);
 			}
-			output.setType(type);
-			outputList.add(output);
 		}
 		// start initial stage of creating TED folders and copy data to tmp
 		// folders

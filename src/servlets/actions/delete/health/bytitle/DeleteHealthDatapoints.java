@@ -12,13 +12,20 @@ import health.database.models.Users;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.acl.Owner;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import server.conf.Constants;
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
 import servlets.util.HealthDatastreamFilter;
@@ -27,9 +34,12 @@ import servlets.util.PermissionFilter;
 import util.AllConstants;
 import util.AllConstants.api_entryPoints;
 import util.DateUtil;
+import util.ServerConfigUtil;
+import cloudstorage.cacss.S3Engine;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.zhumulangma.cloudstorage.server.entity.CloudFile;
 
 /**
  * 
@@ -169,6 +179,19 @@ public class DeleteHealthDatapoints extends HttpServlet {
 					DeleteThread delete=new DeleteThread(datastream, at,loginID);
 					delete.start();
 					totalDeleted=1;
+					String bucketName = ServerConfigUtil
+							.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
+					String objectPrefix=loginID + "/" + datastream.getStreamId()
+							+ "/" + at + "/";
+					   Hashtable<String, Object> returnValues = (Hashtable<String, Object>) S3Engine.s3.GetBucket(bucketName, "leoncool", null, null, 100, objectPrefix);
+			            if (returnValues == null || returnValues.get("owner") == null || returnValues.get("data") == null) {
+			               
+			            }else{
+			            	List<CloudFile> list = (List<CloudFile>) returnValues.get("data");
+				            for (CloudFile file : list) {
+				            	System.out.println("file.get(CloudFile.NAME):"+(String) file.get(CloudFile.NAME));
+				            }
+			            }
 	
 				} catch (Exception ex) {
 					ex.printStackTrace();

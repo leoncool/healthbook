@@ -2,11 +2,14 @@ package servlets.analysis.service;
 
 import health.database.DAO.DatastreamDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
+import health.database.DAO.nosql.HBaseDatapointDAO;
 import health.database.models.Datastream;
+import health.database.models.DatastreamUnits;
 import health.database.models.as.AnalysisModel;
 import health.database.models.as.AnalysisModelEntry;
 import health.database.models.as.AnalysisResult;
 import health.database.models.as.AnalysisService;
+import health.hbase.models.HBaseDataImport;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -213,6 +216,13 @@ public class RunJobPython extends HttpServlet {
 								input.setMaxDataPoints(max);
 								System.out.println("--Setting Max Data Points:"
 										+ max);
+							}
+							if(start<0)
+							{
+								start=0;
+							}if(end<0)
+							{
+								end=Long.MAX_VALUE;
 							}
 							input.setStart(start);
 							input.setEnd(end);
@@ -424,12 +434,53 @@ public class RunJobPython extends HttpServlet {
 				String fileName = request.getParameter("output"
 						+ Integer.toString(i + 1) + "_filename");
 				System.out.println("fileName:"+fileName);
-				output.setSource(fileName);
+			
 				if (sub_fileType.equalsIgnoreCase(AScontants.healthfile)) {
 					output.setType(AScontants.healthfile);
+					
+					String unitRequest = request.getParameter("output"
+							+ Integer.toString(i + 1) + "_unit");
+					String streamTitle = request.getParameter("output"
+							+ Integer.toString(i + 1) + "_source");
+				
+					Datastream datastream=dsDao.getHealthDatastreamByTitle(streamTitle, loginID, true, false);
+					if (datastream == null) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.Unknown_StreamTitle, null,
+								streamTitle);
+						return;
+					}
+					if (!datastream.getOwner().equalsIgnoreCase(loginID)) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.Unauthorized_Access, null,
+								streamTitle);
+						return;
+					}
+					List<DatastreamUnits> unitsList = datastream
+							.getDatastreamUnitsList();
+					DatastreamUnits targetUnit = null;
+					for (DatastreamUnits unit : unitsList) {
+						if (unit.getUnitID().equalsIgnoreCase(unitRequest)
+								|| unit.getShortUnitID().equalsIgnoreCase(unitRequest)) {
+							targetUnit = unit;
+						}
+					}
+					if (targetUnit == null) {
+						ReturnParser.outputErrorException(response,
+								AllConstants.ErrorDictionary.MISSING_DATA, null,
+								AllConstants.api_entryPoints.request_api_unit_id);
+						return;
+					}
+									
+					output.setSource(streamTitle);
+					output.setValue(fileName);
+					output.setUnitid(unitRequest);
+					
+					
 
 				} else if (sub_fileType.equalsIgnoreCase(AScontants.cloudfile)) {
 					output.setType(AScontants.cloudfile);
+					output.setSource(fileName);
 				} else {
 					System.out
 							.println("Return Error Message to User. GetLineNumber:"
