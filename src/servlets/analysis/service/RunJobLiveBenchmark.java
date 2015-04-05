@@ -32,7 +32,7 @@ import org.apache.commons.io.FileUtils;
 
 import server.exception.ErrorCodeException;
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 import util.AllConstants.ServerConfigs;
 import util.ServerConfigUtil;
@@ -89,25 +89,25 @@ public class RunJobLiveBenchmark extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 
 		Gson gson = new Gson();
 		AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 		DatastreamDAO dsDao = new DatastreamDAO();
 		String loginID = "testtest3";
 		String serviceID_String = request
-				.getParameter(AScontants.RequestParameters.Service_ID);
+				.getParameter(MarketplaceContants.RequestParameters.Service_ID);
 		int serviceID = 0;
 		if (serviceID_String == null || serviceID_String.length() < 1) {
 			System.out.println("Return Error Message to User. GetLineNumber:"
 					+ getLineNumber());
 			ReturnParser.outputErrorException(response,
 					AllConstants.ErrorDictionary.MISSING_DATA, null,
-					AScontants.RequestParameters.Service_ID);
+					MarketplaceContants.RequestParameters.Service_ID);
 			return;
 		} else {
 			try {
@@ -116,7 +116,7 @@ public class RunJobLiveBenchmark extends HttpServlet {
 				ex.printStackTrace();
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.Invalid_data_format, null,
-						AScontants.RequestParameters.Service_ID);
+						MarketplaceContants.RequestParameters.Service_ID);
 				return;
 			}
 		}
@@ -128,15 +128,15 @@ public class RunJobLiveBenchmark extends HttpServlet {
 					+ getLineNumber());
 			ReturnParser.outputErrorException(response,
 					AllConstants.ErrorDictionary.service_id_cannot_found, null,
-					AScontants.RequestParameters.Service_ID);
+					MarketplaceContants.RequestParameters.Service_ID);
 			return;
 		}
 		model = asDao.getModelByID(service.getModelId());
 
 		List<AnalysisModelEntry> inputEntryList = asDao
-				.getModelEntriesByModelID(model.getId(), AScontants.as_input);
+				.getModelEntriesByModelID(model.getId(), MarketplaceContants.as_input);
 		List<AnalysisModelEntry> outputEntryList = asDao
-				.getModelEntriesByModelID(model.getId(), AScontants.as_output);
+				.getModelEntriesByModelID(model.getId(), MarketplaceContants.as_output);
 		ArrayList<ASInput> inputList = new ArrayList<ASInput>();
 
 		ArrayList<ASOutput> outputList = new ArrayList<ASOutput>();
@@ -180,8 +180,8 @@ public class RunJobLiveBenchmark extends HttpServlet {
 			String type = outputEntryList.get(i).getDataType();
 			String source = request.getParameter("output"
 					+ Integer.toString(i + 1) + "_source");
-			if (!dataAction.equalsIgnoreCase(AScontants.dataaction_ignore)
-					&& type.equals(AScontants.sensordataType)) {
+			if (!dataAction.equalsIgnoreCase(MarketplaceContants.dataaction_ignore)
+					&& type.equals(MarketplaceContants.sensordataType)) {
 				if (source != null) {
 					output.setSource(source);
 				} else {
@@ -218,7 +218,7 @@ public class RunJobLiveBenchmark extends HttpServlet {
 			String jobID = uuid.toString();
 			result.setJobId(jobID);
 			result.setJobStartTime(new Date());
-			result.setJobStatus(AScontants.ModelJobStatus.running);
+			result.setJobStatus(MarketplaceContants.ModelJobStatus.running);
 			result.setModelId(service.getModelId());
 			result.setUserId(service.getUserId());
 			result.setService_id(serviceID);
@@ -351,9 +351,9 @@ public class RunJobLiveBenchmark extends HttpServlet {
 					for (int i = 0; i < outputList.size(); i++) {
 						ASOutput output = outputList.get(i);
 						if (output.getType().equalsIgnoreCase(
-								AScontants.sensordataType)
+								MarketplaceContants.sensordataType)
 								&& !output.getDataAction().equalsIgnoreCase(
-										AScontants.dataaction_ignore)) {
+										MarketplaceContants.dataaction_ignore)) {
 							OctaveCell octaveResult = (OctaveCell) octave
 									.get(output.getName());
 							List<JsonDataPoints> datapointsList = awU
@@ -408,7 +408,7 @@ public class RunJobLiveBenchmark extends HttpServlet {
 								}
 							}
 						} else if (output.getType().equalsIgnoreCase(
-								AScontants.fileType)) {
+								MarketplaceContants.fileType)) {
 							OctaveString fileOutput = (OctaveString) octave
 									.get(output.getName());
 
@@ -462,17 +462,17 @@ public class RunJobLiveBenchmark extends HttpServlet {
 
 				if (OctaveExecutionSuccessful) {
 					System.out.println("Model Execution Successful!");
-					result.setModel_status(AScontants.ModelJobStatus.finished_succesfully);
+					result.setModel_status(MarketplaceContants.ModelJobStatus.finished_succesfully);
 				} else {
 					System.out.println("Model Execution Failed!");
-					result.setModel_status(AScontants.ModelJobStatus.finished_with_error);
+					result.setModel_status(MarketplaceContants.ModelJobStatus.finished_with_error);
 				}
 				if (WholeJobFinishedSuccessful) {
 					System.out.println("Job Execution Successful!");
-					result.setJobStatus(AScontants.ModelJobStatus.finished_succesfully);
+					result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_succesfully);
 				} else {
 					System.out.println("Job Execution Failed!");
-					result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+					result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 				}
 				if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
 					Gson gson = new GsonBuilder().disableHtmlEscaping()
@@ -499,7 +499,7 @@ public class RunJobLiveBenchmark extends HttpServlet {
 				ex.printStackTrace();
 				result.setJobEndTime(new Date());
 				result.setJobLog(analysisDataMovementLog);
-				result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+				result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 				asDao.updateJobResult(result);
 			}
 		}

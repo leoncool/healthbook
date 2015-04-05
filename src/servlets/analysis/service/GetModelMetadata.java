@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 import com.google.gson.Gson;
@@ -49,19 +49,19 @@ public class GetModelMetadata extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			Gson gson = new Gson();
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String modelName = request
-					.getParameter(AScontants.RequestParameters.ModelName);
+					.getParameter(MarketplaceContants.RequestParameters.ModelName);
 			String modelID = request
-					.getParameter(AScontants.RequestParameters.Model_ID);
+					.getParameter(MarketplaceContants.RequestParameters.Model_ID);
 			AnalysisModel model = null;
 			if (modelName != null && modelName.length() > 1) {
 				List<AnalysisModel> modelList = asDao
@@ -97,8 +97,8 @@ public class GetModelMetadata extends HttpServlet {
 						modelName);
 				return;
 			}
-			List<AnalysisModelEntry> inputsList=asDao.getModelEntriesByModelID(model.getId(),AScontants.as_input);
-			List<AnalysisModelEntry> outputsList=asDao.getModelEntriesByModelID(model.getId(),AScontants.as_output);
+			List<AnalysisModelEntry> inputsList=asDao.getModelEntriesByModelID(model.getId(),MarketplaceContants.as_input);
+			List<AnalysisModelEntry> outputsList=asDao.getModelEntriesByModelID(model.getId(),MarketplaceContants.as_output);
 			
 			JsonElement jmodel = gson.toJsonTree(model);
 			JsonElement jinputsList = gson.toJsonTree(inputsList);

@@ -37,7 +37,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 import util.ServerConfigUtil;
 import util.AllConstants.ServerConfigs;
@@ -159,11 +159,11 @@ public class PostAnalysisService1 extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 
 		String modelRepository = "F:/model_repository/";
 		String tmpFolder = "F:/model_repository/temp/";
@@ -202,7 +202,7 @@ public class PostAnalysisService1 extends HttpServlet {
 					model.setPublisher("publisher");
 					model.setId(uuid.toString());
 					model.setCreatedTime(new Date());
-					model.setStatus(AScontants.status_draft);
+					model.setStatus(MarketplaceContants.status_draft);
 					DiskFileItemFactory factory = new DiskFileItemFactory();
 					factory.setSizeThreshold(THRESHOLD_SIZE);
 					boolean modelZipFileUploaded = false;
@@ -224,13 +224,13 @@ public class PostAnalysisService1 extends HttpServlet {
 									+ fieldvalue);
 
 							if (fieldname
-									.equals(AScontants.RequestParameters.ModelName)) {
+									.equals(MarketplaceContants.RequestParameters.ModelName)) {
 								model.setName(fieldvalue);
 							} else if (fieldname
-									.equals(AScontants.RequestParameters.ModelPriceModel)) {
+									.equals(MarketplaceContants.RequestParameters.ModelPriceModel)) {
 								model.setPricingModel(fieldvalue);
 							} else if (fieldname
-									.equals(AScontants.RequestParameters.ModelPrice)) {
+									.equals(MarketplaceContants.RequestParameters.ModelPrice)) {
 
 								try {
 									if (fieldvalue.length() > 0) {
@@ -243,14 +243,14 @@ public class PostAnalysisService1 extends HttpServlet {
 													response,
 													AllConstants.ErrorDictionary.model_metadata_format_error,
 													null,
-													AScontants.RequestParameters.ModelPrice);
+													MarketplaceContants.RequestParameters.ModelPrice);
 									return;
 								}
 							} else if (fieldname
-									.equals(AScontants.RequestParameters.ModelTerms)) {
+									.equals(MarketplaceContants.RequestParameters.ModelTerms)) {
 								model.setTerms(fieldvalue);
 							} else if (fieldname
-									.equals(AScontants.RequestParameters.ModelDescription)) {
+									.equals(MarketplaceContants.RequestParameters.ModelDescription)) {
 								model.setDesp(fieldvalue);
 							}
 
@@ -262,7 +262,7 @@ public class PostAnalysisService1 extends HttpServlet {
 							System.out.println("**FileUpload--fieldname:"
 									+ fieldname + ", filename:" + filename);
 							if (fieldname
-									.equals(util.AScontants.RequestParameters.ModelZipFile)) {
+									.equals(util.MarketplaceContants.RequestParameters.ModelZipFile)) {
 
 								File newModelFolder = new File(modelRepository
 										+ uuid);
@@ -316,7 +316,7 @@ public class PostAnalysisService1 extends HttpServlet {
 										for (String variable : inputs) {
 											AnalysisModelEntry entry = new AnalysisModelEntry();
 											entry.setModel_id(uuid.toString());
-											entry.setEntryType(AScontants.as_input);
+											entry.setEntryType(MarketplaceContants.as_input);
 											entry.setOrder(inputOrder);
 											entryList.add(entry);
 											inputEntryList.add(entry);
@@ -325,7 +325,7 @@ public class PostAnalysisService1 extends HttpServlet {
 										for (String variable : outputs) {
 											AnalysisModelEntry entry = new AnalysisModelEntry();
 											entry.setModel_id(uuid.toString());
-											entry.setEntryType(AScontants.as_output);
+											entry.setEntryType(MarketplaceContants.as_output);
 											entry.setOrder(outputOrder);
 											entryList.add(entry);
 											outputEntryList.add(entry);
@@ -355,7 +355,7 @@ public class PostAnalysisService1 extends HttpServlet {
 								}
 
 							} else if (filename
-									.equals(util.AScontants.RequestParameters.ModelThumbnail)) {
+									.equals(util.MarketplaceContants.RequestParameters.ModelThumbnail)) {
 
 							}
 

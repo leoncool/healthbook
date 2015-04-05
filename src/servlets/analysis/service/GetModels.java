@@ -22,7 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 /**
@@ -60,24 +60,24 @@ public class GetModels extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			Gson gson = new Gson();
 
 			String searchName = request
-					.getParameter(AScontants.RequestParameters.ModelName);
+					.getParameter(MarketplaceContants.RequestParameters.ModelName);
 			if(searchName!=null&&searchName.length()<1)
 			{
 				searchName=null;
 			}
 			String statusType=request
-					.getParameter(AScontants.RequestParameters.ModelStatus);
+					.getParameter(MarketplaceContants.RequestParameters.ModelStatus);
 			if(statusType==null)
 			{
 				statusType="live";

@@ -423,6 +423,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						} else {
 							System.out
 									.println("--------normal data export with request_api_dataformat-----");
+							System.out.println("------Debug-line426--Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end);
 							hbaseexport = diDao.exportDatapoints(
 									datastream.getStreamId(), start, end,
 									blockid, mapUnits, dateUtil.millisecFormat,
@@ -453,6 +454,7 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 						if (streamTitle
 								.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)) {
 							DataPointsSimulators simulator = new DataPointsSimulators();
+							System.out.println("------Debug--Simulator Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end);
 							hbaseexport = simulator.exportHeartRateDatapoints(
 									datastream.getStreamId(), start, end,
 									blockid, mapUnits, null, settings);
@@ -490,6 +492,8 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 							} else {
 								System.out
 										.println("--------normal data export-----");
+								System.out.println("------Debug--Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end);
+								
 								hbaseexport = diDao.exportDatapoints(
 										datastream.getStreamId(), start, end,
 										blockid, mapUnits, null, settings);

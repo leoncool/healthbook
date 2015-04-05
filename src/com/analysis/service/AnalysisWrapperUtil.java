@@ -32,7 +32,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.io.FileUtils;
 
 import server.exception.ErrorCodeException;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 import util.AllConstants.ServerConfigs;
 import util.ServerConfigUtil;
@@ -149,7 +149,7 @@ public class AnalysisWrapperUtil {
 					.getString();
 			// System.out.println(timeTag);
 			point.setAt(at);
-			if (!timeTag.equalsIgnoreCase(AScontants.nullEntry)
+			if (!timeTag.equalsIgnoreCase(MarketplaceContants.nullEntry)
 					&& timeTag.length() > 1 && !timeTag.equals(".")) {
 				point.setTimetag(timeTag);
 			}
@@ -180,7 +180,7 @@ public class AnalysisWrapperUtil {
 						.getString();
 				value.setUnit_id(unitID);
 
-				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
+				if (!valueTag.equalsIgnoreCase(MarketplaceContants.nullEntry)
 						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
 					//
@@ -321,19 +321,19 @@ public class AnalysisWrapperUtil {
 				// octave.eval("addpath(\"general_package\")");
 				octave.eval("pkg load all");
 				for (ASInput input : inputList) {
-					if (input.getType().equals(AScontants.StringType)) {
+					if (input.getType().equals(MarketplaceContants.StringType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveString octaveInput = new OctaveString(
 								(String) input.getSource());
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.integerType)) {
+					} else if (input.getType().equals(MarketplaceContants.integerType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveInt octaveInput = new OctaveInt(
 								Integer.parseInt(input.getSource()));
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.doubleType)) {
+					} else if (input.getType().equals(MarketplaceContants.doubleType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveDouble octaveInput = new OctaveDouble();
@@ -341,7 +341,7 @@ public class AnalysisWrapperUtil {
 								1, 1);
 						octave.put(input.getName(), octaveInput);
 					} else if (input.getType()
-							.equals(AScontants.sensordataType)) {
+							.equals(MarketplaceContants.sensordataType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						HBaseDatapointDAO diDao = new HBaseDatapointDAO();
@@ -360,25 +360,27 @@ public class AnalysisWrapperUtil {
 						settings.put(
 								AllConstants.ProgramConts.exportSetting_MAX,
 								maxDataPoints);
+						System.out.println("------Debug--Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end+",maxDataPoints:"+maxDataPoints);
 						HBaseDataImport hbaseexport = diDao.exportDatapoints(
 								datastream.getStreamId(), start, end, null,
 								dbtoJUtil.ToDatastreamUnitsMap(datastream),
 								null, settings);
 						UUID uuid = UUID.randomUUID();
 						String inputValue = "sensorData-" + uuid.toString();
+						
 						awU.dumpDatapointsToCsvFile(hbaseexport, tmpfolderPath
 								+ inputValue);
 						OctaveString octaveInput = new OctaveString(
 								(String) inputValue);
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.healthfile)
-							|| input.getType().equals(AScontants.cloudfile)) {
+					} else if (input.getType().equals(MarketplaceContants.healthfile)
+							|| input.getType().equals(MarketplaceContants.cloudfile)) {
 						// health file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						String objectKey = null;
 						String fileName = null;
-						if (input.getType().equals(AScontants.healthfile)) {
+						if (input.getType().equals(MarketplaceContants.healthfile)) {
 							DatastreamDAO dsDao = new DatastreamDAO();
 							Datastream datastream = dsDao.getDatastream(
 									(String) input.getValue(), true, false);
@@ -491,9 +493,9 @@ public class AnalysisWrapperUtil {
 				for (int i = 0; i < outputList.size(); i++) {
 					ASOutput output = outputList.get(i);
 					if (output.getType().equalsIgnoreCase(
-							AScontants.sensordataType)
+							MarketplaceContants.sensordataType)
 							&& !output.getDataAction().equalsIgnoreCase(
-									AScontants.dataaction_ignore)) {
+									MarketplaceContants.dataaction_ignore)) {
 						OctaveCell octaveResult = (OctaveCell) octave
 								.get(output.getName());
 						long time1 = new Date().getTime();
@@ -563,8 +565,8 @@ public class AnalysisWrapperUtil {
 										+ "<p>Internal Error" + "</p>";
 							}
 						}
-					} else if (output.getType().equals(AScontants.healthfile)
-							|| output.getType().equals(AScontants.cloudfile)) {
+					} else if (output.getType().equals(MarketplaceContants.healthfile)
+							|| output.getType().equals(MarketplaceContants.cloudfile)) {
 						OctaveString fileOutput = (OctaveString) octave
 								.get(output.getName());
 
@@ -591,7 +593,7 @@ public class AnalysisWrapperUtil {
 							FileUtils.copyFile(outputFile, outputFileJob);
 
 							if (output.getType().equalsIgnoreCase(
-									AScontants.cloudfile)) {
+									MarketplaceContants.cloudfile)) {
 								// for cloud file type
 								String bucketName = ServerConfigUtil
 										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
@@ -744,17 +746,17 @@ public class AnalysisWrapperUtil {
 
 			if (OctaveExecutionSuccessful) {
 				System.out.println("Model Execution Successful!");
-				result.setModel_status(AScontants.ModelJobStatus.finished_succesfully);
+				result.setModel_status(MarketplaceContants.ModelJobStatus.finished_succesfully);
 			} else {
 				System.out.println("Model Execution Failed!");
-				result.setModel_status(AScontants.ModelJobStatus.finished_with_error);
+				result.setModel_status(MarketplaceContants.ModelJobStatus.finished_with_error);
 			}
 			if (WholeJobFinishedSuccessful) {
 				System.out.println("Job Execution Successful!");
-				result.setJobStatus(AScontants.ModelJobStatus.finished_succesfully);
+				result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_succesfully);
 			} else {
 				System.out.println("Job Execution Failed!");
-				result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+				result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 			}
 			if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
 				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -780,7 +782,7 @@ public class AnalysisWrapperUtil {
 			ex.printStackTrace();
 			result.setJobEndTime(new Date());
 			result.setJobLog(analysisDataMovementLog);
-			result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+			result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 			asDao.updateJobResult(result);
 		}
 		return result;

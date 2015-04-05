@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 import com.google.gson.Gson;
@@ -50,22 +50,22 @@ public class GetService extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			Gson gson = new Gson();
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String serviceID_String = request
-					.getParameter(AScontants.RequestParameters.Service_ID);
+					.getParameter(MarketplaceContants.RequestParameters.Service_ID);
 			int serviceID=0;
 			if (serviceID_String == null || serviceID_String.length() < 1) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						AScontants.RequestParameters.Service_ID);
+						MarketplaceContants.RequestParameters.Service_ID);
 				return;
 			}else{
 				try{
@@ -75,7 +75,7 @@ public class GetService extends HttpServlet {
 					ex.printStackTrace();
 					ReturnParser.outputErrorException(response,
 							AllConstants.ErrorDictionary.Invalid_data_format, null,
-							AScontants.RequestParameters.Service_ID);
+							MarketplaceContants.RequestParameters.Service_ID);
 					return;
 				}
 			}
@@ -85,17 +85,17 @@ public class GetService extends HttpServlet {
 			if (service == null) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.service_id_cannot_found,
-						null, AScontants.RequestParameters.Service_ID);
+						null, MarketplaceContants.RequestParameters.Service_ID);
 				return;
 			}
 			model=asDao.getModelByID(service.getModelId());
 			
 			List<AnalysisModelEntry> inputsList = asDao
 					.getModelEntriesByModelID(model.getId(),
-							AScontants.as_input);
+							MarketplaceContants.as_input);
 			List<AnalysisModelEntry> outputsList = asDao
 					.getModelEntriesByModelID(model.getId(),
-							AScontants.as_output);
+							MarketplaceContants.as_output);
 			JsonElement jservice = gson.toJsonTree(service);
 			JsonElement jmodel = gson.toJsonTree(model);
 			JsonElement jinputsList = gson.toJsonTree(inputsList);

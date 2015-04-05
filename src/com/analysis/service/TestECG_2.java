@@ -5,7 +5,7 @@ import health.input.jsonmodels.JsonDataPoints;
 import java.util.ArrayList;
 import java.util.List;
 
-import util.AScontants;
+import util.MarketplaceContants;
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.OctaveCell;
@@ -56,7 +56,7 @@ public class TestECG_2 {
 			System.out.println(ex.getMessage());
 		}
 		for (ASOutput output : outputList) {
-			if (output.getType() == AScontants.sensordataType) {
+			if (output.getType() == MarketplaceContants.sensordataType) {
 				OctaveCell result = (OctaveCell) octave.get(output.getName());
 				List<JsonDataPoints> datapointsList = awU
 						.unwrapOctaveSensorData(result);
@@ -65,13 +65,13 @@ public class TestECG_2 {
 				} else {
 
 				}
-			} else if (output.getType() == AScontants.fileType) {
+			} else if (output.getType() == MarketplaceContants.fileType) {
 
-			} else if (output.getType() == AScontants.StringType) {
+			} else if (output.getType() == MarketplaceContants.StringType) {
 
-			} else if (output.getType() == AScontants.integerType) {
+			} else if (output.getType() == MarketplaceContants.integerType) {
 
-			} else if (output.getType() == AScontants.doubleType) {
+			} else if (output.getType() == MarketplaceContants.doubleType) {
 
 			}
 

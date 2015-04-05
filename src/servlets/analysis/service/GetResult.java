@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 import com.analysis.service.JsonAnalysisResultWapper;
@@ -52,17 +52,17 @@ public class GetResult extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String jobID = request
-					.getParameter(AScontants.RequestParameters.Job_ID);
+					.getParameter(MarketplaceContants.RequestParameters.Job_ID);
 			AnalysisResult result = null;
 			if (jobID != null && jobID.length() > 1) {
 				result = asDao.getJobResultByID(jobID);

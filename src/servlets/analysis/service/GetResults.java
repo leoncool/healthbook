@@ -23,7 +23,7 @@ import org.apache.commons.beanutils.BeanUtilsBean;
 
 import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 import com.analysis.service.JsonAnalysisResult;
@@ -56,11 +56,11 @@ public class GetResults extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			Users accessUser = null;
@@ -104,8 +104,8 @@ public class GetResults extends HttpServlet {
 			
 			AnalysisServiceDAO asDao = new AnalysisServiceDAO();
 			String jobID = request
-					.getParameter(AScontants.RequestParameters.Job_ID);
-			String serviceID = request.getParameter(AScontants.RequestParameters.Service_ID);
+					.getParameter(MarketplaceContants.RequestParameters.Job_ID);
+			String serviceID = request.getParameter(MarketplaceContants.RequestParameters.Service_ID);
 			int serviceid=0;
 			try{
 				if(serviceID!=null)

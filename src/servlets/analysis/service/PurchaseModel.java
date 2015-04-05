@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
 
 import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 /**
@@ -65,11 +65,11 @@ public class PurchaseModel extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		PrintWriter out = response.getWriter();
 		try {
 			
@@ -118,11 +118,11 @@ public class PurchaseModel extends HttpServlet {
 			Gson gson = new Gson();
 
 			String modelID = request
-					.getParameter(AScontants.RequestParameters.Model_ID);
+					.getParameter(MarketplaceContants.RequestParameters.Model_ID);
 			if (modelID == null || modelID.length() < 5) {
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.MISSING_DATA, null,
-						AScontants.RequestParameters.Model_ID);
+						MarketplaceContants.RequestParameters.Model_ID);
 				return;
 			}
 			AnalysisModel model = asDao.getModelByID(modelID);
@@ -135,7 +135,7 @@ public class PurchaseModel extends HttpServlet {
 			AnalysisService service = new AnalysisService();
 			service.setCreatedTime(new Date());
 			service.setStartTime(new Date());
-			service.setStatus(AScontants.status_live);
+			service.setStatus(MarketplaceContants.status_live);
 			service.setModelId(model.getId());
 			service.setUserId(targetLoginID);
 			service = asDao.createServiceBy(service);

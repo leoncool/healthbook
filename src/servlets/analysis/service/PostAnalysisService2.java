@@ -22,7 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import server.exception.ReturnParser;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 
 /**
@@ -72,11 +72,11 @@ public class PostAnalysisService2 extends HttpServlet {
 	public static boolean validateInputModelEntries(
 			List<AnalysisModelEntry> entryList) {
 		HashMap<String, String> allowedDataTypes = new HashMap<>();
-		allowedDataTypes.put(AScontants.fileType, "");
-		allowedDataTypes.put(AScontants.sensordataType, "");
-		allowedDataTypes.put(AScontants.integerType, "");
-		allowedDataTypes.put(AScontants.doubleType, "");
-		allowedDataTypes.put(AScontants.StringType, "");
+		allowedDataTypes.put(MarketplaceContants.fileType, "");
+		allowedDataTypes.put(MarketplaceContants.sensordataType, "");
+		allowedDataTypes.put(MarketplaceContants.integerType, "");
+		allowedDataTypes.put(MarketplaceContants.doubleType, "");
+		allowedDataTypes.put(MarketplaceContants.StringType, "");
 		for (AnalysisModelEntry entry : entryList) {
 			if (entry.getDataType() == null
 					|| !allowedDataTypes.containsKey(entry.getDataType())) {
@@ -90,17 +90,17 @@ public class PostAnalysisService2 extends HttpServlet {
 	public static boolean validateOutputModelEntries(
 			List<AnalysisModelEntry> entryList) {
 		HashMap<String, String> allowedDataTypes = new HashMap<>();
-		allowedDataTypes.put(AScontants.fileType, "");
-		allowedDataTypes.put(AScontants.sensordataType, "");
-		allowedDataTypes.put(AScontants.integerType, "");
-		allowedDataTypes.put(AScontants.doubleType, "");
-		allowedDataTypes.put(AScontants.StringType, "");
-		allowedDataTypes.put(AScontants.AlertType, "");
+		allowedDataTypes.put(MarketplaceContants.fileType, "");
+		allowedDataTypes.put(MarketplaceContants.sensordataType, "");
+		allowedDataTypes.put(MarketplaceContants.integerType, "");
+		allowedDataTypes.put(MarketplaceContants.doubleType, "");
+		allowedDataTypes.put(MarketplaceContants.StringType, "");
+		allowedDataTypes.put(MarketplaceContants.AlertType, "");
 		HashMap<String, String> allowedDataActions = new HashMap<>();
-		allowedDataActions.put(AScontants.dataaction_saveOrUpdate, "");
-		allowedDataActions.put(AScontants.dataaction_delete, "");
-		allowedDataActions.put(AScontants.dataaction_ignore, "");
-		allowedDataActions.put(AScontants.dataaction_alert, "");
+		allowedDataActions.put(MarketplaceContants.dataaction_saveOrUpdate, "");
+		allowedDataActions.put(MarketplaceContants.dataaction_delete, "");
+		allowedDataActions.put(MarketplaceContants.dataaction_ignore, "");
+		allowedDataActions.put(MarketplaceContants.dataaction_alert, "");
 		for (AnalysisModelEntry entry : entryList) {
 			if (entry.getDataType() == null
 					|| !allowedDataTypes.containsKey(entry.getDataType())) {
@@ -116,14 +116,14 @@ public class PostAnalysisService2 extends HttpServlet {
 				System.out.println("missing output data action");
 				return false;
 			}
-			if (entry.getDataType() == AScontants.AlertType) {
-				if (entry.getDataAction() != AScontants.dataaction_alert
-						&& entry.getDataAction() != AScontants.dataaction_ignore) {
+			if (entry.getDataType() == MarketplaceContants.AlertType) {
+				if (entry.getDataAction() != MarketplaceContants.dataaction_alert
+						&& entry.getDataAction() != MarketplaceContants.dataaction_ignore) {
 					System.out.println("error with data action for alert");
 					return false;
 				}
 			} else {
-				if (entry.getDataAction() == AScontants.dataaction_alert) {
+				if (entry.getDataAction() == MarketplaceContants.dataaction_alert) {
 					System.out
 							.println("error with data action for other types than alert");
 					return false;
@@ -144,14 +144,14 @@ public class PostAnalysisService2 extends HttpServlet {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 		response.setHeader("Access-Control-Allow-Methods",
-				util.AScontants.ACCESS_CONTROL_ALLOW_METHODS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_METHODS);
 		response.setHeader("Access-Control-Expose-Headers",
-				util.AScontants.ACCESS_CONTROL_ALLOW_HEADERS);
+				util.MarketplaceContants.ACCESS_CONTROL_ALLOW_HEADERS);
 
 		String model_id = request
-				.getParameter(AScontants.RequestParameters.Model_ID);
+				.getParameter(MarketplaceContants.RequestParameters.Model_ID);
 		if (model_id == null || model_id.length() < 1) {
 			ReturnParser.outputErrorException(response,
 					AllConstants.ErrorDictionary.missing_model_id, null, "");
@@ -168,9 +168,9 @@ public class PostAnalysisService2 extends HttpServlet {
 		int totalInput = model.getTotalInputs();
 		int totalOutput = model.getTotalOutputs();
 		List<AnalysisModelEntry> inputEntryList = asDao
-				.getModelEntriesByModelID(model_id, AScontants.as_input);
+				.getModelEntriesByModelID(model_id, MarketplaceContants.as_input);
 		List<AnalysisModelEntry> outputEntryList = asDao
-				.getModelEntriesByModelID(model_id, AScontants.as_output);
+				.getModelEntriesByModelID(model_id, MarketplaceContants.as_output);
 		PrintWriter out = response.getWriter();
 		try {
 
@@ -258,7 +258,7 @@ public class PostAnalysisService2 extends HttpServlet {
 			totalEntryList.addAll(inputEntryList);
 			totalEntryList.addAll(outputEntryList);
 			asDao.updateModelEntries(totalEntryList);
-			model.setStatus(AScontants.status_live);
+			model.setStatus(MarketplaceContants.status_live);
 			Gson gson = new Gson();
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,

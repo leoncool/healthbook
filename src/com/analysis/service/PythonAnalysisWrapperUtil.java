@@ -37,7 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import server.exception.ErrorCodeException;
-import util.AScontants;
+import util.MarketplaceContants;
 import util.AllConstants;
 import util.AllConstants.ServerConfigs;
 import util.ServerConfigUtil;
@@ -152,7 +152,7 @@ public class PythonAnalysisWrapperUtil {
 					.getString();
 			// System.out.println(timeTag);
 			point.setAt(at);
-			if (!timeTag.equalsIgnoreCase(AScontants.nullEntry)
+			if (!timeTag.equalsIgnoreCase(MarketplaceContants.nullEntry)
 					&& timeTag.length() > 1 && !timeTag.equals(".")) {
 				point.setTimetag(timeTag);
 			}
@@ -183,7 +183,7 @@ public class PythonAnalysisWrapperUtil {
 						.getString();
 				value.setUnit_id(unitID);
 
-				if (!valueTag.equalsIgnoreCase(AScontants.nullEntry)
+				if (!valueTag.equalsIgnoreCase(MarketplaceContants.nullEntry)
 						&& valueTag.length() > 0 && !valueTag.equals(".")) {
 					value.setVal_tag(valueTag);
 					//
@@ -369,19 +369,19 @@ public class PythonAnalysisWrapperUtil {
 				// octave.eval("addpath(\"general_package\")");
 				// octave.eval("pkg load all");
 				for (ASInput input : inputList) {
-					if (input.getType().equals(AScontants.StringType)) {
+					if (input.getType().equals(MarketplaceContants.StringType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveString octaveInput = new OctaveString(
 								(String) input.getSource());
 						// octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.integerType)) {
+					} else if (input.getType().equals(MarketplaceContants.integerType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveInt octaveInput = new OctaveInt(
 								Integer.parseInt(input.getSource()));
 						// octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.doubleType)) {
+					} else if (input.getType().equals(MarketplaceContants.doubleType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveDouble octaveInput = new OctaveDouble();
@@ -389,7 +389,7 @@ public class PythonAnalysisWrapperUtil {
 								1, 1);
 						// octave.put(input.getName(), octaveInput);
 					} else if (input.getType()
-							.equals(AScontants.sensordataType)) {
+							.equals(MarketplaceContants.sensordataType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						HBaseDatapointDAO diDao = new HBaseDatapointDAO();
@@ -422,14 +422,14 @@ public class PythonAnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) inputValue);
 						// octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(AScontants.healthfile)
-							|| input.getType().equals(AScontants.cloudfile)) {
+					} else if (input.getType().equals(MarketplaceContants.healthfile)
+							|| input.getType().equals(MarketplaceContants.cloudfile)) {
 						// health file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						String objectKey = null;
 						String fileName = null;
-						if (input.getType().equals(AScontants.healthfile)) {
+						if (input.getType().equals(MarketplaceContants.healthfile)) {
 							DatastreamDAO dsDao = new DatastreamDAO();
 							Datastream datastream = dsDao.getDatastream(
 									(String) input.getValue(), true, false);
@@ -575,9 +575,9 @@ public class PythonAnalysisWrapperUtil {
 				for (int i = 0; i < outputList.size(); i++) {
 					ASOutput output = outputList.get(i);
 					if (output.getType().equalsIgnoreCase(
-							AScontants.sensordataType)
+							MarketplaceContants.sensordataType)
 							&& !output.getDataAction().equalsIgnoreCase(
-									AScontants.dataaction_ignore)) {
+									MarketplaceContants.dataaction_ignore)) {
 						OctaveCell octaveResult = null;
 						long time1 = new Date().getTime();
 						List<JsonDataPoints> datapointsList = awU
@@ -646,8 +646,8 @@ public class PythonAnalysisWrapperUtil {
 										+ "<p>Internal Error" + "</p>";
 							}
 						}
-					} else if (output.getType().equals(AScontants.healthfile)
-							|| output.getType().equals(AScontants.cloudfile)) {
+					} else if (output.getType().equals(MarketplaceContants.healthfile)
+							|| output.getType().equals(MarketplaceContants.cloudfile)) {
 						OctaveString fileOutput = new OctaveString(
 								"fig/test_estimated_speed.png");
 						File outputFile = new File(tmpfolderPath
@@ -673,7 +673,7 @@ public class PythonAnalysisWrapperUtil {
 							FileUtils.copyFile(outputFile, outputFileJob);
 							// String loginID = datastream.getOwner();
 							if (output.getType().equalsIgnoreCase(
-									AScontants.cloudfile)) {
+									MarketplaceContants.cloudfile)) {
 								// for cloud file type
 								String bucketName = ServerConfigUtil
 										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
@@ -826,17 +826,17 @@ public class PythonAnalysisWrapperUtil {
 
 			if (OctaveExecutionSuccessful) {
 				System.out.println("Model Execution Successful!");
-				result.setModel_status(AScontants.ModelJobStatus.finished_succesfully);
+				result.setModel_status(MarketplaceContants.ModelJobStatus.finished_succesfully);
 			} else {
 				System.out.println("Model Execution Failed!");
-				result.setModel_status(AScontants.ModelJobStatus.finished_with_error);
+				result.setModel_status(MarketplaceContants.ModelJobStatus.finished_with_error);
 			}
 			if (WholeJobFinishedSuccessful) {
 				System.out.println("Job Execution Successful!");
-				result.setJobStatus(AScontants.ModelJobStatus.finished_succesfully);
+				result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_succesfully);
 			} else {
 				System.out.println("Job Execution Failed!");
-				result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+				result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 			}
 			if (WholeJobFinishedSuccessful && OctaveExecutionSuccessful) {
 				Gson gson = new GsonBuilder().disableHtmlEscaping().create();
@@ -862,7 +862,7 @@ public class PythonAnalysisWrapperUtil {
 			ex.printStackTrace();
 			result.setJobEndTime(new Date());
 			result.setJobLog(analysisDataMovementLog);
-			result.setJobStatus(AScontants.ModelJobStatus.finished_with_error);
+			result.setJobStatus(MarketplaceContants.ModelJobStatus.finished_with_error);
 			asDao.updateJobResult(result);
 		}
 		return result;
