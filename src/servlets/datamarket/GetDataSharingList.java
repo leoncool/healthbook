@@ -148,10 +148,10 @@ public class GetDataSharingList extends HttpServlet {
 		List<DataMarket> dmList=new ArrayList<DataMarket>();
 		for(DataMarket dm:dmListRaw)
 		{
-			Datastream stream=dm.getStreamID();
+			Datastream stream=dm.getDatastream();
 			stream.setDatastreamBlocksList(null);
 			stream.setDatastreamUnitsList(null);
-			dm.setStreamID(stream);
+			dm.setDatastream(stream);
 			dmList.add(dm);	
 		}
 		

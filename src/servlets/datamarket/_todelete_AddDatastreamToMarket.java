@@ -17,12 +17,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-
 import server.exception.ReturnParser;
 import servlets.util.PermissionFilter;
 import util.AllConstants;
-import util.JsonUtil;
 import util.MarketplaceContants;
 
 import com.google.gson.Gson;
@@ -32,14 +29,14 @@ import com.google.gson.JsonObject;
 /**
  * Servlet implementation class GetModelMetadata
  */
-@WebServlet("/AddDatastreamToMarket")
-public class AddDatastreamToMarket extends HttpServlet {
+@WebServlet("/to_delete_AddDatastreamToMarket")
+public class _todelete_AddDatastreamToMarket extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public AddDatastreamToMarket() {
+	public _todelete_AddDatastreamToMarket() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -99,28 +96,35 @@ public class AddDatastreamToMarket extends HttpServlet {
 			if (targetLoginID == null) {
 				targetLoginID = loginID;
 			}
-			DataMarket dm=null;
+			
 			Gson gson = new Gson();
-			JsonUtil jutil=new JsonUtil();
-			try{
-			String jsonInput = jutil.readJsonStrFromHttpRequest(request);
-			dm=gson.fromJson(jsonInput, DataMarket.class);
-			}catch(Exception ex)
-			{
-				ex.printStackTrace();
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.Input_Json_Format_Error,
-						null, null);
-				return;
-			}
-			if(dm==null||dm.getLoginID()==null||dm.getStreamid()==null)
+//			try{
+//			String jsonInput = jutil.readJsonStrFromHttpRequest(request);
+//			dm=gson.fromJson(jsonInput, DataMarket.class);
+//			}catch(Exception ex)
+//			{
+//				ex.printStackTrace();
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.Input_Json_Format_Error,
+//						null, null);
+//				return;
+//			}
+//			if(dm==null||dm.getLoginID()==null||dm.getStreamID()==null)
+//			{
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.MISSING_DATA,
+//						null, null);
+//				return;
+//			}
+			String streamID=null;
+			if(request.getParameter(MarketplaceContants.RequestParameters.streamID)==null)
 			{
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.MISSING_DATA,
-						null, null);
+						null, MarketplaceContants.RequestParameters.streamID);
 				return;
 			}
-			String streamID=dm.getStreamid();
+			streamID=request.getParameter(MarketplaceContants.RequestParameters.streamID);
 			DatastreamDAO dsDao=new DatastreamDAO();
 			
 			Datastream datastream=dsDao.getDatastream(streamID, false, false);
@@ -138,7 +142,12 @@ public class AddDatastreamToMarket extends HttpServlet {
 						null, MarketplaceContants.RequestParameters.streamID);
 				return;
 			}
-			
+			double price=0;
+			if(request.getParameter(MarketplaceContants.RequestParameters.price)!=null)
+			{
+				price=Double.parseDouble(request.getParameter(MarketplaceContants.RequestParameters.price));
+			}
+			String description=request.getParameter(MarketplaceContants.RequestParameters.description);
 			DataMarketDAO dmDao=new DataMarketDAO();
 			if(dmDao.existDataMarketItem(loginID,streamID))
 			{
@@ -148,10 +157,12 @@ public class AddDatastreamToMarket extends HttpServlet {
 				return;
 			}
 			
-			
+			DataMarket dm=new DataMarket();
 			dm.setLoginID(loginID);
+			dm.setPrice(price);
 			dm.setDatastream(datastream);
 			dm.setCreatedTime(new Date());
+			dm.setDescription(description);
 		
 			dm=dmDao.addToMarket(dm);
 			JsonObject jo = new JsonObject();

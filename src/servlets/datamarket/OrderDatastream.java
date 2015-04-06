@@ -123,14 +123,14 @@ public class OrderDatastream extends HttpServlet {
 			
 			DataSharing ds=new DataSharing();
 			ds.setLoginID(loginID);
-			ds.setTargetLoginID(dm.getStreamID().getOwner());
+			ds.setTargetLoginID(dm.getDatastream().getOwner());
 			ds.setCreatedTime(new Date());
 			ds=dmDao.addDataSharing(ds);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			//solve gson error with mulitple level reference
-			dm.setStreamID(null);
+			dm.setDatastream(null);
 			JsonElement jelement=gson.toJsonTree(ds);
 			jo.add("data_sharing",jelement );
 			System.out.println(gson.toJson(jo));
@@ -159,7 +159,7 @@ public class OrderDatastream extends HttpServlet {
 		Gson gson=new Gson();
 		DataMarketDAO dmDao=new DataMarketDAO();
 		DataMarket dm=dmDao.getDataMarketByID(1);
-		dm.setStreamID(null);
+		dm.setDatastream(null);
 		JsonObject jo = new JsonObject();
 		jo.addProperty(AllConstants.ProgramConts.result,
 				AllConstants.ProgramConts.succeed);
