@@ -87,6 +87,9 @@ public class GetDataStreamMeta extends HttpServlet {
             out.println(gson.toJson(jo));
         } catch (Exception ex) {
             ex.printStackTrace();
+            ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, null, null);
+			return;
         } finally {
             out.close();
         }

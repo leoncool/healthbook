@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import server.exception.ReturnParser;
 import util.AllConstants;
 import util.MarketplaceContants;
 
@@ -82,6 +83,9 @@ public class GetDataMarketList extends HttpServlet {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, null, null);
+			return;
 		} finally {
 			out.close();
 		}

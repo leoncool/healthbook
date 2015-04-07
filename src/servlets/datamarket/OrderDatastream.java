@@ -118,19 +118,29 @@ public class OrderDatastream extends HttpServlet {
 						null, MarketplaceContants.RequestParameters.marketID);
 				return;
 			}
+			
 			DataMarketDAO dmDao=new DataMarketDAO();
 			DataMarket dm=dmDao.getDataMarketByID(marketID);
+			
+			if(dmDao.existDataSharingItem(loginID, dm.getDatastream().getStreamId()))
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.data_sharing_item_exist, null, null);
+				return;
+			}
+			
 			
 			DataSharing ds=new DataSharing();
 			ds.setLoginID(loginID);
 			ds.setTargetLoginID(dm.getDatastream().getOwner());
+			ds.setStreamID(dm.getDatastream());
 			ds.setCreatedTime(new Date());
 			ds=dmDao.addDataSharing(ds);
 			JsonObject jo = new JsonObject();
 			jo.addProperty(AllConstants.ProgramConts.result,
 					AllConstants.ProgramConts.succeed);
 			//solve gson error with mulitple level reference
-			dm.setDatastream(null);
+			ds.setStreamID(null);
 			JsonElement jelement=gson.toJsonTree(ds);
 			jo.add("data_sharing",jelement );
 			System.out.println(gson.toJson(jo));
@@ -138,6 +148,9 @@ public class OrderDatastream extends HttpServlet {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			ReturnParser.outputErrorException(response,
+					AllConstants.ErrorDictionary.Internal_Fault, null, null);
+			return;
 		} finally {
 			out.close();
 		}
