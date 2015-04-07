@@ -451,14 +451,15 @@ public class GetHealthDataPointsByTitle extends HttpServlet {
 								return;
 							}
 						}
-						if (streamTitle
-								.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)) {
-							DataPointsSimulators simulator = new DataPointsSimulators();
-							System.out.println("------Debug--Simulator Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end);
-							hbaseexport = simulator.exportHeartRateDatapoints(
-									datastream.getStreamId(), start, end,
-									blockid, mapUnits, null, settings);
-						} else {
+//						if (streamTitle
+//								.equalsIgnoreCase(AllConstants.ProgramConts.defaultDS_Name_heart_rate)) {
+//							DataPointsSimulators simulator = new DataPointsSimulators();
+//							System.out.println("------Debug--Simulator Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end);
+//							hbaseexport = simulator.exportHeartRateDatapoints(
+//									datastream.getStreamId(), start, end,
+//									blockid, mapUnits, null, settings);
+//						} else 
+						{
 							// normal data retrieval comes from here
 							diDao = new HBaseDatapointDAO();
 							boolean useSingleUnitExport = false;

@@ -183,6 +183,7 @@ public class RunJob extends HttpServlet {
 						input.setValue(datastream.getStreamId());
 						long start = 0;
 						long end = Long.MAX_VALUE;
+						String unitid=null;
 						int max = 1000;
 						try {
 							if (request.getParameter("input"
@@ -194,6 +195,12 @@ public class RunJob extends HttpServlet {
 									+ Integer.toString(i + 1) + "_end") != null) {
 								end = Long.parseLong(request.getParameter("input"
 										+ Integer.toString(i + 1) + "_end"));
+							}
+							if (request.getParameter("input"
+									+ Integer.toString(i + 1) + "_unit") != null&&request.getParameter("input"
+											+ Integer.toString(i + 1) + "_unit").length()>4) {
+								unitid = request.getParameter("input"
+										+ Integer.toString(i + 1) + "_unit");
 							}
 							if (request.getParameter("input"
 									+ Integer.toString(i + 1) + "_max") != null) {
@@ -213,6 +220,10 @@ public class RunJob extends HttpServlet {
 							}if(end<0)
 							{
 								end=Long.MAX_VALUE;
+							}
+							if(unitid!=null)
+							{
+								input.setUnitid(unitid);
 							}
 							input.setStart(start);
 							input.setEnd(end);
@@ -383,8 +394,8 @@ public class RunJob extends HttpServlet {
 			String type = outputEntryList.get(i).getDataType();
 			String source = request.getParameter("output"
 					+ Integer.toString(i + 1) + "_source");
-			if (!dataAction.equalsIgnoreCase(MarketplaceContants.dataaction_ignore)
-					&& type.equals(MarketplaceContants.sensordataType)) {
+			//!dataAction.equalsIgnoreCase(MarketplaceContants.dataaction_ignore
+			if (type.equals(MarketplaceContants.sensordataType)) {
 				if (source != null) {
 					
 				} else {
@@ -411,11 +422,10 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
+				output.setType(type);
 				output.setSource(source);
 				output.setValue(datastream.getStreamId());
-			} else if (!dataAction
-					.equalsIgnoreCase(MarketplaceContants.dataaction_ignore)
-					&& type.equals(MarketplaceContants.fileType)) {
+			} else if (type.equals(MarketplaceContants.fileType)) {
 				String sub_fileType = request.getParameter("output"
 						+ Integer.toString(i + 1) + "_type");
 				String fileName = request.getParameter("output"
@@ -462,7 +472,7 @@ public class RunJob extends HttpServlet {
 					output.setSource(streamTitle);
 					output.setValue(fileName);
 					output.setUnitid(unitRequest);
-					
+				
 					
 
 				} else if (sub_fileType.equalsIgnoreCase(MarketplaceContants.cloudfile)) {
@@ -478,9 +488,9 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
-
-				outputList.add(output);
+			
 			}
+			outputList.add(output);
 		}
 		// start initial stage of creating TED folders and copy data to tmp
 		// folders

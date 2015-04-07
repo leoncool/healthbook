@@ -67,6 +67,9 @@ public class AnalysisWrapperUtil {
 			return false;
 		}
 	}
+	public static int getLineNumber() {
+		return Thread.currentThread().getStackTrace()[2].getLineNumber();
+	}
 
 	public static void main(String args[]) {
 		AnalysisWrapperUtil awU = new AnalysisWrapperUtil();
@@ -234,15 +237,21 @@ public class AnalysisWrapperUtil {
 			String line = jDatapoint.getAt();
 			line = line + "#" + jDatapoint.getTimetag();
 			List<JsonDataValues> valueList = jDatapoint.getValue_list();
-			for (JsonDataValues value : valueList) {
-				// use symbol
-				// line = line + " " + value.getUnit_id() + " " + "symbol" + " "
-				// + value.getVal() + " " + value.getVal_tag() + "\n";
-				// do not use symbol
-				line = line + "#" + value.getUnit_id() + "#" + value.getVal()
-						+ "#" + value.getVal_tag() + "" + "\n";
-				dataLineSum.append(line);
+			for(int i=0;i<valueList.size();i++)
+			{
+				JsonDataValues value=valueList.get(i);
+				if(i==(valueList.size()-1))
+				{
+					line = line + "#" + value.getUnit_id() + "#" + value.getVal()
+							+ "#" + value.getVal_tag() + "" + "\n";
+					dataLineSum.append(line);
+				}else{
+					line = line + "#" + value.getUnit_id() + "#" + value.getVal()
+							+ "#" + value.getVal_tag();
+					dataLineSum.append(line);
+				}
 			}
+			
 		}
 		File outputFile = new File(fileLocation);
 		// System.out.println(dataLineSum.toString());
@@ -286,6 +295,7 @@ public class AnalysisWrapperUtil {
 				new File(tmpfolderPath).delete();
 			}
 			try {
+				System.out.println("---copying modelRepository:"+modelRepository+",to:"+tmpfolderPath);
 				FileUtils.copyDirectory(new File(modelRepository), new File(
 						tmpfolderPath));
 			} catch (IOException e) {
@@ -336,7 +346,8 @@ public class AnalysisWrapperUtil {
 					} else if (input.getType().equals(MarketplaceContants.doubleType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
-						OctaveDouble octaveInput = new OctaveDouble();
+						OctaveDouble octaveInput = new OctaveDouble(1,1);
+						System.out.println("debug---double type---"+input.getName()+","+Double.parseDouble(input.getSource()));
 						octaveInput.set(Double.parseDouble(input.getSource()),
 								1, 1);
 						octave.put(input.getName(), octaveInput);
@@ -361,13 +372,23 @@ public class AnalysisWrapperUtil {
 								AllConstants.ProgramConts.exportSetting_MAX,
 								maxDataPoints);
 						System.out.println("------Debug--Retriving Data:"+datastream.getStreamId()+",start:"+start+",end:"+end+",maxDataPoints:"+maxDataPoints);
+						
+						HashMap<String, String> unitIDMap=new HashMap<String, String>();
+						String unitid=input.getUnitid();
+						if(unitid!=null)
+						{
+							unitIDMap.put(unitid, unitid)	;
+						}else{
+							unitIDMap=dbtoJUtil.ToDatastreamUnitsMap(datastream);
+						}
 						HBaseDataImport hbaseexport = diDao.exportDatapoints(
 								datastream.getStreamId(), start, end, null,
-								dbtoJUtil.ToDatastreamUnitsMap(datastream),
+								unitIDMap,
 								null, settings);
 						UUID uuid = UUID.randomUUID();
 						String inputValue = "sensorData-" + uuid.toString();
 						
+					
 						awU.dumpDatapointsToCsvFile(hbaseexport, tmpfolderPath
 								+ inputValue);
 						OctaveString octaveInput = new OctaveString(
@@ -590,6 +611,7 @@ public class AnalysisWrapperUtil {
 											+ outputFile.getAbsolutePath());
 							continue;
 						} else {
+							System.out.println(getLineNumber()+"----"+"starting to copy file....");
 							FileUtils.copyFile(outputFile, outputFileJob);
 
 							if (output.getType().equalsIgnoreCase(
@@ -598,6 +620,7 @@ public class AnalysisWrapperUtil {
 								String bucketName = ServerConfigUtil
 										.getConfigValue(AllConstants.ServerConfigs.CloudStorageBucket);
 								String objectPrefix = loginID + "/cs/";
+								System.out.println(getLineNumber()+"----"+"objectPrefix:"+objectPrefix);
 								try {
 									FileInputStream inStream = new FileInputStream(
 											outputFile);

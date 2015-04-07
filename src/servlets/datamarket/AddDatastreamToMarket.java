@@ -104,6 +104,7 @@ public class AddDatastreamToMarket extends HttpServlet {
 			JsonUtil jutil=new JsonUtil();
 			try{
 			String jsonInput = jutil.readJsonStrFromHttpRequest(request);
+			System.out.println(jsonInput);
 			dm=gson.fromJson(jsonInput, DataMarket.class);
 			}catch(Exception ex)
 			{
@@ -113,11 +114,18 @@ public class AddDatastreamToMarket extends HttpServlet {
 						null, null);
 				return;
 			}
-			if(dm==null||dm.getLoginID()==null||dm.getStreamid()==null)
+			if(dm==null)
 			{
 				ReturnParser.outputErrorException(response,
 						AllConstants.ErrorDictionary.MISSING_DATA,
-						null, null);
+						null, "data market dm");
+				return;
+			}
+			if(dm.getStreamid()==null)
+			{
+				ReturnParser.outputErrorException(response,
+						AllConstants.ErrorDictionary.MISSING_DATA,
+						null, "stream id");
 				return;
 			}
 			String streamID=dm.getStreamid();

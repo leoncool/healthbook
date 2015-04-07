@@ -74,10 +74,12 @@ public class GetUserServices extends HttpServlet {
 		for(AnalysisService aService:serviceList)
 		{
 			AnalysisModel model=asDao.getModelByID(aService.getModelId());
+			if(model!=null){
 			AnalysisServiceReturn asR=new AnalysisServiceReturn();
 			asR.service=aService;
 			asR.model=model;
 			serviceReturnList.add(asR);
+			}
 		}
 			JsonElement service_list = gson.toJsonTree(serviceReturnList);
 

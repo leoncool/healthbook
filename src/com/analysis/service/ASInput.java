@@ -2,6 +2,7 @@ package com.analysis.service;
 
 public class ASInput {
 private String name;
+private String unitid;
 private String type;
 private String notes;
 private Object value;
@@ -73,6 +74,12 @@ public String getSource() {
 }
 public void setSource(String source) {
 	this.source = source;
+}
+public String getUnitid() {
+	return unitid;
+}
+public void setUnitid(String unitid) {
+	this.unitid = unitid;
 }
 
 

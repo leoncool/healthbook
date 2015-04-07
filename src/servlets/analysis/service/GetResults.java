@@ -3,6 +3,7 @@ package servlets.analysis.service;
 import health.database.DAO.UserDAO;
 import health.database.DAO.as.AnalysisServiceDAO;
 import health.database.models.Users;
+import health.database.models.as.AnalysisModel;
 import health.database.models.as.AnalysisResult;
 
 import java.io.IOException;
@@ -133,9 +134,12 @@ public class GetResults extends HttpServlet {
 				JsonAnalysisResult jresult = new JsonAnalysisResult();
 				BeanUtils.copyProperties(jresult, result);
 				jresult.setJson_results(null);
+				AnalysisModel model=asDao.getModelByID(jresult.getModelId());
+				if(model!=null){
 				jresult.setModel_name(asDao.getModelByID(jresult.getModelId())
 						.getName());
 				jresultList.add(jresult);
+				}
 			}
 
 			JsonObject jo = new JsonObject();

@@ -270,7 +270,6 @@ public class PythonAnalysisWrapperUtil {
 			} else {
 				unitidZ = unit.getShortUnitID();
 			}
-
 		}
 		for (JsonDataPoints jDatapoint : jDataPointsList) {
 			Date at = new Date(Long.parseLong(jDatapoint.getAt()));

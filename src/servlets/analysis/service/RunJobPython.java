@@ -491,9 +491,9 @@ public class RunJobPython extends HttpServlet {
 									null, "");
 					return;
 				}
-
-				outputList.add(output);
+			
 			}
+			outputList.add(output);
 		}
 		// start initial stage of creating TED folders and copy data to tmp
 		// folders
