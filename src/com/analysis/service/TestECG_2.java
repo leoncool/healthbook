@@ -59,7 +59,7 @@ public class TestECG_2 {
 			if (output.getType() == MarketplaceContants.sensordataType) {
 				OctaveCell result = (OctaveCell) octave.get(output.getName());
 				List<JsonDataPoints> datapointsList = awU
-						.unwrapOctaveSensorData(result);
+						.unwrapOctaveSensorData(result,null);
 				if (datapointsList == null) {
 
 				} else {

@@ -357,7 +357,7 @@ public class RunJobLiveBenchmark extends HttpServlet {
 							OctaveCell octaveResult = (OctaveCell) octave
 									.get(output.getName());
 							List<JsonDataPoints> datapointsList = awU
-									.unwrapOctaveSensorData(octaveResult);
+									.unwrapOctaveSensorData(octaveResult,null);
 							if (datapointsList == null) {
 								System.out
 										.println("some problem---:datapointsList == null");

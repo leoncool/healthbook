@@ -115,7 +115,8 @@ public class AnalysisWrapperUtil {
 
 	}
 
-	public List<JsonDataPoints> unwrapOctaveSensorData(OctaveCell result) {
+	public List<JsonDataPoints> unwrapOctaveSensorData(OctaveCell result,String forceUnitID) {
+		//note: forceUnitID in this function only works for single data unit data stream
 		int rows = result.getSize()[0];
 		int columns = result.getSize()[1];
 		System.out.println("Rows:" + rows + ",Columns:" + columns);
@@ -164,6 +165,10 @@ public class AnalysisWrapperUtil {
 				OctaveCell unitIDCell = (OctaveCell) result.get(1, startPos);
 				String unitID = ((OctaveString) unitIDCell.get(i + 1))
 						.getString();
+				if(forceUnitID!=null)
+				{
+					unitID=forceUnitID;
+				}
 				if (TrancatedLogCounter < TrancatedLogMax) {
 					System.out.println("-------Data analysis----unitID:"
 							+ unitID + "-------");
@@ -519,9 +524,10 @@ public class AnalysisWrapperUtil {
 									MarketplaceContants.dataaction_ignore)) {
 						OctaveCell octaveResult = (OctaveCell) octave
 								.get(output.getName());
+						String unitID=output.getUnitid();
 						long time1 = new Date().getTime();
 						List<JsonDataPoints> datapointsList = awU
-								.unwrapOctaveSensorData(octaveResult);
+								.unwrapOctaveSensorData(octaveResult,unitID);
 						long time2 = new Date().getTime();
 						System.out
 								.println("--------------UnwrapOctaveSensorData----------Takes:"

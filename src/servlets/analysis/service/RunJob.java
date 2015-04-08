@@ -408,6 +408,13 @@ public class RunJob extends HttpServlet {
 									null, "");
 					return;
 				}
+				String unitID = request.getParameter("output"
+						+ Integer.toString(i + 1) + "_unit");
+				if(unitID!=null&&unitID.length()>3)
+				{
+					output.setUnitid(unitID);
+				}
+				
 				String datastreamTitle = source;
 				Datastream datastream = dsDao.getHealthDatastreamByTitle(
 						datastreamTitle, loginID, true, false);
