@@ -60,8 +60,9 @@ public class GetDataMarketList extends HttpServlet {
 			Gson gson = new Gson();
 			DataMarketDAO dmDao=new DataMarketDAO();
 			String searchName = null;
+			String loginID=request.getParameter(AllConstants.api_entryPoints.request_api_loginid);
 			searchName=request.getParameter(MarketplaceContants.RequestParameters.streamTitle);
-			List<DataMarket> dmListRaw=dmDao.getDataMarketListing(searchName);
+			List<DataMarket> dmListRaw=dmDao.getDataMarketListingByLoginAndTitle(loginID,searchName);
 			List<DataMarket> dmList=new ArrayList<DataMarket>();
 			for(DataMarket dm:dmListRaw)
 			{
