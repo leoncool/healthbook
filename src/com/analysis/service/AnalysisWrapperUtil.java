@@ -171,7 +171,7 @@ public class AnalysisWrapperUtil {
 				}
 				if (TrancatedLogCounter < TrancatedLogMax) {
 					System.out.println("-------Data analysis----unitID:"
-							+ unitID + "-------");
+							+ unitID + "-------"+",ForceUnitID:"+forceUnitID);
 				}
 				OctaveDouble sensorOctaveValue = (OctaveDouble) result.get(1,
 						startPos + 1);
@@ -365,8 +365,12 @@ public class AnalysisWrapperUtil {
 						DBtoJsonUtil dbtoJUtil = new DBtoJsonUtil();
 						Datastream datastream = dsDao.getDatastream(
 								(String) input.getValue(), true, false);
-						long start = input.getStart();
-						long end = input.getEnd();
+						long start = 0;
+						if(input.getStart()>start)
+							start=input.getStart();
+						long end=Long.MAX_VALUE;
+						if(input.getEnd()<end)
+						end = input.getEnd();
 						int maxDataPoints = input.getMaxDataPoints();
 						if (end == 0) {
 							end = new Date().getTime();

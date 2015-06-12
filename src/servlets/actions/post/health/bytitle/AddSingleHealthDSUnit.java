@@ -150,7 +150,7 @@ public class AddSingleHealthDSUnit extends HttpServlet {
 			}
 			try{
 			DatastreamUnits unit=dbtoJUtil.convert_a_jdatastream_unit(junit);
-			if (UnitValueTypes.existValueType(unit.getValueType())) {
+			if (!UnitValueTypes.existValueType(unit.getValueType())) {
 				ReturnParser
 						.outputErrorException(
 								response,

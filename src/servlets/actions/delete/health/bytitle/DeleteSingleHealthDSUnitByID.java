@@ -77,13 +77,13 @@ public class DeleteSingleHealthDSUnitByID extends HttpServlet {
 		} else {
 			accessUser = userDao.getLogin(loginID);
 		}
-		if(loginID.equalsIgnoreCase("dongdong"))
-		{
-			ReturnParser.outputErrorException(response,
-					AllConstants.ErrorDictionary.PERMISSION_DENIED, null,
-					null);
-			return;
-		}
+//		if(loginID.equalsIgnoreCase("dongdong"))
+//		{
+//			ReturnParser.outputErrorException(response,
+//					AllConstants.ErrorDictionary.PERMISSION_DENIED, null,
+//					null);
+//			return;
+//		}
 		PrintWriter out = response.getWriter();
 
 		try {
