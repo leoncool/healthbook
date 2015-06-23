@@ -336,19 +336,19 @@ public class AnalysisWrapperUtil {
 				// octave.eval("addpath(\"general_package\")");
 				octave.eval("pkg load all");
 				for (ASInput input : inputList) {
-					if (input.getType().equals(MarketplaceContants.StringType)) {
+					if (input.getType().equalsIgnoreCase(MarketplaceContants.StringType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveString octaveInput = new OctaveString(
 								(String) input.getSource());
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(MarketplaceContants.integerType)) {
+					} else if (input.getType().equalsIgnoreCase(MarketplaceContants.integerType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveInt octaveInput = new OctaveInt(
 								Integer.parseInt(input.getSource()));
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(MarketplaceContants.doubleType)) {
+					} else if (input.getType().equalsIgnoreCase(MarketplaceContants.doubleType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						OctaveDouble octaveInput = new OctaveDouble(1,1);
@@ -357,7 +357,7 @@ public class AnalysisWrapperUtil {
 								1, 1);
 						octave.put(input.getName(), octaveInput);
 					} else if (input.getType()
-							.equals(MarketplaceContants.sensordataType)) {
+							.equalsIgnoreCase(MarketplaceContants.sensordataType)) {
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						HBaseDatapointDAO diDao = new HBaseDatapointDAO();
@@ -403,14 +403,15 @@ public class AnalysisWrapperUtil {
 						OctaveString octaveInput = new OctaveString(
 								(String) inputValue);
 						octave.put(input.getName(), octaveInput);
-					} else if (input.getType().equals(MarketplaceContants.healthfile)
-							|| input.getType().equals(MarketplaceContants.cloudfile)) {
+					} else if (input.getType().equalsIgnoreCase(MarketplaceContants.healthfile)
+							|| input.getType().equalsIgnoreCase(MarketplaceContants.cloudfile)) {
 						// health file type
 						System.out.println("Input Name:" + input.getName()
 								+ ", Input Type:" + input.getType());
 						String objectKey = null;
 						String fileName = null;
-						if (input.getType().equals(MarketplaceContants.healthfile)) {
+						if (input.getType().equalsIgnoreCase(MarketplaceContants.healthfile)) {
+							System.out.println("inputValue:"+input.getValue());
 							DatastreamDAO dsDao = new DatastreamDAO();
 							Datastream datastream = dsDao.getDatastream(
 									(String) input.getValue(), true, false);
@@ -596,8 +597,8 @@ public class AnalysisWrapperUtil {
 										+ "<p>Internal Error" + "</p>";
 							}
 						}
-					} else if (output.getType().equals(MarketplaceContants.healthfile)
-							|| output.getType().equals(MarketplaceContants.cloudfile)) {
+					} else if (output.getType().equalsIgnoreCase(MarketplaceContants.healthfile)
+							|| output.getType().equalsIgnoreCase(MarketplaceContants.cloudfile)) {
 						OctaveString fileOutput = (OctaveString) octave
 								.get(output.getName());
 

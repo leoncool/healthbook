@@ -304,7 +304,7 @@ public class RunJob extends HttpServlet {
 							null, "filekey");
 					return;
 				}
-				
+				input.setValue(datastream.getStreamId());
 				input.setSource(source);
 				input.setFilekey(filekey);
 				input.setType(MarketplaceContants.healthfile);

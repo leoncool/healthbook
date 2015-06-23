@@ -96,13 +96,13 @@ public class DeleteHealthDatapoints extends HttpServlet {
 			} else {
 				accessUser = userDao.getLogin(loginID);
 			}
-			if(loginID.equalsIgnoreCase("dongdong"))
-			{
-				ReturnParser.outputErrorException(response,
-						AllConstants.ErrorDictionary.PERMISSION_DENIED, null,
-						null);
-				return;
-			}
+//			if(loginID.equalsIgnoreCase("dongdong"))
+//			{
+//				ReturnParser.outputErrorException(response,
+//						AllConstants.ErrorDictionary.PERMISSION_DENIED, null,
+//						null);
+//				return;
+//			}
 			HealthSubjectFilter subFilter = new HealthSubjectFilter();
 			Subject subject = subFilter.subjectFilter(loginID, request,
 					response);
